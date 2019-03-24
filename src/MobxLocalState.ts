@@ -5,8 +5,6 @@ import {
     ToObservablePropsMode
 } from "./toObservableProps"
 
-const EMPTY_ARRAY: any[] = []
-
 export interface IMobxLocalStateOptions<P extends {}> {
     propsMode?: ToObservablePropsMode<P>
 }
@@ -28,8 +26,6 @@ export abstract class MobxLocalState<Props extends {} = {}> {
 
         if (this.effects) {
             this.effectDisposers = this.effects()
-        } else {
-            this.effectDisposers = EMPTY_ARRAY
         }
     }
 
