@@ -1,0 +1,25 @@
+{
+    "version": "2.0.10",
+    "compilerOptions": {
+        "outDir": "dist",
+        "target": "es5",
+        "module": "esnext",
+        "moduleResolution": "node",
+        "downlevelIteration": true,
+        "esModuleInterop": true,
+        "alwaysStrict": true,
+        "sourceMap": false,
+        "removeComments": false,
+        "strict": true,
+        "noImplicitReturns": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": false,
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "experimentalDecorators": true,
+        "lib": ["es6", "dom"],
+        "jsx": "react"
+    },
+    "include": ["src/**/*", "test/**/*"],
+    "exclude": ["node_modules"]
+}
