@@ -75,7 +75,9 @@
         "reactive",
         "hooks",
         "observer",
-        "useObserver"
+        "useObserver",
+        "MobxLocalState",
+        "useMobxLocalState"
     ],
     "lint-staged": {
         "*.{ts,js}": [
