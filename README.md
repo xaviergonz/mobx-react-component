@@ -1,6 +1,6 @@
 # mobx-react-localstate <!-- omit in toc -->
 
-[![Build Status](https://travis-ci.org/mobxjs/mobx-react-localstate.svg?branch=master)](https://travis-ci.org/mobxjs/mobx-react-localstate)[![Coverage Status](https://coveralls.io/repos/github/mobxjs/mobx-react-localstate/badge.svg)](https://coveralls.io/github/mobxjs/mobx-react-localstate)
+[![Build Status](https://travis-ci.org/xaviergonz/mobx-react-localstate.svg?branch=master)](https://travis-ci.org/xaviergonz/mobx-react-localstate)[![Coverage Status](https://coveralls.io/repos/github/xaviergonz/mobx-react-localstate/badge.svg)](https://coveralls.io/github/xaviergonz/mobx-react-localstate)
 
 React local state made easy with [mobx](https://github.com/mobxjs/mobx) and [mobx-react](https://github.com/mobxjs/mobx-react).
 
