@@ -1,9 +1,13 @@
-import { computed, reaction } from "mobx"
+import { computed, configure, observable, reaction, runInAction } from "mobx"
 import { observer, useObserver } from "mobx-react"
 import * as React from "react"
 import { cleanup, render } from "react-testing-library"
-import { MobxLocalState, useMobxLocalState } from "../src"
+import { Effects, injectedProperty, useMobxLocalState } from "../src"
 import { changesList } from "./utils"
+
+configure({
+    enforceActions: "always"
+})
 
 afterEach(cleanup)
 
@@ -15,159 +19,226 @@ interface IProps {
     }
 }
 
-let disposerCalled = 0
+describe("state with props and effects", () => {
+    it("with useObserver - deep - classes", () => {
+        let renders = 0
+        const [obsChanges, expectObsChangesToBe] = changesList()
+        let disposerCalled = 0
 
-class MyState extends MobxLocalState<IProps> {
-    constructor(readonly obsChanges: string[]) {
-        super()
-    }
+        class MyState {
+            props = injectedProperty<IProps>("deep")
 
-    @computed
-    get addXY() {
-        return this.props.x + this.props.y
-    }
+            @computed
+            get addXY() {
+                return this.props.x + this.props.y
+            }
 
-    public effects = () => [
-        reaction(
-            () => this.props,
-            () => {
-                this.obsChanges.push("obsProps changed")
-            }
-        ),
-        reaction(
-            () => this.props.x,
-            () => {
-                this.obsChanges.push("obsProps.x changed")
-            }
-        ),
-        reaction(
-            () => this.props.y,
-            () => {
-                this.obsChanges.push("obsProps.y changed")
-            }
-        ),
-        reaction(
-            () => this.props.obj,
-            () => {
-                this.obsChanges.push("obsProps.obj changed")
-            }
-        ),
-        reaction(
-            () => this.props.obj.x,
-            () => {
-                this.obsChanges.push("obsProps.obj.x changed")
-            }
-        ),
-        () => {
-            disposerCalled++
+            effects: Effects = () => [
+                reaction(
+                    () => this.props,
+                    () => {
+                        obsChanges.push("obsProps changed")
+                    }
+                ),
+                reaction(
+                    () => this.props.x,
+                    () => {
+                        obsChanges.push("obsProps.x changed")
+                    }
+                ),
+                reaction(
+                    () => this.props.y,
+                    () => {
+                        obsChanges.push("obsProps.y changed")
+                    }
+                ),
+                reaction(
+                    () => this.props.obj,
+                    () => {
+                        obsChanges.push("obsProps.obj changed")
+                    }
+                ),
+                reaction(
+                    () => this.props.obj.x,
+                    () => {
+                        obsChanges.push("obsProps.obj.x changed")
+                    }
+                ),
+                () => {
+                    disposerCalled++
+                }
+            ]
         }
-    ]
-}
 
-beforeEach(() => {
-    disposerCalled = 0
-})
+        const TestComponent = (props: IProps) => {
+            const myState = useMobxLocalState(() => new MyState(), {
+                props
+            })
 
-it("with useObserver - deep", () => {
-    let renders = 0
-    const [obsChanges, expectObsChangesToBe] = changesList()
+            renders++
+            return useObserver(() => (
+                <div>
+                    {props.x}-{myState.props.x} {props.y}-{myState.props.y} {myState.addXY}{" "}
+                    {myState.props.obj.x}
+                </div>
+            ))
+        }
+        const obj = {
+            x: 9
+        }
+        const { container, rerender, unmount } = render(<TestComponent x={0} y={0} obj={obj} />)
+        const div = container.querySelector("div")!
 
-    const TestComponent = (props: IProps) => {
-        const myState = useMobxLocalState(() => new MyState(obsChanges), props, {
-            propsMode: "deep"
-        })
+        expect(div.textContent).toBe("0-0 0-0 0 9")
+        expect(renders).toBe(1)
+        expectObsChangesToBe([])
 
-        renders++
-        return useObserver(() => (
-            <div>
-                {props.x}-{myState.props.x} {props.y}-{myState.props.y} {myState.addXY}{" "}
-                {myState.props.obj.x}
-            </div>
-        ))
-    }
-    const obj = {
-        x: 9
-    }
-    const { container, rerender, unmount } = render(<TestComponent x={0} y={0} obj={obj} />)
-    const div = container.querySelector("div")!
+        // re-render with same props, but change deep prop
+        obj.x = 10
+        rerender(<TestComponent x={0} y={0} obj={obj} />)
+        expectObsChangesToBe(["obsProps.obj.x changed"]) // change is found since we are in deep mode
+        expect(div.textContent).toBe("0-0 0-0 0 10")
+        expect(renders).toBe(3) // TODO: sadly this is double rendered
 
-    expect(div.textContent).toBe("0-0 0-0 0 9")
-    expect(renders).toBe(1)
-    expectObsChangesToBe([])
+        // re-render with different props
+        rerender(<TestComponent x={1} y={0} obj={obj} />)
+        expect(div.textContent).toBe("1-1 0-0 1 10")
+        expectObsChangesToBe(["obsProps.x changed"])
+        expect(renders).toBe(5) // TODO: sadly this is double rendered
 
-    // re-render with same props, but change deep prop
-    obj.x = 10
-    rerender(<TestComponent x={0} y={0} obj={obj} />)
-    expect(div.textContent).toBe("0-0 0-0 0 10")
-    expectObsChangesToBe(["obsProps.obj.x changed"])
-    expect(renders).toBe(3) // TODO: sadly this is double rendered
+        // re-render with different props
+        rerender(<TestComponent x={2} y={1} obj={obj} />)
+        expect(div.textContent).toBe("2-2 1-1 3 10")
+        expectObsChangesToBe(["obsProps.x changed", "obsProps.y changed"])
+        expect(renders).toBe(7) // TODO: sadly this is double rendered
 
-    // re-render with different props
-    rerender(<TestComponent x={1} y={0} obj={obj} />)
-    expect(div.textContent).toBe("1-1 0-0 1 10")
-    expect(renders).toBe(5) // TODO: sadly this is double rendered
-    expectObsChangesToBe(["obsProps.x changed"])
-
-    // re-render with different props
-    rerender(<TestComponent x={2} y={1} obj={obj} />)
-    expect(div.textContent).toBe("2-2 1-1 3 10")
-    expect(renders).toBe(7) // TODO: sadly this is double rendered
-    expectObsChangesToBe(["obsProps.x changed", "obsProps.y changed"])
-
-    // disposer must be called
-    expect(disposerCalled).toBe(0)
-    unmount()
-    expect(disposerCalled).toBe(1)
-})
-
-it("with observer - shallow", () => {
-    let renders = 0
-    const [obsChanges, expectObsChangesToBe] = changesList()
-
-    const TestComponent = observer((props: IProps) => {
-        const myState = useMobxLocalState(() => new MyState(obsChanges), props, {
-            propsMode: "shallow"
-        })
-
-        renders++
-        return (
-            <div>
-                {props.x}-{myState.props.x} {props.y}-{myState.props.y} {myState.addXY}{" "}
-                {myState.props.obj.x}
-            </div>
-        )
+        // disposer must be called
+        expect(disposerCalled).toBe(0)
+        unmount()
+        expect(disposerCalled).toBe(1)
     })
-    const obj = {
-        x: 9
+
+    it("with observer - shallow - objects", () => {
+        let renders = 0
+        const [obsChanges, expectObsChangesToBe] = changesList()
+        let disposerCalled = 0
+
+        const newMyState = () =>
+            observable({
+                props: injectedProperty<IProps>("shallow"),
+
+                get addXY() {
+                    return this.props.x + this.props.y
+                },
+
+                effects() {
+                    return [
+                        reaction(
+                            () => this.props,
+                            () => {
+                                obsChanges.push("obsProps changed")
+                            }
+                        ),
+                        reaction(
+                            () => this.props.x,
+                            () => {
+                                obsChanges.push("obsProps.x changed")
+                            }
+                        ),
+                        reaction(
+                            () => this.props.y,
+                            () => {
+                                obsChanges.push("obsProps.y changed")
+                            }
+                        ),
+                        reaction(
+                            () => this.props.obj,
+                            () => {
+                                obsChanges.push("obsProps.obj changed")
+                            }
+                        ),
+                        reaction(
+                            () => this.props.obj.x,
+                            () => {
+                                obsChanges.push("obsProps.obj.x changed")
+                            }
+                        ),
+                        () => {
+                            disposerCalled++
+                        }
+                    ]
+                }
+            })
+
+        const TestComponent = observer((props: IProps) => {
+            const myState = useMobxLocalState(() => newMyState(), {
+                props
+            })
+
+            renders++
+            return (
+                <div>
+                    {props.x}-{myState.props.x} {props.y}-{myState.props.y} {myState.addXY}{" "}
+                    {myState.props.obj.x}
+                </div>
+            )
+        })
+        const obj = {
+            x: 9
+        }
+        const { container, rerender, unmount } = render(<TestComponent x={0} y={0} obj={obj} />)
+        const div = container.querySelector("div")!
+
+        expect(div.textContent).toBe("0-0 0-0 0 9")
+        expect(renders).toBe(1)
+        expectObsChangesToBe([])
+
+        // re-render with same props, but change deep prop
+        obj.x = 10
+        rerender(<TestComponent x={0} y={0} obj={obj} />)
+        expect(div.textContent).toBe("0-0 0-0 0 9") // 9 since memo will prevent the re-render at all
+        expect(renders).toBe(1)
+        expectObsChangesToBe([])
+
+        // re-render with different props
+        rerender(<TestComponent x={1} y={0} obj={obj} />)
+        expect(div.textContent).toBe("1-1 0-0 1 10")
+        expect(renders).toBe(3) // TODO: sadly this is double rendered
+        expectObsChangesToBe(["obsProps.x changed"])
+
+        // re-render with different props
+        rerender(<TestComponent x={2} y={1} obj={obj} />)
+        expect(div.textContent).toBe("2-2 1-1 3 10")
+        expect(renders).toBe(5) // TODO: sadly this is double rendered
+        expectObsChangesToBe(["obsProps.x changed", "obsProps.y changed"])
+
+        // disposer must be called
+        expect(disposerCalled).toBe(0)
+        unmount()
+        expect(disposerCalled).toBe(1)
+    })
+})
+
+it("state without props and effects", () => {
+    class MyState {
+        @observable
+        x!: number
+
+        constructor() {
+            runInAction(() => {
+                this.x = 10
+            })
+        }
     }
-    const { container, rerender, unmount } = render(<TestComponent x={0} y={0} obj={obj} />)
+
+    const TestComponent = observer(() => {
+        const myState = useMobxLocalState(() => new MyState())
+
+        return <div>{myState.x}</div>
+    })
+
+    const { container } = render(<TestComponent />)
     const div = container.querySelector("div")!
 
-    expect(div.textContent).toBe("0-0 0-0 0 9")
-    expect(renders).toBe(1)
-    expectObsChangesToBe([])
-
-    // re-render with same props, but change deep prop
-    obj.x = 10
-    rerender(<TestComponent x={0} y={0} obj={obj} />)
-    expect(div.textContent).toBe("0-0 0-0 0 9") // 9 since memo will prevent the re-render at all
-    expect(renders).toBe(1)
-    expectObsChangesToBe([])
-
-    // re-render with different props
-    rerender(<TestComponent x={1} y={0} obj={obj} />)
-    expect(div.textContent).toBe("1-1 0-0 1 10")
-    expect(renders).toBe(3) // TODO: sadly this is double rendered
-    expectObsChangesToBe(["obsProps.x changed"])
-
-    // re-render with different props
-    rerender(<TestComponent x={2} y={1} obj={obj} />)
-    expect(div.textContent).toBe("2-2 1-1 3 10")
-    expect(renders).toBe(5) // TODO: sadly this is double rendered
-    expectObsChangesToBe(["obsProps.x changed", "obsProps.y changed"])
-
-    // disposer must be called
-    expect(disposerCalled).toBe(0)
-    unmount()
-    expect(disposerCalled).toBe(1)
+    expect(div.textContent).toBe("10")
 })

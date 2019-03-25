@@ -1,132 +1,259 @@
 # mobx-react-localstate <!-- omit in toc -->
 
-[![Build Status](https://travis-ci.org/xaviergonz/mobx-react-localstate.svg?branch=master)](https://travis-ci.org/xaviergonz/mobx-react-localstate)[![Coverage Status](https://coveralls.io/repos/github/xaviergonz/mobx-react-localstate/badge.svg)](https://coveralls.io/github/xaviergonz/mobx-react-localstate)
+[![npm version](https://badge.fury.io/js/mobx-react-localstate.svg)](https://badge.fury.io/js/mobx-react-localstate)
+[![Build Status](https://travis-ci.org/xaviergonz/mobx-react-localstate.svg?branch=master)](https://travis-ci.org/xaviergonz/mobx-react-localstate)
+[![Coverage Status](https://coveralls.io/repos/github/xaviergonz/mobx-react-localstate/badge.svg)](https://coveralls.io/github/xaviergonz/mobx-react-localstate)
 
-React local state made easy with [mobx](https://github.com/mobxjs/mobx) and [mobx-react](https://github.com/mobxjs/mobx-react).
+### React local state made easy with [mobx](https://github.com/mobxjs/mobx) and [mobx-react](https://github.com/mobxjs/mobx-react).
+
+```
+npm install mobx-react-localstate
+yarn add mobx-react-localstate
+```
 
 **You need React version 16.8.0 and above and mobx-react 6.0.0 and above**
 
-Class based components **are not supported** except using `<Observer>` directly in its `render` method. If you want to transition existing projects from classes to hooks (as most of us do), you can use this package alongside the [mobx-react](https://github.com/mobxjs/mobx-react) just fine. The only conflict point is about the `observer` HOC. Subscribe [to this issue](https://github.com/mobxjs/mobx-react/issues/640) for a proper migration guide.
-
-[![NPM](https://nodei.co/npm/mobx-react-localstate.png)](https://www.npmjs.com/package/mobx-react-localstate)
-
 Project is written in TypeScript and provides type safety out of the box. No Flow Type support is planned at this moment, but feel free to contribute.
 
-- [API documentation](#api-documentation)
-  - [`observer<P>(baseComponent: FunctionComponent<P>, options?: IObserverOptions): FunctionComponent<P>`](#observerpbasecomponent-functioncomponentp-options-iobserveroptions-functioncomponentp)
-  - [`useObservable<T>(initialValue: T): T`](#useobservabletinitialvalue-t-t)
-  - [`useDisposable<D extends TDisposable>(disposerGenerator: () => D, inputs: ReadonlyArray<any> = []): D`](#usedisposabled-extends-tdisposabledisposergenerator---d-inputs-readonlyarrayany---d)
+If you know how to use mobx and how to use hooks the example should be pretty much self explanatory.
 
-## API documentation
-
-### `observer<P>(baseComponent: FunctionComponent<P>, options?: IObserverOptions): FunctionComponent<P>`
-
-Function that converts a function component into a reactive component, which tracks which observables are used automatically re-renders the component when one of these values changes. Observables can be passed through props, accessed from context or created locally with `useObservable`.
-
-As for options, it is an optional object with the following optional properties:
-
--   `forwardRef`: pass `true` to use [`forwardRef`](https://reactjs.org/docs/forwarding-refs.html) over the inner component, pass `false` (the default) otherwise.
+### With classes
 
 ```tsx
-import { observer, useObservable } from "mobx-react-lite"
+import { action, computed, observable, when } from "mobx"
+import { observer, useObserver } from "mobx-react"
+import * as React from "react"
+import { Effects, injectedProperty, useMobxLocalState } from "mobx-react-localstate"
 
-const FriendlyComponent = observer(() => {
-    const friendNameRef = React.useRef()
-    const data = useObservable({
-        friends: [] as string[],
-        addFriend(favorite: boolean = false) {
-            if (favorite === true) {
-                data.friends.unshift(friendNameRef.current.value + " * ")
-            } else {
-                data.friends.push(friendNameRef.current.value)
+interface IMyComponentProps {
+    x: number
+}
+
+class MyComponentState {
+    props = injectedProperty<IMyComponentProps>()
+
+    @observable
+    y = 0
+
+    @action.bound
+    incY() {
+        this.y++
+    }
+
+    @computed
+    get sum() {
+        return this.props.x + this.y
+    }
+
+    // effects will be auto disposed on unmount,
+    // they need to be named "effects"
+    effects: Effects = () => [
+        when(
+            () => this.sum > 10,
+            () => {
+                console.log("you reached ten!")
             }
-            friendNameRef.current.value = ""
-        },
-        get friendsCount() {
-            return data.friends.length
+        )
+    ]
+}
+
+// with observer
+const MyComponent1 = observer((props: IMyComponentProps) => {
+    const state = useMobxLocalState(() => new MyComponentState(), {
+        // inject the following values as observables in the state
+        props: {
+            value: props,
+            updateMode: "shallow" // how to transform the value into an observable
         }
     })
 
     return (
         <div>
-            <b>Count of friends: {data.friendsCount} </b>
-            {data.friends.map(friend => (
-                <div>{friend}</div>
-            ))}
-            <hr />
-            <input ref={friendNameRef} />
-            <button onClick={data.addFriend}>Add friend </button>
-            <button onClick={() => data.addFriend(true)}>Add favorite friend</button>
+            <div>
+                x + y = {state.props.x} + {state.y} = {state.sum}
+            </div>
+            <button onClick={state.incY}>Increment Y</button>
         </div>
     )
 })
-```
 
-[![Edit FriendlyComponent](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/jzj48v2xry?module=%2Fsrc%2FFriendlyComponent.tsx)
-
-### `useObservable<T>(initialValue: T): T`
-
-React hook that allows creating observable object within a component body and keeps track of it over renders. Gets all the benefits from [observable objects](https://mobx.js.org/refguide/object.html) including computed properties and methods. You can also use arrays, Map and Set.
-
-Warning: With current implementation you also need to wrap your component to `observer`. It's also possible to have `useObserver` only in case you are not expecting rerender of the whole component.
-
-```tsx
-import { observer, useObservable, useObserver } from "mobx-react-lite"
-
-const TodoList = () => {
-    const todos = useObservable(new Map<string, boolean>())
-    const todoRef = React.useRef()
-    const addTodo = React.useCallback(() => {
-        todos.set(todoRef.current.value, false)
-        todoRef.current.value = ""
-    }, [])
-    const toggleTodo = React.useCallback((todo: string) => {
-        todos.set(todo, !todos.get(todo))
-    }, [])
+// with useObserver and memo
+const MyComponent2 = React.memo((props: IMyComponentProps) => {
+    const state = useMobxLocalState(() => new MyComponentState(), {
+        // inject the following values as observables in the state
+        props: {
+            value: props,
+            updateMode: "shallow" // how to transform the value into an observable
+        }
+    })
 
     return useObserver(() => (
         <div>
-            {Array.from(todos).map(([todo, done]) => (
-                <div onClick={() => toggleTodo(todo)} key={todo}>
-                    {todo}
-                    {done ? " ✔" : " ⏲"}
-                </div>
-            ))}
-            <input ref={todoRef} />
-            <button onClick={addTodo}>Add todo</button>
+            <div>
+                x + y = {state.props.x} + {state.y} = {state.sum}
+            </div>
+            <button onClick={state.incY}>Increment Y</button>
         </div>
     ))
+})
+```
+
+## With plain objects
+
+```tsx
+import { action, observable, when } from "mobx"
+import { observer, useObserver } from "mobx-react"
+import * as React from "react"
+import { injectedProperty, useMobxLocalState } from "mobx-react-localstate"
+
+interface IMyComponentProps {
+    x: number
+}
+
+const newMyComponentState = () =>
+    observable(
+        {
+            props: injectedProperty<IMyComponentProps>(),
+
+            // observable
+            y: 0,
+
+            // action (decorated below)
+            incY() {
+                this.y++
+            },
+
+            // computed
+            get sum() {
+                return this.props.x + this.y
+            },
+
+            // effects will be auto disposed on unmount,
+            // they need to be named "effects"
+            effects() {
+                return [
+                    when(
+                        () => this.sum > 10,
+                        () => {
+                            console.log("you reached ten!")
+                        }
+                    )
+                ]
+            }
+        },
+        {
+            incY: action
+        }
+    )
+
+// with observer
+const MyComponent1 = observer((props: IMyComponentProps) => {
+    const state = useMobxLocalState(() => newMyComponentState(), {
+        // inject the following values as observables in the state
+        props: {
+            value: props,
+            updateMode: "shallow" // how to transform the value into an observable
+        }
+    })
+
+    return (
+        <div>
+            <div>
+                x + y = {state.props.x} + {state.y} = {state.sum}
+            </div>
+            <button onClick={state.incY}>Increment Y</button>
+        </div>
+    )
+})
+
+// with useObserver and memo
+const MyComponent2 = React.memo((props: IMyComponentProps) => {
+    const state = useMobxLocalState(() => newMyComponentState(), {
+        // inject the following values as observables in the state
+        props: {
+            value: props,
+            updateMode: "shallow" // how to transform the value into an observable
+        }
+    })
+
+    return useObserver(() => (
+        <div>
+            <div>
+                x + y = {state.props.x} + {state.y} = {state.sum}
+            </div>
+            <button onClick={state.incY}>Increment Y</button>
+        </div>
+    ))
+})
+```
+
+## useMobxLocalState
+
+```ts
+useMobxLocalState<T extends MobxLocalState>(
+    constructFn: () => T,
+    dependencies?: IDependencies<T>
+): T
+
+type IDependencies<T> = { [k in keyof T]?: IDependency<T[k]> }
+
+interface IDependency<T> {
+    value: T
+    updateMode?: UpdateableObservableMode<T>
+}
+
+export type UpdateableObservableMode<T> =
+    | "shallow" // the reference is not changed and the properties (primitives, objects, maps and arrays) are turned into a shallowly observable values
+    | "deep" // the reference is not changed and properties (primitives, objects, maps and arrays) are turned into a deeply observable values
+    | (T extends object
+          ? {
+                deepProps: Array<keyof T> // like 'shallow', except some properties are turned into deep observables 'opt-in'
+            }
+          : never)
+```
+
+`useMobxLocalState` second parameter (`dependencies`) is optional and allows you to inject into the state object any given observable or non-observable values as observable values.
+This is specially useful when any of your computed values of reaction depend on some non-observable values (such as props or some context).
+Each dependency is in the form:
+
+```ts
+{
+    PROPERTY_INSIDE_STATE: {
+        value: VALUE_TO_TRANSFORM,
+        updateMode?: "shallow" | "deep" | { deepProps: [ORIGINAL_VALUE_PROP_NAMES] }
+    }
 }
 ```
 
-### `useDisposable<D extends TDisposable>(disposerGenerator: () => D, inputs: ReadonlyArray<any> = []): D`
+Where the mode controls how the transformation into observable is made, being `shallow` the default. For example, if you only want to make certain props to be transformed into deep observables you can pass something like:
 
-The disposable is any kind of function that returns another function to be called on a component unmount to clean up used resources. Use MobX related functions like [`reaction`](https://mobx.js.org/refguide/reaction.html), [`autorun`](https://mobx.js.org/refguide/autorun.html), [`when`](https://mobx.js.org/refguide/when.html), [`observe`](https://mobx.js.org/refguide/observe.html), or anything else that returns a disposer.
-Returns the generated disposer for early disposal.
+```ts
+{
+    props: {
+        value: props,
+        updateMode: {
+            deepProps: ["propToMakeDeep1", "propToMakeDeep2"]
+        }
+    }
+}
+```
 
-Example (TypeScript):
+## FAQ
 
-```typescript
-import { reaction } from "mobx"
-import { observer, useComputed, useDisposable } from "mobx-react-lite"
+#### How do I use data from other hooks inside the state object?
 
-const Name = observer((props: { firstName: string; lastName: string }) => {
-    const fullName = useComputed(() => `${props.firstName} ${props.lastName}`, [
-        props.firstName,
-        props.lastName
-    ])
-
-    // when the name changes then send this info to the server
-    useDisposable(() =>
-        reaction(
-            () => fullName,
-            () => {
-                // send this to some server
-            }
-        )
-    )
-
-    // render phase
-    return `Your full name is ${props.firstName} ${props.lastName}`
+```ts
+// component
+const contextData = useContext(...) // contextData type is IContextData for example
+const state = useMobxLocalState(() => new MyComponentState(), {
+    contextData: {
+        value: contextData
+        // shallow update mode when none is given
+    }
 })
+
+// state
+class MyComponentState extends MobxLocalState {
+    contextData!: IContextData // it will be a shallow observable
+}
 ```

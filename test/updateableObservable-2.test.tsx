@@ -1,9 +1,14 @@
 import * as mobx from "mobx"
+import { configure } from "mobx"
 import { observer, useComputed } from "mobx-react"
 import * as React from "react"
 import { useState } from "react"
 import { cleanup, render } from "react-testing-library"
-import { toObservableProps, ToObservablePropsMode } from "../src"
+import { updateableObservable, UpdateableObservableMode } from "../src"
+
+configure({
+    enforceActions: "always"
+})
 
 function toJson(val: any): string {
     if (val instanceof Map) {
@@ -12,7 +17,7 @@ function toJson(val: any): string {
     return JSON.stringify(val)
 }
 
-function doTest(options: ToObservablePropsMode<any>) {
+function doTest(options: UpdateableObservableMode<any>) {
     describe(`options: ${JSON.stringify(options)}`, () => {
         const shallow = options === "shallow"
 
@@ -32,7 +37,7 @@ function doTest(options: ToObservablePropsMode<any>) {
         })
 
         function ComponentClass(nonObsProps: any) {
-            const [obsProps] = useState(() => toObservableProps<any>(options))
+            const [obsProps] = useState(() => updateableObservable<any>(undefined, options))
             obsProps.update(nonObsProps)
             const props = obsProps.get()
 
@@ -172,14 +177,18 @@ function doTest(options: ToObservablePropsMode<any>) {
         })
 
         it("(obs object) deep prop with value set", async () => {
-            mobx.set(dp, "x", 5)
+            mobx.runInAction(() => {
+                mobx.set(dp, "x", 5)
+            })
             rerender(<Component prop3={dp} />)
             expect(computedCalls).toEqual(["prop3.x: 5"])
             expect(renders).toBe(1)
         })
 
         it("(obs object) deep prop with value removed", async () => {
-            mobx.remove(dp, "x")
+            mobx.runInAction(() => {
+                mobx.remove(dp, "x")
+            })
             rerender(<Component prop3={dp} />)
             expect(computedCalls).toEqual(["prop3.x: undefined"])
             expect(renders).toBe(1)
