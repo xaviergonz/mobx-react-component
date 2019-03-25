@@ -49,7 +49,7 @@ export function useMobxLocalState<T extends object>(
             })
         }
 
-        const disposeEffects = instantiateEffects(state, (state as any).effects)
+        const disposeEffects = instantiateEffects(state)
 
         return {
             state,
@@ -74,12 +74,25 @@ export function useMobxLocalState<T extends object>(
     return data.state
 }
 
-function instantiateEffects(context: any, effects?: () => ReadonlyArray<() => any>) {
-    if (!effects) {
+function instantiateEffects(state: any) {
+    if (typeof state !== "object") {
+        // istanbul ignore next
         return undefined
     }
 
-    let effectDisposers: ReadonlyArray<() => any> | undefined = effects.call(context)
+    const effectKeys = Object.keys(state).filter(k => k.startsWith("fx_"))
+    if (effectKeys.length <= 0) {
+        return undefined
+    }
+
+    let effectDisposers: ReadonlyArray<() => any> | undefined = effectKeys.map(k => {
+        const fxCreator = state[k]
+        if (typeof fxCreator !== "function") {
+            // istanbul ignore next
+            throw new Error(`function expected for effect key '${k}'`)
+        }
+        return fxCreator.call(state)
+    })
     return () => {
         if (effectDisposers) {
             effectDisposers.forEach(disposer => disposer())

@@ -2,7 +2,7 @@ import { computed, configure, observable, reaction, runInAction } from "mobx"
 import { observer, useObserver } from "mobx-react"
 import * as React from "react"
 import { cleanup, render } from "react-testing-library"
-import { Effects, injectedProperty, useMobxLocalState } from "../src"
+import { injectedProperty, useMobxLocalState } from "../src"
 import { changesList } from "./utils"
 
 configure({
@@ -33,41 +33,44 @@ describe("state with props and effects", () => {
                 return this.props.x + this.props.y
             }
 
-            effects: Effects = () => [
+            fx_1 = () =>
                 reaction(
                     () => this.props,
                     () => {
                         obsChanges.push("obsProps changed")
                     }
-                ),
+                )
+            fx_2 = () =>
                 reaction(
                     () => this.props.x,
                     () => {
                         obsChanges.push("obsProps.x changed")
                     }
-                ),
+                )
+            fx_3 = () =>
                 reaction(
                     () => this.props.y,
                     () => {
                         obsChanges.push("obsProps.y changed")
                     }
-                ),
+                )
+            fx_4 = () =>
                 reaction(
                     () => this.props.obj,
                     () => {
                         obsChanges.push("obsProps.obj changed")
                     }
-                ),
+                )
+            fx_5 = () =>
                 reaction(
                     () => this.props.obj.x,
                     () => {
                         obsChanges.push("obsProps.obj.x changed")
                     }
-                ),
-                () => {
-                    disposerCalled++
-                }
-            ]
+                )
+            fx_6 = () => () => {
+                disposerCalled++
+            }
         }
 
         const TestComponent = (props: IProps) => {
@@ -131,42 +134,50 @@ describe("state with props and effects", () => {
                     return this.props.x + this.props.y
                 },
 
-                effects() {
-                    return [
-                        reaction(
-                            () => this.props,
-                            () => {
-                                obsChanges.push("obsProps changed")
-                            }
-                        ),
-                        reaction(
-                            () => this.props.x,
-                            () => {
-                                obsChanges.push("obsProps.x changed")
-                            }
-                        ),
-                        reaction(
-                            () => this.props.y,
-                            () => {
-                                obsChanges.push("obsProps.y changed")
-                            }
-                        ),
-                        reaction(
-                            () => this.props.obj,
-                            () => {
-                                obsChanges.push("obsProps.obj changed")
-                            }
-                        ),
-                        reaction(
-                            () => this.props.obj.x,
-                            () => {
-                                obsChanges.push("obsProps.obj.x changed")
-                            }
-                        ),
+                fx_1() {
+                    return reaction(
+                        () => this.props,
                         () => {
-                            disposerCalled++
+                            obsChanges.push("obsProps changed")
                         }
-                    ]
+                    )
+                },
+                fx_2() {
+                    return reaction(
+                        () => this.props.x,
+                        () => {
+                            obsChanges.push("obsProps.x changed")
+                        }
+                    )
+                },
+                fx_3() {
+                    return reaction(
+                        () => this.props.y,
+                        () => {
+                            obsChanges.push("obsProps.y changed")
+                        }
+                    )
+                },
+                fx_4() {
+                    return reaction(
+                        () => this.props.obj,
+                        () => {
+                            obsChanges.push("obsProps.obj changed")
+                        }
+                    )
+                },
+                fx_5() {
+                    return reaction(
+                        () => this.props.obj.x,
+                        () => {
+                            obsChanges.push("obsProps.obj.x changed")
+                        }
+                    )
+                },
+                fx_6() {
+                    return () => {
+                        disposerCalled++
+                    }
                 }
             })
 

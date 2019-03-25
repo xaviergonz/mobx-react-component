@@ -3,7 +3,7 @@
 import { action, computed, observable, when } from "mobx"
 import { observer, useObserver } from "mobx-react"
 import * as React from "react"
-import { Effects, injectedProperty, useMobxLocalState } from "../src"
+import { injectedProperty, useMobxLocalState } from "../src"
 
 interface IMyComponentProps {
     x: number
@@ -28,15 +28,15 @@ class MyComponentState {
     }
 
     // effects will be auto disposed on unmount,
-    // they need to be named "effects"
-    effects: Effects = () => [
-        when(
-            () => this.sum > 10,
+    // the need to start with the name "fx_"
+    fx_when10() {
+        return when(
+            () => this.sum === 10,
             () => {
                 console.log("you reached ten!")
             }
         )
-    ]
+    }
 }
 
 // with observer
