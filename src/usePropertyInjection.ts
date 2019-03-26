@@ -1,6 +1,6 @@
 import { action, isObservable, observable, remove, runInAction } from "mobx"
 import { useState } from "react"
-import { useSkippingForceUpdate } from "./mobx-react-lite/utils"
+import { useSkippingForceUpdate } from "./utils"
 
 export function usePropertyInjection<T extends object>(
     state: T,

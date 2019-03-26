@@ -11,7 +11,7 @@ class MyComponentClass extends MobxComponent<IMyComponentProps, HTMLButtonElemen
     }
 }
 
-const MyComponent = mobxComponent(MyComponentClass)
+export const MyComponent = mobxComponent(MyComponentClass)
 
 // You can now get a ref directly to the DOM button:
 // const ref = React.createRef<HTMLButtonElement>();

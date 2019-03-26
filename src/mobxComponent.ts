@@ -1,3 +1,4 @@
+import { IUseObserverOptions, useObserver } from "mobx-react-lite"
 import {
     forwardRef,
     memo,
@@ -7,10 +8,10 @@ import {
     ValidationMap,
     WeakValidationMap
 } from "react"
-import { useObserver } from "./mobx-react-lite"
 import { ReactManagedAttributes } from "./react-types"
 import { useEffectMethods } from "./useEffectMethods"
 import { usePropertyInjection } from "./usePropertyInjection"
+import { useForceUpdate } from "./utils"
 
 function injectedProperty<T>(): T {
     return (undefined as any) as T
@@ -53,6 +54,10 @@ type MobxComponentProps<T extends MobxComponent<any>> = T extends MobxComponent<
 type MobxComponentRef<T extends MobxComponent<any>> = T extends MobxComponent<any, infer _TR>
     ? _TR
     : never
+
+const useObserverOptions: IUseObserverOptions = {
+    useForceUpdate
+}
 
 export function mobxComponent<
     T extends MobxComponent<any, any>,
@@ -98,9 +103,13 @@ export function mobxComponent<
 
             useEffectMethods(state)
 
-            return useObserver(() => {
-                return state.render(state.props, ref)
-            }, displayName)
+            return useObserver(
+                () => {
+                    return state.render(state.props, ref)
+                },
+                displayName,
+                useObserverOptions
+            )
         }
 
         // as any to not destroy the types

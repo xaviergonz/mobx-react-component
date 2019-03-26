@@ -1,10 +1,11 @@
 import * as mobx from "mobx"
 import { configure } from "mobx"
+import { useObserver } from "mobx-react-lite"
 import * as React from "react"
 import { memo, useState } from "react"
 import { act, cleanup, render } from "react-testing-library"
-import { updateableObservable, UpdateableObservableMode, useObserver } from "../src"
-import { useSkippingForceUpdate } from "../src/mobx-react-lite/utils"
+import { updateableObservable, UpdateableObservableMode } from "../src"
+import { useForceUpdate, useSkippingForceUpdate } from "../src/utils"
 
 configure({
     enforceActions: "always"
@@ -73,16 +74,22 @@ function doTest(options: UpdateableObservableMode<any>) {
             })
 
             // render
-            return useObserver(() => {
-                const p1 = computedWithProp1()
-                toJson(p1) // just to deeply read it
-                const p2 = computedWithProp2()
-                const deepC = deepComputed()
-                const str = `${p1} ${p2} ${deepC}`
+            return useObserver(
+                () => {
+                    const p1 = computedWithProp1()
+                    toJson(p1) // just to deeply read it
+                    const p2 = computedWithProp2()
+                    const deepC = deepComputed()
+                    const str = `${p1} ${p2} ${deepC}`
 
-                renders++
-                return computedComponent() || props.children || str
-            })
+                    renders++
+                    return computedComponent() || props.children || str
+                },
+                undefined,
+                {
+                    useForceUpdate
+                }
+            )
         })
 
         it("initial state", () => {

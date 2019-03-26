@@ -1,3 +1,2 @@
-export * from "./mobx-react-lite"
 export * from "./mobxComponent"
-export * from "./updateableObservable"
+export * from "./updateableObservable" // TODO: move to another package
