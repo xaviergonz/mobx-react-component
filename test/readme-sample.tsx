@@ -34,7 +34,7 @@ class MyComponentClass extends MobxComponent<IMyComponentProps> {
         return when(
             () => this.sum === 10,
             () => {
-                console.log("you reached ten!")
+                // you reached ten!
             }
         )
     }
