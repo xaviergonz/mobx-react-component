@@ -1,3 +1,3 @@
-export * from "./injectedProperty"
+export * from "./mobx-react-lite"
+export * from "./mobxComponent"
 export * from "./updateableObservable"
-export * from "./useMobxLocalState"
