@@ -4,7 +4,7 @@
 [![Build Status](https://travis-ci.org/xaviergonz/mobx-react-component.svg?branch=master)](https://travis-ci.org/xaviergonz/mobx-react-component)
 [![Coverage Status](https://coveralls.io/repos/github/xaviergonz/mobx-react-component/badge.svg)](https://coveralls.io/github/xaviergonz/mobx-react-component)
 
-### Write React functional components (with hooks) + MobX for local state in a fancy way.
+### Write React functional components (with hooks) + MobX for local state in a fancy way
 
 ```
 npm install mobx-react-component
@@ -89,4 +89,27 @@ const MyComponent = mobxComponent(
 
 // usage
 // <MyComponent x={5}/>
+```
+
+Forward references are supported as well
+
+```tsx
+import * as React from "react"
+import { MobxComponent, mobxComponent } from "mobx-react-component"
+
+interface IMyComponentProps {
+    children: React.ReactNode
+}
+
+class MyComponentClass extends MobxComponent<IMyComponentProps, HTMLButtonElement> {
+    render(props: IMyComponentProps, ref: React.Ref<HTMLButtonElement>) {
+        return <button ref={ref}>{props.children}</button>
+    }
+}
+
+const MyComponent = mobxComponent(MyComponentClass)
+
+// You can now get a ref directly to the DOM button:
+// const ref = React.createRef<HTMLButtonElement>();
+// <MyComponent ref={ref}/>
 ```
