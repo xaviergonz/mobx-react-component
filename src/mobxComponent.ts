@@ -48,11 +48,9 @@ export abstract class MobxComponent<P extends object = {}, TRef = {}> {
     private [contextsToInject]: IContextToInject[]
 }
 
-type MobxComponentProps<T extends MobxComponent<any>> = T extends MobxComponent<infer _P>
-    ? _P
-    : never
-type MobxComponentRef<T extends MobxComponent<any>> = T extends MobxComponent<any, infer _TR>
-    ? _TR
+type MobxComponentProps<T extends MobxComponent<any>> = T extends MobxComponent<infer P> ? P : never
+type MobxComponentRef<T extends MobxComponent<any>> = T extends MobxComponent<any, infer TR>
+    ? TR
     : never
 
 const useObserverOptions: IUseObserverOptions = {
