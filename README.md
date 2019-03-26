@@ -4,7 +4,7 @@
 [![Build Status](https://travis-ci.org/xaviergonz/mobx-react-component.svg?branch=master)](https://travis-ci.org/xaviergonz/mobx-react-component)
 [![Coverage Status](https://coveralls.io/repos/github/xaviergonz/mobx-react-component/badge.svg)](https://coveralls.io/github/xaviergonz/mobx-react-component)
 
-### Write React functional components + MobX for local state the fancy way.
+### Write React functional components (with hooks) + MobX for local state in a fancy way.
 
 ```
 npm install mobx-react-component
