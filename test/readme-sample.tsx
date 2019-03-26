@@ -6,7 +6,7 @@ interface IMyComponentProps {
     x: number
 }
 
-const SomeContext = React.createContext({})
+const SomeContext = React.createContext({}) // might be a root store
 
 class MyComponentClass extends MobxComponent<IMyComponentProps> {
     // this.props will become an observable reference version of props
