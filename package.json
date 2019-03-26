@@ -1,5 +1,5 @@
 {
-    "name": "mobx-react-localstate",
+    "name": "mobx-react-component",
     "version": "0.0.1",
     "description": "React local state made easy with mobx and mobx-react",
     "main": "dist/index.js",
@@ -10,7 +10,7 @@
     "types": "dist/index.d.ts",
     "repository": {
         "type": "git",
-        "url": "https://github.com/mobxjs/mobx-react-localstate.git"
+        "url": "https://github.com/mobxjs/mobx-react-component.git"
     },
     "scripts": {
         "prettier": "prettier --write \"**/*.js\" \"**/*.ts\"",
@@ -25,13 +25,12 @@
     "author": "Javier González Garcés",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/mobxjs/mobx-react-localstate/issues"
+        "url": "https://github.com/mobxjs/mobx-react-component/issues"
     },
     "homepage": "https://mobxjs.github.io/mobx",
     "peerDependencies": {
         "mobx": "^4.0.0 || ^5.0.0",
-        "react": "^16.8.0",
-        "mobx-react": "^6.0.0-rc"
+        "react": "^16.8.0"
     },
     "devDependencies": {
         "@types/jest": "^24.0.11",
@@ -63,8 +62,7 @@
         "ts-jest": "^24.0.0",
         "tslint": "^5.14.0",
         "tslint-config-prettier": "^1.18.0",
-        "typescript": "^3.3.4000",
-        "mobx-react": "^6.0.0-rc"
+        "typescript": "^3.3.4000"
     },
     "keywords": [
         "mobx",

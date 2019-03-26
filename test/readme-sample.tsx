@@ -1,28 +1,6 @@
-# mobx-react-component <!-- omit in toc -->
-
-[![npm version](https://badge.fury.io/js/mobx-react-component.svg)](https://badge.fury.io/js/mobx-react-component)
-[![Build Status](https://travis-ci.org/xaviergonz/mobx-react-component.svg?branch=master)](https://travis-ci.org/xaviergonz/mobx-react-component)
-[![Coverage Status](https://coveralls.io/repos/github/xaviergonz/mobx-react-component/badge.svg)](https://coveralls.io/github/xaviergonz/mobx-react-component)
-
-### Write React functional components (with hooks) + MobX for local state in a fancy way.
-
-```
-npm install mobx-react-component
-yarn add mobx-react-component
-```
-
-**You need React version 16.8.0 and above and mobx-react-lite x.x.x and above**
-
-Project is written in TypeScript and provides type safety out of the box. No Flow Type support is planned at this moment, but feel free to contribute.
-
-If you know how to use mobx and how to use hooks the example should be pretty much self explanatory.
-
-### Example
-
-```tsx
 import { action, computed, observable, when } from "mobx"
 import * as React from "react"
-import { ContextValue, injectContext, MobxComponent, mobxComponent } from "mobx-react-component"
+import { ContextValue, injectContext, MobxComponent, mobxComponent } from "../src"
 
 interface IMyComponentProps {
     x: number
@@ -76,7 +54,7 @@ class MyComponentClass extends MobxComponent<IMyComponentProps> {
     }
 }
 
-const MyComponent = mobxComponent(
+export const MyComponent = mobxComponent(
     MyComponentClass,
     // statics (defaultProps, displayName, propTypes, etc. can be declared here)
     {
@@ -89,4 +67,3 @@ const MyComponent = mobxComponent(
 
 // usage
 // <MyComponent x={5}/>
-```

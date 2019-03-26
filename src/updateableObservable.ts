@@ -1,5 +1,6 @@
 import {
     action,
+    IObservableValue,
     isObservable,
     isObservableArray,
     isObservableMap,
@@ -11,55 +12,93 @@ import {
 
 type LocalObservables = WeakMap<any, boolean>
 
-const EMPTY_OBJECT = {}
+export type UpdateableObservableMode<T> =
+    | "shallow" // the reference is not changed and the properties (primitives, objects, maps and arrays) are turned into a shallowly observable values
+    | "deep" // the reference is not changed and properties (primitives, objects, maps and arrays) are turned into a deeply observable values
+    | (T extends object
+          ? {
+                deepProps: Array<keyof T> // like 'shallow', except some properties are turned into deep observables 'opt-in'
+            }
+          : never)
 
-export type ToObservablePropsMode<P> =
-    | "shallow" // the reference is not changed and the props (primitives, objects, maps and arrays) are turned into a shallowly observable object
-    | "deep" // the reference is not changed and props (primitives, objects, maps and arrays) are turned into a deeply observable object
-    | {
-          deepProps: Array<keyof P> // like 'shallow', except some properties are turned into deep observables 'opt-in'
-      }
-
-export interface IToObservablePropsRet<P> {
-    get: () => P
-    update: (props: P) => void
+export interface IUpdateableObservable<T> {
+    get(): T
+    getBoxed(): T | IObservableValue<T>
+    update(props: T): void
 }
 
-export function toObservableProps<P>(
-    mode: ToObservablePropsMode<P> = "shallow"
-): IToObservablePropsRet<P> {
+const alwaysDeep = () => true
+const alwaysShallow = () => false
+
+const invalidModeError = "mode has to be one of 'shallow', 'deep' or '{ deepProps }'"
+
+export function updateableObservable<T>(
+    initialValue: T,
+    mode: UpdateableObservableMode<T>
+): IUpdateableObservable<T> {
     let isDeepProp: (pname: string) => boolean
     if (mode === "deep") {
-        isDeepProp = () => true
+        isDeepProp = alwaysDeep
     } else if (mode === "shallow") {
-        isDeepProp = () => false
-    } else {
+        isDeepProp = alwaysShallow
+    } else if (isPlainObject(mode)) {
+        const modeDeepProps = mode.deepProps as string[]
+        if (!Array.isArray(modeDeepProps)) {
+            // istanbul ignore next
+            throw new Error(invalidModeError)
+        }
+
         // convert array to object so lookup is faster
         const deepProps: { [pname: string]: boolean } = {}
-        ;(mode.deepProps as string[]).forEach(propName => {
+        modeDeepProps.forEach(propName => {
             deepProps[propName] = true
         })
 
         isDeepProp = propName => deepProps[propName]
+    } else {
+        // istanbul ignore next
+        throw new Error(invalidModeError)
     }
 
     // keeps track of which observable comes from props and which were generated locally
     const localObservables = new WeakMap()
 
-    const observed = observable.object<P>({} as any, undefined, { deep: false })
-    localObservables.set(observed, true)
+    let observed: any
+    let boxed = false
 
-    const update = action((unobserved: P) => {
-        updateObservableObject(observed, unobserved || EMPTY_OBJECT, isDeepProp, localObservables)
+    const update = action("updateObservable", (unobserved: T) => {
+        observed = updateObservableValue(observed, unobserved, isDeepProp, localObservables)
+        if (!isObservable(observed)) {
+            boxed = true
+            observed = observable.box(observed, { deep: false })
+        } else {
+            boxed = false
+        }
+        localObservables.set(observed, true)
     })
 
+    update(initialValue)
+
     return {
-        get: () => observed,
+        get() {
+            if (boxed) {
+                return observed.get()
+            }
+            return observed
+        },
+        getBoxed() {
+            return observed
+        },
         update
     }
 }
 
-function updateObservableValue(oldV: any, newV: any, localObservables: LocalObservables) {
+function updateObservableValue(
+    oldV: any,
+    newV: any,
+    isDeepProp: undefined | ((pname: string) => boolean),
+    localObservables: LocalObservables
+) {
     if (isObservable(newV)) {
         return newV
     }
@@ -67,7 +106,7 @@ function updateObservableValue(oldV: any, newV: any, localObservables: LocalObse
         return updateObservableArray(oldV, newV, localObservables)
     }
     if (isPlainObject(newV)) {
-        return updateObservableObject(oldV, newV, undefined, localObservables)
+        return updateObservableObject(oldV, newV, isDeepProp, localObservables)
     }
     if (newV instanceof Map) {
         return updateObservableMap(oldV, newV, localObservables)
@@ -89,7 +128,7 @@ function updateObservableArray(oldArr: any, newArr: any[], localObservables: Loc
         const newValue = newArr[i]
 
         if (oldValue !== newValue) {
-            set(oldArr, i, updateObservableValue(oldValue, newValue, localObservables))
+            set(oldArr, i, updateObservableValue(oldValue, newValue, undefined, localObservables))
         }
     }
 
@@ -114,7 +153,11 @@ function updateObservableMap(
         const oldValue = oldMap.get(propName)
 
         if (oldValue !== newValue) {
-            set(oldMap, propName, updateObservableValue(oldValue, newValue, localObservables))
+            set(
+                oldMap,
+                propName,
+                updateObservableValue(oldValue, newValue, undefined, localObservables)
+            )
         }
     })
 
@@ -148,7 +191,7 @@ function updateObservableObject(
         const newValue =
             isDeepProp && !isDeepProp(propName)
                 ? maybeNewValue
-                : updateObservableValue(oldValue, maybeNewValue, localObservables)
+                : updateObservableValue(oldValue, maybeNewValue, undefined, localObservables)
 
         if (oldValue !== newValue) {
             set(oldObj, propName, newValue)
