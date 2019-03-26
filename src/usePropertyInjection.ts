@@ -1,17 +1,16 @@
-import { action, isObservable, observable, remove, runInAction } from "mobx"
+import { isObservable, remove, runInAction } from "mobx"
 import { useState } from "react"
-import { useSkippingForceUpdate } from "./utils"
+import { useObservableRef } from "./useObservableRef"
 
 export function usePropertyInjection<T extends object>(
     state: T,
     propName: keyof T,
     value: T[typeof propName]
 ): void {
-    const [updateInjectedProperty] = useState(() => {
-        const boxedObservable = observable.box(value, { deep: false })
+    const boxedObservable = useObservableRef(value, true)
 
-        const stateObservable = isObservable(state)
-        if (stateObservable) {
+    useState(() => {
+        if (isObservable(state)) {
             runInAction(() => {
                 remove(state as any, propName)
             })
@@ -24,16 +23,8 @@ export function usePropertyInjection<T extends object>(
             configurable: true,
             enumerable: true,
             get() {
-                return boxedObservable.get()
+                return boxedObservable.current
             }
         })
-
-        return action(`updateInjectedProperty(${propName})`, (newValue: typeof value) => {
-            boxedObservable.set(newValue)
-        })
-    })
-
-    useSkippingForceUpdate(() => {
-        updateInjectedProperty(value)
     })
 }
