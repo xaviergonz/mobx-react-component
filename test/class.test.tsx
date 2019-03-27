@@ -1,4 +1,4 @@
-import { computed, configure, observable, reaction, runInAction } from "mobx"
+import { action, computed, configure, observable, reaction, runInAction } from "mobx"
 import * as React from "react"
 import { PropsWithChildren } from "react"
 import { act, cleanup, render } from "react-testing-library"
@@ -255,4 +255,44 @@ it("context injection", () => {
     expect(div.textContent).toBe("6")
     expectRendersToBe(1)
     expectObsChangesToBe(["contextValue changed to 6"])
+})
+
+it("actions", () => {
+    class MyComponent extends MobxComponent {
+        @observable
+        x!: number
+
+        constructor() {
+            super()
+            runInAction(() => {
+                this.x = 1
+            })
+        }
+
+        @action.bound
+        incX() {
+            this.x++
+        }
+
+        render() {
+            return (
+                <div>
+                    <span>{this.x}</span>
+                    <button onClick={this.incX}>Inc</button>
+                </div>
+            )
+        }
+    }
+    const TestComponent = mobxComponent(MyComponent)
+
+    const { container } = render(<TestComponent />)
+
+    let span = container.querySelector("span")!
+    expect(span.textContent).toBe("1")
+
+    const button = container.querySelector("button")!
+    button.click()
+
+    span = container.querySelector("span")!
+    expect(span.textContent).toBe("2")
 })

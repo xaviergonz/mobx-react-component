@@ -2,7 +2,13 @@ import { configure, observable, reaction, runInAction } from "mobx"
 import * as React from "react"
 import { memo } from "react"
 import { act, cleanup, render } from "react-testing-library"
-import { useMobxEffects, useMobxObservable, useMobxObsRefs, useMobxRender } from "../src"
+import {
+    useMobxActions,
+    useMobxEffects,
+    useMobxObservable,
+    useMobxObsRefs,
+    useMobxRender
+} from "../src"
 import { changesList } from "./utils"
 
 configure({
@@ -212,4 +218,36 @@ it("statics works", () => {
     rerender(<TestComponent x={6} />)
     div = container.querySelector("div")!
     expect(div.textContent).toBe("6")
+})
+
+it("actions", () => {
+    const TestComponent = memo(() => {
+        const state = useMobxObservable(() => ({
+            x: 1
+        }))
+
+        const actions = useMobxActions(() => ({
+            incX() {
+                state.x++
+            }
+        }))
+
+        return useMobxRender(() => (
+            <div>
+                <span>{state.x}</span>
+                <button onClick={actions.incX}>Inc</button>
+            </div>
+        ))
+    })
+
+    const { container } = render(<TestComponent />)
+
+    let span = container.querySelector("span")!
+    expect(span.textContent).toBe("1")
+
+    const button = container.querySelector("button")!
+    button.click()
+
+    span = container.querySelector("span")!
+    expect(span.textContent).toBe("2")
 })

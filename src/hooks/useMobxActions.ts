@@ -1,4 +1,4 @@
-import { action } from "mobx"
+import { action, observable } from "mobx"
 import { useState } from "react"
 
 export function useMobxActions<O extends object>(actionsFn: () => O): O {
@@ -6,12 +6,12 @@ export function useMobxActions<O extends object>(actionsFn: () => O): O {
         // create actions object
         const actions = actionsFn()
 
-        // make sure each action is bound and with a name
-        Object.entries(actions).forEach(([k, v]) => {
-            ;(actions as any)[k] = action(k, v.bind(actions))
+        const decorators: any = {}
+        Object.keys(actions).forEach(k => {
+            decorators[k] = action.bound
         })
 
-        return actions
+        return observable(actions, decorators)
     })
 
     return act
