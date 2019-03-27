@@ -21,9 +21,6 @@ If you know how to use mobx and how to use hooks the example should be pretty mu
 
 #### Using hooks
 
-<details>
-<summary>Code</summary>
-
 ```tsx
 import { when } from "mobx"
 import * as React from "react"
@@ -99,12 +96,7 @@ MyComponent.displayName = "MyComponent"
 // <MyComponent x={5}/>
 ```
 
-</details>
-
 #### Using a "hook-ish" class
-
-<details>
-<summary>Code</summary>
 
 ```tsx
 import { action, computed, observable, when } from "mobx"
@@ -205,5 +197,3 @@ export const MyComponent = mobxComponent(MyComponentClass)
 // const ref = React.createRef<HTMLButtonElement>();
 // <MyComponent ref={ref}/>
 ```
-
-</details>
