@@ -31,7 +31,7 @@ import {
     useMobxObservable,
     useMobxObsRefs,
     useMobxRender
-} from "../src"
+} from "mobx-react-component"
 
 interface IMyComponentProps {
     x: number
