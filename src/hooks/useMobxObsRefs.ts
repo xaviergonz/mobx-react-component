@@ -1,6 +1,5 @@
 import { action, observable, set } from "mobx"
 import { useState } from "react"
-import { useSkippingForceUpdate } from "../utils"
 
 export function useMobxObsRefs<T extends object>(values: T): T {
     const [data] = useState(() => {
@@ -22,9 +21,7 @@ export function useMobxObsRefs<T extends object>(values: T): T {
         }
     })
 
-    useSkippingForceUpdate(() => {
-        data.update(values)
-    })
+    data.update(values)
 
     return data.obsObj
 }

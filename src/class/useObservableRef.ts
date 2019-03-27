@@ -1,6 +1,5 @@
 import { action, observable } from "mobx"
 import { useState } from "react"
-import { useSkippingForceUpdate } from "../utils"
 
 export function useObservableRef<T>(
     updatedValue: T,
@@ -27,13 +26,7 @@ export function useObservableRef<T>(
         }
     })
 
-    if (skipForceUpdate) {
-        useSkippingForceUpdate(() => {
-            data.set(updatedValue)
-        })
-    } else {
-        data.set(updatedValue)
-    }
+    data.set(updatedValue)
 
     return data.obj
 }

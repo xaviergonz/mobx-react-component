@@ -7,7 +7,7 @@ import {
     ValidationMap,
     WeakValidationMap
 } from "react"
-import { useMobxRender } from "../hooks/useMobxRender"
+import { useMobxObserver } from "../shared/useMobxObserver"
 import { ReactManagedAttributes } from "./react-types"
 import { useEffectMethods } from "./useEffectMethods"
 import { usePropertyInjection } from "./usePropertyInjection"
@@ -74,21 +74,23 @@ export function mobxComponent<
     >
 
     const funcComponent = (props: P2, ref: React.Ref<R>) => {
-            const [state] = useState(constructFn)
+            return useMobxObserver(() => {
+                const [state] = useState(constructFn)
 
-            usePropertyInjection(state, "props", props as any)
+                usePropertyInjection(state, "props", props as any)
 
-            const contexts = state[contextsToInject]
-            if (contexts) {
-                contexts.forEach(c => {
-                    const contextValue = useContext(c.context)
-                    usePropertyInjection(state, c.propName as any, contextValue)
-                })
-            }
+                const contexts = state[contextsToInject]
+                if (contexts) {
+                    contexts.forEach(c => {
+                        const contextValue = useContext(c.context)
+                        usePropertyInjection(state, c.propName as any, contextValue)
+                    })
+                }
 
-            useEffectMethods(state)
+                useEffectMethods(state)
 
-            return useMobxRender(() => state.render(state.props, ref), displayName)
+                return state.render(state.props, ref)
+            }, displayName)
         }
 
         // as any to not destroy the types

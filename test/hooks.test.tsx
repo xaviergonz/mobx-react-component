@@ -3,11 +3,11 @@ import * as React from "react"
 import { memo } from "react"
 import { act, cleanup, render } from "react-testing-library"
 import {
+    mobxObserver,
     useMobxActions,
     useMobxEffects,
     useMobxObservable,
-    useMobxObsRefs,
-    useMobxRender
+    useMobxObsRefs
 } from "../src"
 import { changesList } from "./utils"
 
@@ -29,7 +29,7 @@ let renders = 0
 function expectRendersToBe(n: number) {
     const r = renders
     renders = 0
-    expect(n).toBe(r)
+    expect(r).toBe(n)
 }
 
 it("with props and effects", () => {
@@ -37,54 +37,54 @@ it("with props and effects", () => {
 
     let disposerCalled = 0
 
-    const TestComponent = memo((unobsProps: IProps) => {
-        const obs = useMobxObsRefs({
-            props: unobsProps
-        })
+    const TestComponent = memo(
+        mobxObserver((unobsProps: IProps) => {
+            const obs = useMobxObsRefs({
+                props: unobsProps
+            })
 
-        const state = useMobxObservable(() => ({
-            get addXY() {
-                return obs.props.x + obs.props.y
-            }
-        }))
+            const state = useMobxObservable(() => ({
+                get addXY() {
+                    return obs.props.x + obs.props.y
+                }
+            }))
 
-        useMobxEffects(() => [
-            reaction(
-                () => obs.props,
+            useMobxEffects(() => [
+                reaction(
+                    () => obs.props,
+                    () => {
+                        obsChanges.push("obsProps changed")
+                    }
+                ),
+                reaction(
+                    () => obs.props.x,
+                    () => {
+                        obsChanges.push("obsProps.x changed")
+                    }
+                ),
+                reaction(
+                    () => obs.props.y,
+                    () => {
+                        obsChanges.push("obsProps.y changed")
+                    }
+                ),
+                reaction(
+                    () => obs.props.obj,
+                    () => {
+                        obsChanges.push("obsProps.obj changed")
+                    }
+                ),
+                reaction(
+                    () => obs.props.obj.x,
+                    () => {
+                        obsChanges.push("obsProps.obj.x changed")
+                    }
+                ),
                 () => {
-                    obsChanges.push("obsProps changed")
+                    disposerCalled++
                 }
-            ),
-            reaction(
-                () => obs.props.x,
-                () => {
-                    obsChanges.push("obsProps.x changed")
-                }
-            ),
-            reaction(
-                () => obs.props.y,
-                () => {
-                    obsChanges.push("obsProps.y changed")
-                }
-            ),
-            reaction(
-                () => obs.props.obj,
-                () => {
-                    obsChanges.push("obsProps.obj changed")
-                }
-            ),
-            reaction(
-                () => obs.props.obj.x,
-                () => {
-                    obsChanges.push("obsProps.obj.x changed")
-                }
-            ),
-            () => {
-                disposerCalled++
-            }
-        ])
+            ])
 
-        return useMobxRender(() => {
             renders++
             return (
                 <div>
@@ -93,7 +93,7 @@ it("with props and effects", () => {
                 </div>
             )
         })
-    })
+    )
 
     let obj = {
         x: 9
@@ -153,21 +153,21 @@ it("with props and effects", () => {
 })
 
 it("without props / effects", () => {
-    const TestComponent = memo(() => {
-        const state = useMobxObservable(() => ({
-            x: 10
-        }))
+    const TestComponent = memo(
+        mobxObserver(() => {
+            const state = useMobxObservable(() => ({
+                x: 10
+            }))
 
-        const [s] = React.useState(5)
+            const [s] = React.useState(5)
 
-        return useMobxRender(() => {
             return (
                 <div>
                     {state.x} {s}
                 </div>
             )
         })
-    })
+    )
 
     const { container } = render(<TestComponent />)
     const div = container.querySelector("div")!
@@ -177,11 +177,11 @@ it("without props / effects", () => {
 
 it("ref forwarding works", () => {
     const TestComponent = memo(
-        React.forwardRef((props: {}, ref: React.Ref<HTMLInputElement>) => {
-            return useMobxRender(() => {
+        React.forwardRef(
+            mobxObserver((props: {}, ref: React.Ref<HTMLInputElement>) => {
                 return <input ref={ref} />
             })
-        })
+        )
     )
 
     const inputRef = React.createRef<HTMLInputElement>()
@@ -199,15 +199,13 @@ it("statics works", () => {
             props
         })
 
-        return useMobxRender(() => {
-            return <div>{obs.props.x}</div>
-        })
+        return <div>{obs.props.x}</div>
     }
     WrappedTestComponent.defaultProps = {
         x: 5
     }
 
-    const TestComponent = memo(WrappedTestComponent)
+    const TestComponent = memo(mobxObserver(WrappedTestComponent))
     TestComponent.displayName = "My component"
 
     expect(TestComponent.displayName).toBe("My component")
@@ -221,24 +219,26 @@ it("statics works", () => {
 })
 
 it("actions", () => {
-    const TestComponent = memo(() => {
-        const state = useMobxObservable(() => ({
-            x: 1
-        }))
+    const TestComponent = memo(
+        mobxObserver(() => {
+            const state = useMobxObservable(() => ({
+                x: 1
+            }))
 
-        const actions = useMobxActions(() => ({
-            incX() {
-                state.x++
-            }
-        }))
+            const actions = useMobxActions(() => ({
+                incX() {
+                    state.x++
+                }
+            }))
 
-        return useMobxRender(() => (
-            <div>
-                <span>{state.x}</span>
-                <button onClick={actions.incX}>Inc</button>
-            </div>
-        ))
-    })
+            return (
+                <div>
+                    <span>{state.x}</span>
+                    <button onClick={actions.incX}>Inc</button>
+                </div>
+            )
+        })
+    )
 
     const { container } = render(<TestComponent />)
 
