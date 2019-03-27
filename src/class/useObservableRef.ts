@@ -1,10 +1,10 @@
 import { action, observable } from "mobx"
 import { useState } from "react"
-import { useSkippingForceUpdate } from "./utils"
+import { useSkippingForceUpdate } from "../utils"
 
 export function useObservableRef<T>(
     updatedValue: T,
-    skipForceUpdate = false
+    skipForceUpdate = true
 ): {
     readonly current: T
 } {

@@ -20,6 +20,6 @@
         "lib": ["es6", "dom"],
         "jsx": "react"
     },
-    "include": ["src/**/*", "test/**/*"],
+    "include": ["src/**/*", "test/**/*", "samples/**/*"],
     "exclude": ["node_modules"]
 }

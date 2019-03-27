@@ -17,25 +17,117 @@ Project is written in TypeScript and provides type safety out of the box. No Flo
 
 If you know how to use mobx and how to use hooks the example should be pretty much self explanatory.
 
-### Example
+### Examples
+
+#### Using hooks
+
+<details>
+<summary>Code</summary>
 
 ```tsx
-import { action, computed, observable, when } from "mobx"
+import { when } from "mobx"
 import * as React from "react"
-import { ContextValue, injectContext, MobxComponent, mobxComponent } from "mobx-react-component"
+import { memo, useContext } from "react"
+import {
+    useMobxActions,
+    useMobxEffects,
+    useMobxObservable,
+    useMobxObsRefs,
+    useMobxRender
+} from "../src"
 
 interface IMyComponentProps {
     x: number
 }
 
-const SomeContext = React.createContext({}) // might be a root store
+const SomeContext = React.createContext({ x: 5 }) // might be a root store
+
+export const MyComponent = memo((unobsProps: IMyComponentProps) => {
+    // observable refs of the given data
+    // note: do NOT ever destructure this when using or else the observability
+    // will be lost! (in other words, always use obs.X to access the value)
+    const obs = useMobxObsRefs({
+        props: unobsProps,
+        someContextValue: useContext(SomeContext)
+    })
+
+    const state = useMobxObservable(
+        () => ({
+            // observable value
+            y: 0,
+
+            // computed
+            get sum() {
+                return obs.props.x + this.y
+            }
+        }),
+        // decorators (optional)
+        {
+            // properties will default to observables / computed
+        }
+    )
+
+    const actions = useMobxActions(() => ({
+        incY() {
+            state.y++
+        }
+    }))
+
+    // effects will be started on first render and auto disposed on unmount
+    useMobxEffects(() => [
+        when(
+            () => state.sum === 10,
+            () => {
+                // you reached ten!
+            }
+        )
+    ])
+
+    return useMobxRender(() => (
+        <div>
+            <div>
+                x + y = {obs.props.x} + {state.y} = {state.sum}
+            </div>
+            <button onClick={actions.incY}>Increment Y</button>
+        </div>
+    ))
+})
+
+MyComponent.displayName = "MyComponent"
+
+// usage
+// <MyComponent x={5}/>
+```
+
+</details>
+
+#### Using a "hook-ish" class
+
+<details>
+<summary>Code</summary>
+
+```tsx
+import { action, computed, observable, when } from "mobx"
+import * as React from "react"
+import {
+    injectContext,
+    MobxComponent,
+    mobxComponent,
+    ReactContextValue
+} from "mobx-react-component"
+
+interface IMyComponentProps {
+    x: number
+}
+
+const SomeContext = React.createContext({ x: 5 }) // might be a root store
 
 class MyComponentClass extends MobxComponent<IMyComponentProps> {
     // this.props will become an observable reference version of props
 
     // this.someContext will become an observable reference
     @injectContext(SomeContext)
-    someContext!: ContextValue<typeof SomeContext>
+    someContext!: ReactContextValue<typeof SomeContext>
 
     @observable
     y = 0
@@ -76,7 +168,7 @@ class MyComponentClass extends MobxComponent<IMyComponentProps> {
     }
 }
 
-const MyComponent = mobxComponent(
+export const MyComponent = mobxComponent(
     MyComponentClass,
     // statics (defaultProps, displayName, propTypes, etc. can be declared here)
     {
@@ -107,9 +199,11 @@ class MyComponentClass extends MobxComponent<IMyComponentProps, HTMLButtonElemen
     }
 }
 
-const MyComponent = mobxComponent(MyComponentClass)
+export const MyComponent = mobxComponent(MyComponentClass)
 
 // You can now get a ref directly to the DOM button:
 // const ref = React.createRef<HTMLButtonElement>();
 // <MyComponent ref={ref}/>
 ```
+
+</details>

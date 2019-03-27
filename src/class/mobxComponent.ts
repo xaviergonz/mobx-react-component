@@ -1,4 +1,3 @@
-import { IUseObserverOptions, useObserver } from "mobx-react-lite"
 import {
     forwardRef,
     memo,
@@ -8,14 +7,10 @@ import {
     ValidationMap,
     WeakValidationMap
 } from "react"
+import { useMobxRender } from "../hooks/useMobxRender"
 import { ReactManagedAttributes } from "./react-types"
 import { useEffectMethods } from "./useEffectMethods"
 import { usePropertyInjection } from "./usePropertyInjection"
-import { useForceUpdate } from "./utils"
-
-function injectedProperty<T>(): T {
-    return (undefined as any) as T
-}
 
 interface IContextToInject {
     context: React.Context<any>
@@ -23,10 +18,6 @@ interface IContextToInject {
 }
 
 const contextsToInject = Symbol("contextsToInject")
-
-export type ContextValue<T extends React.Context<any>> = T extends React.Context<infer V>
-    ? V
-    : never
 
 export const injectContext = (context: React.Context<any>) => {
     return (target: MobxComponent<any, any>, propertyKey: string) => {
@@ -41,7 +32,7 @@ export const injectContext = (context: React.Context<any>) => {
 }
 
 export abstract class MobxComponent<P extends object = {}, TRef = {}> {
-    props = injectedProperty<P>()
+    props!: P
 
     abstract render(props: P, ref: React.Ref<TRef>): ReactElement | null
 
@@ -52,10 +43,6 @@ type MobxComponentProps<T extends MobxComponent<any>> = T extends MobxComponent<
 type MobxComponentRef<T extends MobxComponent<any>> = T extends MobxComponent<any, infer TR>
     ? TR
     : never
-
-const useObserverOptions: IUseObserverOptions = {
-    useForceUpdate
-}
 
 export function mobxComponent<
     T extends MobxComponent<any, any>,
@@ -101,13 +88,7 @@ export function mobxComponent<
 
             useEffectMethods(state)
 
-            return useObserver(
-                () => {
-                    return state.render(state.props, ref)
-                },
-                displayName,
-                useObserverOptions
-            )
+            return useMobxRender(() => state.render(state.props, ref), displayName)
         }
 
         // as any to not destroy the types

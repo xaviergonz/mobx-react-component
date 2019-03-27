@@ -1,19 +1,19 @@
 import { action, computed, observable, when } from "mobx"
 import * as React from "react"
-import { ContextValue, injectContext, MobxComponent, mobxComponent } from "../src"
+import { injectContext, MobxComponent, mobxComponent, ReactContextValue } from "../src"
 
 interface IMyComponentProps {
     x: number
 }
 
-const SomeContext = React.createContext({}) // might be a root store
+const SomeContext = React.createContext({ x: 5 }) // might be a root store
 
 class MyComponentClass extends MobxComponent<IMyComponentProps> {
     // this.props will become an observable reference version of props
 
     // this.someContext will become an observable reference
     @injectContext(SomeContext)
-    someContext!: ContextValue<typeof SomeContext>
+    someContext!: ReactContextValue<typeof SomeContext>
 
     @observable
     y = 0
