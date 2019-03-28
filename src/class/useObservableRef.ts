@@ -1,6 +1,6 @@
 import { action } from "mobx"
-import { useState } from "react"
 import { newObservableWrapper } from "../shared/observableWrapper"
+import { useLazyInit } from "../shared/useLazyInit"
 
 export function useObservableRef<T>(
     updatedValue: T,
@@ -8,7 +8,7 @@ export function useObservableRef<T>(
 ): {
     readonly current: T
 } {
-    const [data] = useState(() => {
+    const data = useLazyInit(() => {
         const { get, update } = newObservableWrapper(updatedValue, mode)
 
         const set = action("updateObservableRef", (newValue: typeof updatedValue) => {

@@ -1,5 +1,5 @@
 import { isObservable, remove, runInAction } from "mobx"
-import { useState } from "react"
+import { useLazyInit } from "../shared/useLazyInit"
 import { useObservableRef } from "./useObservableRef"
 
 export function usePropertyInjection<T extends object>(
@@ -10,7 +10,7 @@ export function usePropertyInjection<T extends object>(
 ): void {
     const boxedObservable = useObservableRef(value, mode)
 
-    useState(() => {
+    useLazyInit(() => {
         if (isObservable(state)) {
             runInAction(() => {
                 remove(state as any, propName)

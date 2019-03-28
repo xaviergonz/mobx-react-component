@@ -1,13 +1,12 @@
-import { useLayoutEffect, useState } from "react"
+import { useLayoutEffect } from "react"
+import { useLazyInit } from "../shared/useLazyInit"
 
 export function useEffectMethods(state: any): void {
-    const [disposeEffects] = useState(() => {
+    const disposeEffects = useLazyInit(() => {
         return instantiateEffects(state)
     })
 
-    if (disposeEffects) {
-        useLayoutEffect(() => disposeEffects, [])
-    }
+    useLayoutEffect(() => disposeEffects, [])
 }
 
 function instantiateEffects(state: any) {

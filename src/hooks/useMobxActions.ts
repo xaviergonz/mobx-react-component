@@ -1,8 +1,8 @@
 import { action, observable } from "mobx"
-import { useState } from "react"
+import { useLazyInit } from "../shared/useLazyInit"
 
 export function useMobxActions<O extends object>(actionsFn: () => O): O {
-    const [act] = useState(() => {
+    const act = useLazyInit(() => {
         // create actions object
         const actions = actionsFn()
 

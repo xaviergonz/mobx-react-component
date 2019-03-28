@@ -1,7 +1,8 @@
-import { useLayoutEffect, useState } from "react"
+import { useLayoutEffect } from "react"
+import { useLazyInit } from "../shared/useLazyInit"
 
 export function useMobxEffects(effectsFn: () => ReadonlyArray<() => any>): void {
-    const [disposeEffects] = useState(() => {
+    const disposeEffects = useLazyInit(() => {
         let effects: ReadonlyArray<() => any> | undefined = effectsFn()
         return () => {
             if (effects) {
@@ -11,7 +12,5 @@ export function useMobxEffects(effectsFn: () => ReadonlyArray<() => any>): void 
         }
     })
 
-    if (disposeEffects) {
-        useLayoutEffect(() => disposeEffects, [])
-    }
+    useLayoutEffect(() => disposeEffects, [])
 }

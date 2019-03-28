@@ -1,11 +1,9 @@
 import { observable } from "mobx"
-import { useState } from "react"
+import { useLazyInit } from "../shared/useLazyInit"
 
 export function useMobxObservable<O extends object, D>(
     obsFn: () => O,
     decorators?: { [K in keyof O]?: (...args: any) => any }
 ): O {
-    const [obsObj] = useState(() => observable(obsFn(), decorators))
-
-    return obsObj
+    return useLazyInit(() => observable(obsFn(), decorators))
 }

@@ -1,12 +1,12 @@
 import { action } from "mobx"
-import { useState } from "react"
 import { newObservableWrapper, ObservableWrapperUpdater } from "../shared/observableWrapper"
+import { useLazyInit } from "../shared/useLazyInit"
 
 export function useMobxObsRefs<O extends object>(
     values: O,
     decorators?: { [K in keyof O]?: "ref" | "shallow" }
 ): O {
-    const [data] = useState(() => {
+    const data = useLazyInit(() => {
         const _decorators: { [k: string]: "ref" | "shallow" | undefined } = { ...decorators } as any
         const _values: any = values
 
