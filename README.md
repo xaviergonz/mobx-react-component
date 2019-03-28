@@ -55,8 +55,10 @@ export const MyComponent = memo(
 
         // observable refs of the given data
 
-        // note: do NOT ever destructure this when using or else the observability
+        // note 1: do NOT ever destructure this when using or else the observability
         // will be lost! (in other words, always use obs.X to access the value)
+        // note 2: if the context value is actually an observable that will never
+        // change its ref then this is not needed
         const obs = useMobxObsRefs({
             someContextValue: useContext(SomeContext)
         })
