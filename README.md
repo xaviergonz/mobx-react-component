@@ -21,6 +21,8 @@ If you know how to use mobx and how to use hooks the example should be pretty mu
 
 #### Using hooks
 
+[Edit in CodeSandbox](https://codesandbox.io/s/jlmx7jk779)
+
 ```tsx
 import { when } from "mobx"
 import * as React from "react"
