@@ -1,22 +1,23 @@
-import { action, observable } from "mobx"
+import { action } from "mobx"
 import { useState } from "react"
+import { newObservableWrapper } from "../shared/observableWrapper"
 
 export function useObservableRef<T>(
     updatedValue: T,
-    skipForceUpdate = true
+    mode: "ref" | "shallow"
 ): {
     readonly current: T
 } {
     const [data] = useState(() => {
-        const boxedObservable = observable.box(updatedValue, { deep: false })
+        const { get, update } = newObservableWrapper(updatedValue, mode)
 
-        const set = action(`setObservableRef`, (newValue: typeof updatedValue) => {
-            boxedObservable.set(newValue)
+        const set = action("updateObservableRef", (newValue: typeof updatedValue) => {
+            update(newValue)
         })
 
         const obj = {
             get current(): T {
-                return boxedObservable.get()
+                return get()
             }
         }
 

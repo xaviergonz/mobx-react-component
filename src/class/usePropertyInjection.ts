@@ -5,9 +5,10 @@ import { useObservableRef } from "./useObservableRef"
 export function usePropertyInjection<T extends object>(
     state: T,
     propName: keyof T,
-    value: T[typeof propName]
+    value: T[typeof propName],
+    mode: "ref" | "shallow"
 ): void {
-    const boxedObservable = useObservableRef(value, true)
+    const boxedObservable = useObservableRef(value, mode)
 
     useState(() => {
         if (isObservable(state)) {

@@ -10,9 +10,6 @@ export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "obs
     const [, setTick] = useState(0)
 
     const reaction = useRef<Reaction | null>(null)
-
-    useDebugValue(reaction, printDebugValue)
-
     useLayoutEffect(() => () => disposeReaction(reaction), [])
 
     // render the original component, but have the
@@ -35,6 +32,9 @@ export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "obs
             exception = e
         }
     })
+
+    useDebugValue(reaction, printDebugValue)
+
     if (exception) {
         reaction.current.dispose()
         throw exception // re-throw any exceptions catched during rendering
@@ -42,7 +42,7 @@ export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "obs
     return rendering
 }
 
-export function printDebugValue(v: React.MutableRefObject<Reaction | null>) {
+function printDebugValue(v: React.MutableRefObject<Reaction | null>) {
     if (!v.current) {
         return "<unknown>"
     }

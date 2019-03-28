@@ -13,15 +13,25 @@ interface IMyComponentProps {
     x: number
 }
 
-const SomeContext = React.createContext({ x: 5 }) // might be a root store
+const SomeContext = React.createContext({ z: 2 }) // might be a root store
 
 export const MyComponent = memo(
-    mobxObserver((unobsProps: IMyComponentProps) => {
+    mobxObserver((props: IMyComponentProps) => {
+        // props is a shallowly observable object
+
+        // note 1: its ref will be kept immutable, so when using hooks pass the actual
+        // single props it depends on, not just "props"
+        // if you really need to access the original props object for some reason
+        // you can still use `getOriginalProps(props)`
+
+        // note 2: do NOT ever destructure this when using or else the observability
+        // will be lost! (in other words, always use props.X to access the value)
+
         // observable refs of the given data
+
         // note: do NOT ever destructure this when using or else the observability
         // will be lost! (in other words, always use obs.X to access the value)
         const obs = useMobxObsRefs({
-            props: unobsProps,
             someContextValue: useContext(SomeContext)
         })
 
@@ -32,7 +42,7 @@ export const MyComponent = memo(
 
                 // computed
                 get sum() {
-                    return obs.props.x + this.y
+                    return props.x + this.y + obs.someContextValue.z
                 }
             }),
             // decorators (optional)
@@ -60,7 +70,7 @@ export const MyComponent = memo(
         return (
             <div>
                 <div>
-                    x + y = {obs.props.x} + {state.y} = {state.sum}
+                    x + y + z = {props.x} + {state.y} + {obs.someContextValue.z} = {state.sum}
                 </div>
                 <button onClick={actions.incY}>Increment Y</button>
             </div>

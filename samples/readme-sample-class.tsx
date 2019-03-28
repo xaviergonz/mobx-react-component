@@ -6,10 +6,15 @@ interface IMyComponentProps {
     x: number
 }
 
-const SomeContext = React.createContext({ x: 5 }) // might be a root store
+const SomeContext = React.createContext({ z: 2 }) // might be a root store
 
 class MyComponentClass extends MobxComponent<IMyComponentProps> {
     // this.props will become an observable reference version of props
+
+    // note: its ref will be kept immutable, so when using hooks pass the actual
+    // single props it depends on, not just "props"
+    // if you really need to access the original props object for some reason
+    // you can still use `getOriginalProps(props)`
 
     // this.someContext will become an observable reference
     @injectContext(SomeContext)
@@ -25,7 +30,7 @@ class MyComponentClass extends MobxComponent<IMyComponentProps> {
 
     @computed
     get sum() {
-        return this.props.x + this.y
+        return this.props.x + this.y + this.someContext.z
     }
 
     // effects will be auto disposed on unmount,
@@ -46,7 +51,7 @@ class MyComponentClass extends MobxComponent<IMyComponentProps> {
         return (
             <div>
                 <div>
-                    x + y = {props.x} + {this.y} = {this.sum}
+                    x + y + z = {props.x} + {this.y} + {this.someContext.z} = {this.sum}
                 </div>
                 <button onClick={this.incY}>Increment Y</button>
             </div>

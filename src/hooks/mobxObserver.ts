@@ -1,22 +1,36 @@
 import { isUsingStaticRendering } from "mobx-react-lite"
+import { setOriginalProps } from "../shared/originalProps"
 import { useMobxObserver } from "../shared/useMobxObserver"
+import { useMobxObsRefs } from "./useMobxObsRefs"
 
 export function mobxObserver<T extends React.FC<any>>(baseComponent: T): T {
-    // The working of observer is explaind step by step in this talk: https://www.youtube.com/watch?v=cPF4iBedoF0&feature=youtu.be&t=1307
     if (isUsingStaticRendering()) {
         return baseComponent
     }
 
     const baseComponentName = baseComponent.displayName || baseComponent.name
 
-    const wrappedComponent = (props: any, ref: any) => {
-        return useMobxObserver(() => baseComponent(props, ref), baseComponentName)
+    const observerComponent = (props: any, ref: any) => {
+        return useMobxObserver(() => {
+            // turn props into a shallow observable object
+            const obs = useMobxObsRefs(
+                {
+                    props
+                },
+                {
+                    props: "shallow"
+                }
+            )
+            setOriginalProps(obs.props, props)
+
+            return baseComponent(obs.props, ref)
+        }, baseComponentName)
     }
-    wrappedComponent.displayName = baseComponentName
+    observerComponent.displayName = baseComponentName
 
-    copyStaticProperties(baseComponent, wrappedComponent)
+    copyStaticProperties(baseComponent, observerComponent)
 
-    return wrappedComponent as any
+    return observerComponent as any
 }
 
 // based on https://github.com/mridgway/hoist-non-react-statics/blob/master/src/index.js

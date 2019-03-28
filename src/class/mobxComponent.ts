@@ -7,6 +7,7 @@ import {
     ValidationMap,
     WeakValidationMap
 } from "react"
+import { setOriginalProps } from "../shared/originalProps"
 import { useMobxObserver } from "../shared/useMobxObserver"
 import { ReactManagedAttributes } from "./react-types"
 import { useEffectMethods } from "./useEffectMethods"
@@ -77,13 +78,14 @@ export function mobxComponent<
             return useMobxObserver(() => {
                 const [state] = useState(constructFn)
 
-                usePropertyInjection(state, "props", props as any)
+                usePropertyInjection(state, "props", props as any, "shallow")
+                setOriginalProps(state.props, props)
 
                 const contexts = state[contextsToInject]
                 if (contexts) {
                     contexts.forEach(c => {
                         const contextValue = useContext(c.context)
-                        usePropertyInjection(state, c.propName as any, contextValue)
+                        usePropertyInjection(state, c.propName as any, contextValue, "ref")
                     })
                 }
 

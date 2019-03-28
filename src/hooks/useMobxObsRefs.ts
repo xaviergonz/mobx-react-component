@@ -1,27 +1,50 @@
-import { action, observable, set } from "mobx"
+import { action } from "mobx"
 import { useState } from "react"
+import { newObservableWrapper, ObservableWrapperUpdater } from "../shared/observableWrapper"
 
-export function useMobxObsRefs<T extends object>(values: T): T {
+export function useMobxObsRefs<O extends object>(
+    values: O,
+    decorators?: { [K in keyof O]?: "ref" | "shallow" }
+): O {
     const [data] = useState(() => {
-        const decorators: any = {}
-        Object.keys(values).forEach(k => {
-            decorators[k] = observable.ref
+        const _decorators: { [k: string]: "ref" | "shallow" | undefined } = { ...decorators } as any
+        const _values: any = values
+
+        const obsObj: any = {}
+        const obsObjUpdaters: Record<any, ObservableWrapperUpdater<any>> = {}
+
+        function defineProp(prop: string | symbol, v: any, mode: "ref" | "shallow") {
+            const { get, update } = newObservableWrapper(v, mode)
+
+            obsObjUpdaters[prop as any] = update
+
+            Object.defineProperty(obsObj, prop, {
+                enumerable: true,
+                configurable: true,
+                get() {
+                    return get()
+                }
+            })
+        }
+
+        Object.entries(_values).forEach(([propName, initialValue]) => {
+            const mode = _decorators[propName] || "ref"
+            defineProp(propName, initialValue, mode)
         })
 
-        const obsObj = observable(values, decorators)
-        const update = action("updateObservableRefs", (currentValues: T) => {
+        const updateAll = action("updateMobxObsRefs", (currentValues: O) => {
             Object.entries(currentValues).forEach(([k, v]) => {
-                set(obsObj, k, v)
+                obsObjUpdaters[k](v)
             })
         })
 
         return {
             obsObj,
-            update
+            updateAll
         }
     })
 
-    data.update(values)
+    data.updateAll(values)
 
     return data.obsObj
 }

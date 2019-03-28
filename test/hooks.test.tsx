@@ -3,6 +3,7 @@ import * as React from "react"
 import { memo } from "react"
 import { act, cleanup, render } from "react-testing-library"
 import {
+    getOriginalProps,
     mobxObserver,
     useMobxActions,
     useMobxEffects,
@@ -38,44 +39,40 @@ it("with props and effects", () => {
     let disposerCalled = 0
 
     const TestComponent = memo(
-        mobxObserver((unobsProps: IProps) => {
-            const obs = useMobxObsRefs({
-                props: unobsProps
-            })
-
+        mobxObserver((props: IProps) => {
             const state = useMobxObservable(() => ({
                 get addXY() {
-                    return obs.props.x + obs.props.y
+                    return props.x + props.y
                 }
             }))
 
             useMobxEffects(() => [
                 reaction(
-                    () => obs.props,
+                    () => props,
                     () => {
                         obsChanges.push("obsProps changed")
                     }
                 ),
                 reaction(
-                    () => obs.props.x,
+                    () => props.x,
                     () => {
                         obsChanges.push("obsProps.x changed")
                     }
                 ),
                 reaction(
-                    () => obs.props.y,
+                    () => props.y,
                     () => {
                         obsChanges.push("obsProps.y changed")
                     }
                 ),
                 reaction(
-                    () => obs.props.obj,
+                    () => props.obj,
                     () => {
                         obsChanges.push("obsProps.obj changed")
                     }
                 ),
                 reaction(
-                    () => obs.props.obj.x,
+                    () => props.obj.x,
                     () => {
                         obsChanges.push("obsProps.obj.x changed")
                     }
@@ -88,8 +85,7 @@ it("with props and effects", () => {
             renders++
             return (
                 <div>
-                    {obs.props.x}-{obs.props.x} {obs.props.y}-{obs.props.y} {state.addXY}{" "}
-                    {obs.props.obj.x}
+                    {props.x}-{props.x} {props.y}-{props.y} {state.addXY} {props.obj.x}
                 </div>
             )
         })
@@ -112,19 +108,19 @@ it("with props and effects", () => {
     rerender(<TestComponent x={0} y={0} obj={obj} />)
     expect(div.textContent).toBe("0-0 0-0 0 10")
     expectRendersToBe(1)
-    expectObsChangesToBe(["obsProps changed", "obsProps.obj changed", "obsProps.obj.x changed"])
+    expectObsChangesToBe(["obsProps.obj changed", "obsProps.obj.x changed"])
 
     // re-render with different props
     rerender(<TestComponent x={1} y={0} obj={obj} />)
     expect(div.textContent).toBe("1-1 0-0 1 10")
     expectRendersToBe(1)
-    expectObsChangesToBe(["obsProps changed", "obsProps.x changed"])
+    expectObsChangesToBe(["obsProps.x changed"])
 
     // re-render with different props
     rerender(<TestComponent x={2} y={1} obj={obj} />)
     expect(div.textContent).toBe("2-2 1-1 3 10")
     expectRendersToBe(1)
-    expectObsChangesToBe(["obsProps changed", "obsProps.x changed", "obsProps.y changed"])
+    expectObsChangesToBe(["obsProps.x changed", "obsProps.y changed"])
 
     // use an observable object
     obj = observable({
@@ -133,7 +129,7 @@ it("with props and effects", () => {
     rerender(<TestComponent x={2} y={1} obj={obj} />)
     expect(div.textContent).toBe("2-2 1-1 3 10")
     expectRendersToBe(1)
-    expectObsChangesToBe(["obsProps changed", "obsProps.obj changed"])
+    expectObsChangesToBe(["obsProps.obj changed"])
 
     // mutate an observable object
     act(() => {
@@ -250,4 +246,19 @@ it("actions", () => {
 
     span = container.querySelector("span")!
     expect(span.textContent).toBe("2")
+})
+
+it("original props are there", () => {
+    interface IProps2 {
+        x: number
+    }
+
+    const TestComponent = mobxObserver((props: IProps2) => {
+        const originalProps = getOriginalProps(props)
+        expect(props.x).toBe(originalProps.x)
+        expect(props).not.toBe(originalProps)
+        return null
+    })
+
+    render(<TestComponent x={5} />)
 })

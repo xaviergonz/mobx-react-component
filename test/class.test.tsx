@@ -105,19 +105,19 @@ it("with props and effects", () => {
     rerender(<TestComponent x={0} y={0} obj={obj} />)
     expect(div.textContent).toBe("0-0 0-0 0 10")
     expectRendersToBe(1)
-    expectObsChangesToBe(["obsProps changed", "obsProps.obj changed", "obsProps.obj.x changed"])
+    expectObsChangesToBe(["obsProps.obj changed", "obsProps.obj.x changed"])
 
     // re-render with different props
     rerender(<TestComponent x={1} y={0} obj={obj} />)
     expect(div.textContent).toBe("1-1 0-0 1 10")
     expectRendersToBe(1)
-    expectObsChangesToBe(["obsProps changed", "obsProps.x changed"])
+    expectObsChangesToBe(["obsProps.x changed"])
 
     // re-render with different props
     rerender(<TestComponent x={2} y={1} obj={obj} />)
     expect(div.textContent).toBe("2-2 1-1 3 10")
     expectRendersToBe(1)
-    expectObsChangesToBe(["obsProps changed", "obsProps.x changed", "obsProps.y changed"])
+    expectObsChangesToBe(["obsProps.x changed", "obsProps.y changed"])
 
     // use an observable object
     obj = observable({
@@ -126,7 +126,7 @@ it("with props and effects", () => {
     rerender(<TestComponent x={2} y={1} obj={obj} />)
     expect(div.textContent).toBe("2-2 1-1 3 10")
     expectRendersToBe(1)
-    expectObsChangesToBe(["obsProps changed", "obsProps.obj changed"])
+    expectObsChangesToBe(["obsProps.obj changed"])
 
     // mutate an observable object
     act(() => {
