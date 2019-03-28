@@ -1,6 +1,6 @@
 {
     "name": "mobx-react-component",
-    "version": "0.10.0",
+    "version": "0.11.0",
     "description": "Write React functional components (with hooks) + MobX for local state in a fancy way",
     "main": "dist/index.js",
     "jsnext:main": "dist/index.module.js",
