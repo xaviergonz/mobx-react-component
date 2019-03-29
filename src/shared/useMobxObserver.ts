@@ -1,6 +1,6 @@
 import { getDependencyTree, Reaction } from "mobx"
-import { isUsingStaticRendering } from "mobx-react-lite"
 import { useDebugValue, useLayoutEffect, useRef, useState } from "react"
+import { isUsingStaticRendering } from "./staticRendering"
 
 export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "observed"): T {
     if (isUsingStaticRendering()) {

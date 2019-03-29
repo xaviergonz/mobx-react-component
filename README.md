@@ -11,7 +11,7 @@ npm install mobx-react-component
 yarn add mobx-react-component
 ```
 
-**You need React version 16.8.0 and above and mobx-react-lite 1.2.0 and above**
+**Requires React version 16.8.0 and above**
 
 Project is written in TypeScript and provides type safety out of the box. No Flow Type support is planned at this moment, but feel free to contribute.
 

@@ -1,5 +1,5 @@
-import { isUsingStaticRendering } from "mobx-react-lite"
 import { setOriginalProps } from "../shared/originalProps"
+import { isUsingStaticRendering } from "../shared/staticRendering"
 import { useMobxObserver } from "../shared/useMobxObserver"
 import { useMobxObservableRefs } from "./useMobxObservableRefs"
 
