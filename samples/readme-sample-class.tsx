@@ -33,15 +33,16 @@ class MyComponentClass extends MobxComponent<IMyComponentProps> {
         return this.props.x + this.y + this.someContext.z
     }
 
-    // effects will be auto disposed on unmount,
-    // the need to start with the name "fx_"
-    fx_when10() {
-        return when(
-            () => this.sum === 10,
-            () => {
-                // you reached ten!
-            }
-        )
+    // effects will be run on first render and auto disposed on unmount
+    getEffects() {
+        return [
+            when(
+                () => this.sum === 10,
+                () => {
+                    // you reached ten!
+                }
+            )
+        ]
     }
 
     render(props: IMyComponentProps) {

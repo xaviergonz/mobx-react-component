@@ -7,10 +7,11 @@ import {
     ValidationMap,
     WeakValidationMap
 } from "react"
+import { MobxEffects } from "../shared/MobxEffects"
 import { setOriginalProps } from "../shared/originalProps"
+import { useMobxEffects } from "../shared/useMobxEffects"
 import { useMobxObserver } from "../shared/useMobxObserver"
 import { ReactManagedAttributes } from "./react-types"
-import { useEffectMethods } from "./useEffectMethods"
 import { usePropertyInjection } from "./usePropertyInjection"
 
 interface IContextToInject {
@@ -36,6 +37,8 @@ export abstract class MobxComponent<P extends object = {}, TRef = {}> {
     props!: P
 
     abstract render(props: P, ref: React.Ref<TRef>): ReactElement | null
+
+    getEffects?(): MobxEffects
 
     private [contextsToInject]: IContextToInject[]
 }
@@ -89,7 +92,9 @@ export function mobxComponent<
                     })
                 }
 
-                useEffectMethods(state)
+                if (state.getEffects) {
+                    useMobxEffects(state.getEffects.bind(state))
+                }
 
                 return state.render(state.props, ref)
             }, displayName)

@@ -37,43 +37,42 @@ it("with props and effects", () => {
             return this.props.x + this.props.y
         }
 
-        fx_1 = () =>
-            reaction(
-                () => this.props,
+        getEffects() {
+            return [
+                reaction(
+                    () => this.props,
+                    () => {
+                        obsChanges.push("obsProps changed")
+                    }
+                ),
+                reaction(
+                    () => this.props.x,
+                    () => {
+                        obsChanges.push("obsProps.x changed")
+                    }
+                ),
+                reaction(
+                    () => this.props.y,
+                    () => {
+                        obsChanges.push("obsProps.y changed")
+                    }
+                ),
+                reaction(
+                    () => this.props.obj,
+                    () => {
+                        obsChanges.push("obsProps.obj changed")
+                    }
+                ),
+                reaction(
+                    () => this.props.obj.x,
+                    () => {
+                        obsChanges.push("obsProps.obj.x changed")
+                    }
+                ),
                 () => {
-                    obsChanges.push("obsProps changed")
+                    disposerCalled++
                 }
-            )
-        fx_2 = () =>
-            reaction(
-                () => this.props.x,
-                () => {
-                    obsChanges.push("obsProps.x changed")
-                }
-            )
-        fx_3 = () =>
-            reaction(
-                () => this.props.y,
-                () => {
-                    obsChanges.push("obsProps.y changed")
-                }
-            )
-        fx_4 = () =>
-            reaction(
-                () => this.props.obj,
-                () => {
-                    obsChanges.push("obsProps.obj changed")
-                }
-            )
-        fx_5 = () =>
-            reaction(
-                () => this.props.obj.x,
-                () => {
-                    obsChanges.push("obsProps.obj.x changed")
-                }
-            )
-        fx_6 = () => () => {
-            disposerCalled++
+            ]
         }
 
         render(props: PropsWithChildren<IProps>) {
@@ -222,14 +221,16 @@ it("context injection", () => {
         @injectContext(Context)
         contextValue!: number
 
-        fx_context() {
-            return reaction(
-                () => this.contextValue,
-                v => {
-                    obsChanges.push(`contextValue changed to ${v}`)
-                },
-                { fireImmediately: true }
-            )
+        getEffects() {
+            return [
+                reaction(
+                    () => this.contextValue,
+                    v => {
+                        obsChanges.push(`contextValue changed to ${v}`)
+                    },
+                    { fireImmediately: true }
+                )
+            ]
         }
 
         render() {
