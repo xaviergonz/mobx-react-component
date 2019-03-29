@@ -19,9 +19,9 @@ If you know how to use mobx and how to use hooks the example should be pretty mu
 
 ### Examples
 
-#### Using hooks
+[Edit in CodeSandbox](https://stackblitz.com/edit/mobx-react-component-sample)
 
-[Edit in CodeSandbox](https://codesandbox.io/s/jlmx7jk779)
+#### Using hooks
 
 ```tsx
 import { observable, when } from "mobx"
