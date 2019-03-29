@@ -2,7 +2,7 @@ import { action } from "mobx"
 import { newObservableWrapper, ObservableWrapperUpdater } from "../shared/observableWrapper"
 import { useLazyInit } from "../shared/useLazyInit"
 
-export function useMobxObsRefs<O extends object>(
+export function useMobxObservableRefs<O extends object>(
     values: O,
     decorators?: { [K in keyof O]?: "ref" | "shallow" }
 ): O {
@@ -32,7 +32,7 @@ export function useMobxObsRefs<O extends object>(
             defineProp(propName, initialValue, mode)
         })
 
-        const updateAll = action("updateMobxObsRefs", (currentValues: O) => {
+        const updateAll = action("updateMobxObservableRefs", (currentValues: O) => {
             Object.entries(currentValues).forEach(([k, v]) => {
                 obsObjUpdaters[k](v)
             })

@@ -8,7 +8,7 @@ import {
     useMobxActions,
     useMobxEffects,
     useMobxObservable,
-    useMobxObsRefs
+    useMobxObservableRefs
 } from "../src"
 import { changesList } from "./utils"
 
@@ -40,11 +40,13 @@ it("with props and effects", () => {
 
     const TestComponent = memo(
         mobxObserver((props: IProps) => {
-            const state = useMobxObservable(() => ({
-                get addXY() {
-                    return props.x + props.y
-                }
-            }))
+            const state = useMobxObservable(() =>
+                observable({
+                    get addXY() {
+                        return props.x + props.y
+                    }
+                })
+            )
 
             useMobxEffects(() => [
                 reaction(
@@ -151,9 +153,11 @@ it("with props and effects", () => {
 it("without props / effects", () => {
     const TestComponent = memo(
         mobxObserver(() => {
-            const state = useMobxObservable(() => ({
-                x: 10
-            }))
+            const state = useMobxObservable(() =>
+                observable({
+                    x: 10
+                })
+            )
 
             const [s] = React.useState(5)
 
@@ -191,7 +195,7 @@ it("statics works", () => {
     }
 
     const WrappedTestComponent = (props: IProps2) => {
-        const obs = useMobxObsRefs({
+        const obs = useMobxObservableRefs({
             props
         })
 
@@ -217,9 +221,11 @@ it("statics works", () => {
 it("actions", () => {
     const TestComponent = memo(
         mobxObserver(() => {
-            const state = useMobxObservable(() => ({
-                x: 1
-            }))
+            const state = useMobxObservable(() =>
+                observable({
+                    x: 1
+                })
+            )
 
             const actions = useMobxActions(() => ({
                 incX() {

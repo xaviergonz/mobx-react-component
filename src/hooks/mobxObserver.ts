@@ -1,7 +1,7 @@
 import { isUsingStaticRendering } from "mobx-react-lite"
 import { setOriginalProps } from "../shared/originalProps"
 import { useMobxObserver } from "../shared/useMobxObserver"
-import { useMobxObsRefs } from "./useMobxObsRefs"
+import { useMobxObservableRefs } from "./useMobxObservableRefs"
 
 export function mobxObserver<T extends React.FC<any>>(baseComponent: T): T {
     if (isUsingStaticRendering()) {
@@ -13,7 +13,7 @@ export function mobxObserver<T extends React.FC<any>>(baseComponent: T): T {
     const observerComponent = (props: any, ref: any) => {
         return useMobxObserver(() => {
             // turn props into a shallow observable object
-            const obs = useMobxObsRefs(
+            const obs = useMobxObservableRefs(
                 {
                     props
                 },
@@ -24,7 +24,7 @@ export function mobxObserver<T extends React.FC<any>>(baseComponent: T): T {
             setOriginalProps(obs.props, props)
 
             return baseComponent(obs.props, ref)
-        }, baseComponentName)
+        }, observerComponent.displayName)
     }
     observerComponent.displayName = baseComponentName
 

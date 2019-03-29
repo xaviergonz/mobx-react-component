@@ -19,7 +19,7 @@ export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "obs
     // we use a new reaction to ensure we don't react to observables set in the render phase
     // this is different from how mobx-react-lite does, where it reuses the reaction
     disposeReaction(reaction)
-    reaction.current = new Reaction(`observer(${baseComponentName})`, () => {
+    reaction.current = new Reaction(`mobxObserver(${baseComponentName})`, () => {
         setTick(t => t + 1)
     })
 
@@ -36,7 +36,7 @@ export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "obs
     useDebugValue(reaction, printDebugValue)
 
     if (exception) {
-        reaction.current.dispose()
+        disposeReaction(reaction)
         throw exception // re-throw any exceptions catched during rendering
     }
     return rendering

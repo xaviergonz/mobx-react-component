@@ -24,7 +24,7 @@ If you know how to use mobx and how to use hooks the example should be pretty mu
 [Edit in CodeSandbox](https://codesandbox.io/s/jlmx7jk779)
 
 ```tsx
-import { when } from "mobx"
+import { observable, when } from "mobx"
 import * as React from "react"
 import { memo, useContext } from "react"
 import {
@@ -32,7 +32,7 @@ import {
     useMobxActions,
     useMobxEffects,
     useMobxObservable,
-    useMobxObsRefs
+    useMobxObservableRefs
 } from "mobx-react-component"
 
 interface IMyComponentProps {
@@ -59,12 +59,12 @@ export const MyComponent = memo(
         // will be lost! (in other words, always use obs.X to access the value)
         // note 2: if the context value is actually an observable that will never
         // change its ref then this is not needed
-        const obs = useMobxObsRefs({
+        const obs = useMobxObservableRefs({
             someContextValue: useContext(SomeContext)
         })
 
-        const state = useMobxObservable(
-            () => ({
+        const state = useMobxObservable(() =>
+            observable({
                 // observable value
                 y: 0,
 
@@ -72,11 +72,7 @@ export const MyComponent = memo(
                 get sum() {
                     return props.x + this.y + obs.someContextValue.z
                 }
-            }),
-            // decorators (optional)
-            {
-                // properties will default to observables / computed
-            }
+            })
         )
 
         const actions = useMobxActions(() => ({
