@@ -1,6 +1,6 @@
 import { action, computed, observable, when } from "mobx"
 import * as React from "react"
-import { injectContext, MobxComponent, mobxComponent, ReactContextValue } from "../src"
+import { IMobxComponent, injectContext, mobxComponent, ReactContextValue } from "../src"
 
 interface IMyComponentProps {
     x: number
@@ -8,8 +8,9 @@ interface IMyComponentProps {
 
 const SomeContext = React.createContext({ z: 2 }) // might be a root store
 
-class MyComponentClass extends MobxComponent<IMyComponentProps> {
+class MyComponentClass implements IMobxComponent<IMyComponentProps> {
     // this.props will become an observable reference version of props
+    props!: IMyComponentProps
 
     // note: its ref will be kept immutable, so when using hooks pass the actual
     // single props it depends on, not just "props"

@@ -15,34 +15,39 @@ interface IContextToInject {
 const contextsToInject = Symbol("contextsToInject")
 
 export const injectContext = (context: React.Context<any>) => {
-    return (target: MobxComponent<any, any>, propertyKey: string) => {
+    return (target: IMobxComponent, propertyKey: string) => {
+        const t = (target as unknown) as IInternalMobxComponent
         // target is the prototype
-        let arr = target[contextsToInject]
+        let arr = t[contextsToInject]
         if (!arr) {
             arr = []
-            target[contextsToInject] = arr
+            t[contextsToInject] = arr
         }
         arr.push({ context, propName: propertyKey })
     }
 }
 
-export abstract class MobxComponent<P extends object = {}, TRef = {}> {
-    props!: P
+export interface IMobxComponent<P extends object = {}, TRef = {}> {
+    props: P
 
-    abstract render(props: P, ref: React.Ref<TRef>): ReactElement | null
+    render(props: P, ref: React.Ref<TRef>): ReactElement | null
 
     getEffects?(): MobxEffects
-
-    private [contextsToInject]: IContextToInject[]
 }
 
-type MobxComponentProps<T extends MobxComponent<any>> = T extends MobxComponent<infer P> ? P : never
-type MobxComponentRef<T extends MobxComponent<any>> = T extends MobxComponent<any, infer TR>
+interface IInternalMobxComponent {
+    [contextsToInject]: IContextToInject[]
+}
+
+type MobxComponentProps<T extends IMobxComponent<any, any>> = T extends IMobxComponent<infer P, any>
+    ? P
+    : never
+type MobxComponentRef<T extends IMobxComponent<any, any>> = T extends IMobxComponent<any, infer TR>
     ? TR
     : never
 
 export function mobxComponent<
-    T extends MobxComponent<any, any>,
+    T extends IMobxComponent<any, any>,
     P extends MobxComponentProps<T>,
     R extends MobxComponentRef<T>,
     DP extends Partial<P>,
@@ -60,7 +65,7 @@ export function mobxComponent<
     const displayName = (statics && statics.displayName) || clazz.name
 
     const constructFn = () => {
-        const state = new clazz()
+        const state: IMobxComponent & IInternalMobxComponent = new clazz() as any
 
         const contexts = state[contextsToInject]
 
