@@ -1,4 +1,5 @@
 import { isObservable, remove, runInAction } from "mobx"
+import { ObservableWrapperMode } from "../shared/observableWrapper"
 import { useLazyInit } from "../shared/useLazyInit"
 import { useObservableRef } from "./useObservableRef"
 
@@ -6,7 +7,7 @@ export function usePropertyInjection<T extends object>(
     state: T,
     propName: keyof T,
     value: T[typeof propName],
-    mode: "ref" | "shallow"
+    mode: ObservableWrapperMode
 ): void {
     const boxedObservable = useObservableRef(value, mode)
 

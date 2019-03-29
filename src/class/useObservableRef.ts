@@ -1,10 +1,10 @@
 import { action } from "mobx"
-import { newObservableWrapper } from "../shared/observableWrapper"
+import { newObservableWrapper, ObservableWrapperMode } from "../shared/observableWrapper"
 import { useLazyInit } from "../shared/useLazyInit"
 
 export function useObservableRef<T>(
     updatedValue: T,
-    mode: "ref" | "shallow"
+    mode: ObservableWrapperMode
 ): {
     readonly current: T
 } {

@@ -9,7 +9,12 @@ export interface IObservableWrapper<T> {
     update: ObservableWrapperUpdater<T>
 }
 
-export function newObservableWrapper<T>(val: T, mode: "ref" | "shallow"): IObservableWrapper<T> {
+export type ObservableWrapperMode = "ref" | "shallow" | "deep"
+
+export function newObservableWrapper<T>(
+    val: T,
+    mode: ObservableWrapperMode
+): IObservableWrapper<T> {
     if (mode === "ref") {
         const obs = observable.box(val, { deep: false })
         return {
@@ -17,7 +22,7 @@ export function newObservableWrapper<T>(val: T, mode: "ref" | "shallow"): IObser
             update: obs.set.bind(obs)
         }
     } else {
-        const obs = updateableObservable(val, "shallow")
+        const obs = updateableObservable(val, mode)
         return {
             get: obs.get.bind(obs),
             update: obs.update.bind(obs)
