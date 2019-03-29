@@ -1,14 +1,7 @@
-import {
-    forwardRef,
-    memo,
-    ReactElement,
-    useContext,
-    useState,
-    ValidationMap,
-    WeakValidationMap
-} from "react"
+import { forwardRef, memo, ReactElement, useContext, ValidationMap, WeakValidationMap } from "react"
 import { MobxEffects } from "../shared/MobxEffects"
 import { setOriginalProps } from "../shared/originalProps"
+import { useLazyInit } from "../shared/useLazyInit"
 import { useMobxEffects } from "../shared/useMobxEffects"
 import { useMobxObserver } from "../shared/useMobxObserver"
 import { ReactManagedAttributes } from "./react-types"
@@ -66,7 +59,31 @@ export function mobxComponent<
 ) {
     const displayName = (statics && statics.displayName) || clazz.name
 
-    const constructFn = () => new clazz()
+    const constructFn = () => {
+        const state = new clazz()
+
+        const contexts = state[contextsToInject]
+
+        let updateContexts
+        if (contexts) {
+            updateContexts = () => {
+                contexts.forEach(c => {
+                    usePropertyInjection(state, c.propName as any, useContext(c.context), "ref")
+                })
+            }
+        }
+
+        let updateEffects
+        if (state.getEffects) {
+            const boundGetEffects = state.getEffects.bind(state)
+
+            updateEffects = () => {
+                useMobxEffects(boundGetEffects)
+            }
+        }
+
+        return { state, updateContexts, updateEffects }
+    }
 
     // we use this trick to make defaultProps and propTypes behave correctly
     type P2 = ReactManagedAttributes<
@@ -79,21 +96,17 @@ export function mobxComponent<
 
     const funcComponent = (props: P2, ref: React.Ref<R>) => {
             return useMobxObserver(() => {
-                const [state] = useState(constructFn)
+                const { state, updateContexts, updateEffects } = useLazyInit(constructFn)
 
                 usePropertyInjection(state, "props", props as any, "shallow")
                 setOriginalProps(state.props, props)
 
-                const contexts = state[contextsToInject]
-                if (contexts) {
-                    contexts.forEach(c => {
-                        const contextValue = useContext(c.context)
-                        usePropertyInjection(state, c.propName as any, contextValue, "ref")
-                    })
+                if (updateContexts) {
+                    updateContexts()
                 }
 
-                if (state.getEffects) {
-                    useMobxEffects(state.getEffects.bind(state))
+                if (updateEffects) {
+                    updateEffects()
                 }
 
                 return state.render(state.props, ref)
