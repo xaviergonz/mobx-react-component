@@ -424,19 +424,19 @@ function runTestSuite(mode: "observer" | "useObserver") {
             const errorsSeen: any[] = []
 
             class ErrorBoundary extends React.Component {
-                public static getDerivedStateFromError() {
+                static getDerivedStateFromError() {
                     return { hasError: true }
                 }
 
-                public state = {
+                state = {
                     hasError: false
                 }
 
-                public componentDidCatch(error: any, info: any) {
+                componentDidCatch(error: any, info: any) {
                     errorsSeen.push("" + error)
                 }
 
-                public render() {
+                render() {
                     if (this.state.hasError) {
                         return <span>Saw error!</span>
                     }
