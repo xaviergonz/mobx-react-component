@@ -1,9 +1,19 @@
+import { ValidationMap, WeakValidationMap } from "react"
 import { setOriginalProps } from "../shared/originalProps"
 import { isUsingStaticRendering } from "../shared/staticRendering"
 import { useMobxObserver } from "../shared/useMobxObserver"
 import { useMobxObservableRefs } from "./useMobxObservableRefs"
 
-export function mobxObserver<T extends React.FC<any>>(baseComponent: T): T {
+export interface IMobxObserverComponent<P> {
+    propTypes?: WeakValidationMap<P>
+    contextTypes?: ValidationMap<any>
+    defaultProps?: Partial<P>
+    displayName?: string
+}
+
+export function mobxObserver<T extends React.FC<any>>(
+    baseComponent: T
+): T & IMobxObserverComponent<T extends React.FC<infer P> ? P : never> {
     if (isUsingStaticRendering()) {
         return baseComponent
     }

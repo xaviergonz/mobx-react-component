@@ -10,7 +10,14 @@ export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "obs
     const [, setTick] = useState(0)
 
     const reaction = useRef<Reaction | null>(null)
-    useLayoutEffect(() => () => disposeReaction(reaction), [])
+    const oldReaction = useRef<Reaction | null>(null)
+    useLayoutEffect(
+        () => () => {
+            disposeReaction(oldReaction)
+            disposeReaction(reaction)
+        },
+        []
+    )
 
     // render the original component, but have the
     // reaction track the observables, so that rendering
@@ -18,9 +25,14 @@ export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "obs
 
     // we use a new reaction to ensure we don't react to observables set in the render phase
     // this is different from how mobx-react-lite does, where it reuses the reaction
-    disposeReaction(reaction)
-    reaction.current = new Reaction(`mobxObserver(${baseComponentName})`, () => {
-        setTick(t => t + 1)
+    // however we will dispose of the old reaction after this one is done tracking so any
+    // cached computeds won't die early
+    oldReaction.current = reaction.current
+
+    reaction.current = new Reaction(`mobxObserver(${baseComponentName})`, function(this: Reaction) {
+        if (reaction.current === this) {
+            setTick(t => t + 1)
+        }
     })
 
     let rendering!: T
@@ -34,6 +46,8 @@ export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "obs
     })
 
     useDebugValue(reaction, printDebugValue)
+
+    disposeReaction(oldReaction)
 
     if (exception) {
         disposeReaction(reaction)

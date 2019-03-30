@@ -205,7 +205,7 @@ it("statics works", () => {
         x: 5
     }
 
-    const TestComponent = memo(mobxObserver(WrappedTestComponent))
+    const TestComponent = mobxObserver(WrappedTestComponent)
     TestComponent.displayName = "My component"
 
     expect(TestComponent.displayName).toBe("My component")
