@@ -14,14 +14,14 @@ interface IContextToInject {
 
 const contextsToInject = Symbol("contextsToInject")
 
-export const injectContext = (context: React.Context<any>) => {
-    return (target: IMobxComponent, propertyKey: string) => {
-        const t = (target as unknown) as IInternalMobxComponent
+export function injectContext(context: React.Context<any>) {
+    return (targetComponent: IMobxComponent, propertyKey: string) => {
         // target is the prototype
-        let arr = t[contextsToInject]
+        const prototype = (targetComponent as unknown) as IInternalMobxComponent
+        let arr = prototype[contextsToInject]
         if (!arr) {
             arr = []
-            t[contextsToInject] = arr
+            prototype[contextsToInject] = arr
         }
         arr.push({ context, propName: propertyKey })
     }
