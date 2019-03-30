@@ -1,6 +1,5 @@
 import { action, computed, configure, observable, reaction, runInAction } from "mobx"
 import * as React from "react"
-import { PropsWithChildren } from "react"
 import { act, cleanup, render } from "react-testing-library"
 import { IMobxComponent, injectContext, mobxComponent } from "../src"
 import { changesList } from "./utils"
@@ -77,7 +76,7 @@ it("with props and effects", () => {
             ]
         }
 
-        render(props: PropsWithChildren<IProps>) {
+        render(props: IProps) {
             renders++
             return (
                 <div>
@@ -148,8 +147,6 @@ it("with props and effects", () => {
 
 it("without props / effects", () => {
     class MyComponent implements IMobxComponent {
-        props!: {}
-
         @observable
         x!: number
 
@@ -179,8 +176,6 @@ it("without props / effects", () => {
 
 it("ref forwarding works", () => {
     class C implements IMobxComponent<{}, HTMLInputElement> {
-        props!: {}
-
         render(props: {}, ref: React.Ref<HTMLInputElement>) {
             return <input ref={ref} />
         }
@@ -225,8 +220,6 @@ it("context injection", () => {
     const [obsChanges, expectObsChangesToBe] = changesList()
 
     class C implements IMobxComponent {
-        props!: {}
-
         @injectContext(Context)
         contextValue!: number
 
@@ -269,8 +262,6 @@ it("context injection", () => {
 
 it("actions", () => {
     class MyComponent implements IMobxComponent {
-        props!: {}
-
         @observable
         x!: number
 

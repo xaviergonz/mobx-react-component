@@ -12,23 +12,23 @@ interface IContextToInject {
     propName: string
 }
 
-const contextsToInject = Symbol("contextsToInject")
+const contextsToInjectSymbol = Symbol("contextsToInject")
 
 export function injectContext(context: React.Context<any>) {
     return (targetComponent: IMobxComponent, propertyKey: string) => {
         // target is the prototype
         const prototype = (targetComponent as unknown) as IInternalMobxComponent
-        let arr = prototype[contextsToInject]
-        if (!arr) {
-            arr = []
-            prototype[contextsToInject] = arr
+        let contextsToInject = prototype[contextsToInjectSymbol]
+        if (!contextsToInject) {
+            contextsToInject = []
+            prototype[contextsToInjectSymbol] = contextsToInject
         }
-        arr.push({ context, propName: propertyKey })
+        contextsToInject.push({ context, propName: propertyKey })
     }
 }
 
 export interface IMobxComponent<P extends object = {}, TRef = {}> {
-    props: P
+    props?: P
 
     render(props: P, ref: React.Ref<TRef>): ReactElement | null
 
@@ -36,7 +36,7 @@ export interface IMobxComponent<P extends object = {}, TRef = {}> {
 }
 
 interface IInternalMobxComponent {
-    [contextsToInject]: IContextToInject[]
+    [contextsToInjectSymbol]: IContextToInject[]
 }
 
 type MobxComponentProps<T extends IMobxComponent<any, any>> = T extends IMobxComponent<infer P, any>
@@ -65,9 +65,9 @@ export function mobxComponent<
     const displayName = (statics && statics.displayName) || clazz.name
 
     const constructFn = () => {
-        const state: IMobxComponent & IInternalMobxComponent = new clazz() as any
+        const state: IMobxComponent<any, any> & IInternalMobxComponent = new clazz() as any
 
-        const contexts = state[contextsToInject]
+        const contexts = state[contextsToInjectSymbol]
 
         let updateContexts
         if (contexts) {
@@ -104,7 +104,7 @@ export function mobxComponent<
                 const { state, updateContexts, updateEffects } = useLazyInit(constructFn)
 
                 usePropertyInjection(state, "props", props as any, "shallow")
-                setOriginalProps(state.props, props)
+                setOriginalProps(state.props!, props)
 
                 if (updateContexts) {
                     updateContexts()
@@ -114,7 +114,7 @@ export function mobxComponent<
                     updateEffects()
                 }
 
-                return state.render(state.props, ref)
+                return state.render(state.props!, ref)
             }, displayName)
         }
 
