@@ -18,10 +18,10 @@ observerWrapper.propTypes = {
     render: ObserverPropsCheck
 }
 
-const ObserverComponent = memo(observerWrapper)
-ObserverComponent.displayName = "Observer"
+const Observer = memo(observerWrapper)
+Observer.displayName = "Observer"
 
-export { ObserverComponent as Observer }
+export { Observer }
 
 function ObserverPropsCheck(
     props: { [k: string]: any },
