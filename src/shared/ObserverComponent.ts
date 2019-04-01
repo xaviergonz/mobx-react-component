@@ -1,4 +1,4 @@
-import { ReactElement } from "react"
+import { memo, ReactElement } from "react"
 import { useMobxObserver } from "./useMobxObserver"
 
 interface IObserverProps {
@@ -6,17 +6,19 @@ interface IObserverProps {
     render?(): ReactElement<any>
 }
 
-function ObserverComponent({ children, render }: IObserverProps) {
+const observerWrapper = ({ children, render }: IObserverProps) => {
     const component = children || render
     if (typeof component !== "function") {
         return null
     }
     return useMobxObserver(component)
 }
-ObserverComponent.propTypes = {
+observerWrapper.propTypes = {
     children: ObserverPropsCheck,
     render: ObserverPropsCheck
 }
+
+const ObserverComponent = memo(observerWrapper)
 ObserverComponent.displayName = "Observer"
 
 export { ObserverComponent as Observer }
