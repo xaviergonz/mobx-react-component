@@ -1,6 +1,6 @@
 {
     "name": "mobx-react-component",
-    "version": "0.21.0",
+    "version": "0.22.0",
     "description": "Write React functional components (with hooks) + MobX for local state in a fancy way",
     "main": "dist/index.js",
     "jsnext:main": "dist/index.module.js",
@@ -10,7 +10,7 @@
     "types": "dist/index.d.ts",
     "repository": {
         "type": "git",
-        "url": "https://github.com/mobxjs/mobx-react-component.git"
+        "url": "https://github.com/xaviergonz/mobx-react-component.git"
     },
     "scripts": {
         "prettier": "prettier --write \"**/*.js\" \"**/*.ts\"",
@@ -25,9 +25,8 @@
     "author": "Javier González Garcés",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/mobxjs/mobx-react-component/issues"
+        "url": "https://github.com/xaviergonz/mobx-react-component/issues"
     },
-    "homepage": "https://mobxjs.github.io/mobx",
     "peerDependencies": {
         "mobx": "^4.0.0 || ^5.0.0",
         "react": "^16.8.0"
