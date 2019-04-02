@@ -15,7 +15,7 @@ interface IContextToInject {
 const contextsToInjectSymbol = Symbol("contextsToInject")
 
 export function injectContext(context: React.Context<any>) {
-    return (targetComponent: IMobxComponent, propertyKey: string) => {
+    return (targetComponent: MobxComponent, propertyKey: string) => {
         // target is the prototype
         const prototype = (targetComponent as unknown) as IInternalMobxComponent
         let contextsToInject = prototype[contextsToInjectSymbol]
@@ -27,10 +27,12 @@ export function injectContext(context: React.Context<any>) {
     }
 }
 
-export interface IMobxComponent<P extends object = {}, TRef = {}> {
-    props?: P
+export abstract class MobxComponent<P extends object = {}, TRef = {}> {
+    readonly props!: P
+    readonly originalProps!: P
+    readonly ref!: React.Ref<TRef>
 
-    render(props: P, ref: React.Ref<TRef>): ReactElement | null
+    abstract render(): ReactElement | null
 
     getEffects?(): MobxEffects
 }
@@ -39,15 +41,15 @@ interface IInternalMobxComponent {
     [contextsToInjectSymbol]: IContextToInject[]
 }
 
-type MobxComponentProps<T extends IMobxComponent<any, any>> = T extends IMobxComponent<infer P, any>
+type MobxComponentProps<T extends MobxComponent<any, any>> = T extends MobxComponent<infer P, any>
     ? P
     : never
-type MobxComponentRef<T extends IMobxComponent<any, any>> = T extends IMobxComponent<any, infer TR>
+type MobxComponentRef<T extends MobxComponent<any, any>> = T extends MobxComponent<any, infer TR>
     ? TR
     : never
 
 export function mobxComponent<
-    T extends IMobxComponent<any, any>,
+    T extends MobxComponent<any, any>,
     P extends MobxComponentProps<T>,
     R extends MobxComponentRef<T>,
     DP extends Partial<P>,
@@ -65,7 +67,7 @@ export function mobxComponent<
     const displayName = (statics && statics.displayName) || clazz.name
 
     const constructFn = () => {
-        const state: IMobxComponent<any, any> & IInternalMobxComponent = new clazz() as any
+        const state: MobxComponent<any, any> & IInternalMobxComponent = new clazz() as any
 
         const contexts = state[contextsToInjectSymbol]
 
@@ -104,7 +106,9 @@ export function mobxComponent<
                 const { state, updateContexts, updateEffects } = useLazyInit(constructFn)
 
                 usePropertyInjection(state, "props", props as any, "shallow")
-                setOriginalProps(state.props!, props)
+                setOriginalProps(state.props, props)
+                ;(state as any).originalProps = props
+                ;(state as any).ref = ref
 
                 if (updateContexts) {
                     updateContexts()
@@ -114,7 +118,7 @@ export function mobxComponent<
                     updateEffects()
                 }
 
-                return state.render(state.props!, ref)
+                return state.render()
             }, displayName)
         }
 

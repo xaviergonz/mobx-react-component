@@ -1,6 +1,6 @@
 import { action, computed, observable, when } from "mobx"
 import * as React from "react"
-import { IMobxComponent, injectContext, mobxComponent, ReactContextValue } from "../src"
+import { injectContext, MobxComponent, mobxComponent, ReactContextValue } from "../src"
 
 interface IMyComponentProps {
     x: number
@@ -8,14 +8,15 @@ interface IMyComponentProps {
 
 const SomeContext = React.createContext({ z: 2 }) // might be a root store
 
-class MyComponentClass implements IMobxComponent<IMyComponentProps> {
+class MyComponentClass extends MobxComponent<IMyComponentProps> {
     // this.props will become an observable reference version of props
-    props!: IMyComponentProps
 
     // note: its ref will be kept immutable, so when using hooks pass the actual
     // single props it depends on, not just "props"
     // if you really need to access the original props object for some reason
-    // you can still use `getOriginalProps(props)`
+    // you can still use `this.originalProps` or `getOriginalProps(this.props)`
+
+    // this.ref will contain the forward reference (if any)
 
     // this.someContext will become an observable reference
     @injectContext(SomeContext)
@@ -46,10 +47,11 @@ class MyComponentClass implements IMobxComponent<IMyComponentProps> {
         ]
     }
 
-    render(props: IMyComponentProps) {
+    render() {
         // this is a function component render, so hooks can be used as usual
         // the only difference is that everything above (the logic) is available in "this"
         // additionally the component will auto-rerender when any observable changes
+        const { props } = this
         return (
             <div>
                 <div>

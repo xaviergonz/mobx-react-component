@@ -1,14 +1,13 @@
 import * as React from "react"
-import { IMobxComponent, mobxComponent } from "../src"
+import { MobxComponent, mobxComponent } from "../src"
 
 interface IMyComponentProps {
     children: React.ReactNode
 }
 
-class MyComponentClass implements IMobxComponent<IMyComponentProps, HTMLButtonElement> {
-    props!: IMyComponentProps
-
-    render(props: IMyComponentProps, ref: React.Ref<HTMLButtonElement>) {
+class MyComponentClass extends MobxComponent<IMyComponentProps, HTMLButtonElement> {
+    render() {
+        const { ref, props } = this
         return <button ref={ref}>{props.children}</button>
     }
 }

@@ -1,7 +1,7 @@
 import { action, computed, configure, observable, reaction, runInAction } from "mobx"
 import * as React from "react"
 import { act, cleanup, render } from "react-testing-library"
-import { IMobxComponent, injectContext, mobxComponent } from "../src"
+import { injectContext, MobxComponent, mobxComponent } from "../src"
 import { changesList } from "./utils"
 
 configure({
@@ -30,9 +30,7 @@ it("with props and effects", () => {
 
     let disposerCalled = 0
 
-    class MyComponent implements IMobxComponent<IProps> {
-        props!: IProps
-
+    class MyComponent extends MobxComponent<IProps> {
         @computed
         get addXY() {
             return this.props.x + this.props.y
@@ -76,7 +74,8 @@ it("with props and effects", () => {
             ]
         }
 
-        render(props: IProps) {
+        render() {
+            const { props } = this
             renders++
             return (
                 <div>
@@ -146,11 +145,12 @@ it("with props and effects", () => {
 })
 
 it("without props / effects", () => {
-    class MyComponent implements IMobxComponent {
+    class MyComponent extends MobxComponent {
         @observable
         x!: number
 
         constructor() {
+            super()
             runInAction(() => {
                 this.x = 10
             })
@@ -175,8 +175,9 @@ it("without props / effects", () => {
 })
 
 it("ref forwarding works", () => {
-    class C implements IMobxComponent<{}, HTMLInputElement> {
-        render(props: {}, ref: React.Ref<HTMLInputElement>) {
+    class C extends MobxComponent<{}, HTMLInputElement> {
+        render() {
+            const { ref } = this
             return <input ref={ref} />
         }
     }
@@ -192,10 +193,9 @@ it("statics works", () => {
         x: number
     }
 
-    class C implements IMobxComponent<IProps2> {
-        props!: IProps2
-
-        render(props: IProps2) {
+    class C extends MobxComponent<IProps2> {
+        render() {
+            const { props } = this
             return <div>{props.x}</div>
         }
     }
@@ -219,7 +219,7 @@ it("context injection", () => {
     const Context = React.createContext(5)
     const [obsChanges, expectObsChangesToBe] = changesList()
 
-    class C implements IMobxComponent {
+    class C extends MobxComponent {
         @injectContext(Context)
         contextValue!: number
 
@@ -261,11 +261,12 @@ it("context injection", () => {
 })
 
 it("actions", () => {
-    class MyComponent implements IMobxComponent {
+    class MyComponent extends MobxComponent {
         @observable
         x!: number
 
         constructor() {
+            super()
             runInAction(() => {
                 this.x = 1
             })
