@@ -1,11 +1,15 @@
 import {
     action,
+    IObservableArray,
     IObservableValue,
     isObservable,
     isObservableArray,
     isObservableMap,
     isObservableObject,
+    isObservableSet,
     observable,
+    ObservableMap,
+    ObservableSet,
     remove,
     set
 } from "mobx"
@@ -144,10 +148,17 @@ function updateObservableValue(
     if (newV instanceof Map) {
         return updateObservableMap(oldV, newV, localObservables)
     }
+    if (newV instanceof Set) {
+        return updateObservableSet(oldV, newV, localObservables)
+    }
     return newV
 }
 
-function updateObservableArray(oldArr: any, newArr: any[], localObservables: LocalObservables) {
+function updateObservableArray(
+    oldArr: IObservableArray<any>,
+    newArr: any[],
+    localObservables: LocalObservables
+) {
     if (!isObservableArray(oldArr) || !localObservables.has(oldArr)) {
         oldArr = observable.array([], { deep: false })
         localObservables.set(oldArr, true)
@@ -169,7 +180,7 @@ function updateObservableArray(oldArr: any, newArr: any[], localObservables: Loc
 }
 
 function updateObservableMap(
-    oldMap: any,
+    oldMap: ObservableMap<any, any>,
     newMap: Map<any, any>,
     localObservables: LocalObservables
 ) {
@@ -200,6 +211,34 @@ function updateObservableMap(
     })
 
     return oldMap
+}
+
+function updateObservableSet(
+    oldSet: ObservableSet<any>,
+    newSet: Set<any>,
+    localObservables: LocalObservables
+) {
+    if (!isObservableSet(oldSet) || !localObservables.has(oldSet)) {
+        oldSet = observable.set([], { deep: false })
+        localObservables.set(oldSet, true)
+    }
+
+    // remove deleted items
+    oldSet.forEach(oldValue => {
+        if (!newSet.has(oldValue)) {
+            remove(oldSet, oldValue)
+        }
+    })
+
+    // add missing items
+    newSet.forEach(newValue => {
+        if (!oldSet.has(newValue)) {
+            // TODO: mobx does not offer set for sets
+            oldSet.add(updateObservableValue(undefined, newValue, undefined, localObservables))
+        }
+    })
+
+    return oldSet
 }
 
 function updateObservableObject(

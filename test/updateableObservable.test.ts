@@ -1,4 +1,4 @@
-import { configure, isObservable, isObservableMap, observable } from "mobx"
+import { configure, isObservable, isObservableMap, isObservableSet, observable } from "mobx"
 import { updateableObservable } from "../src/shared/updateableObservable"
 
 configure({
@@ -72,6 +72,26 @@ configure({
             expect(u.get()).toBe(map)
             expect(isObservableMap(map)).toBe(true)
             expect(Array.from(map.entries())).toEqual([[1, 2]])
+        }
+
+        {
+            // sets
+            const orig = new Set([1, 2])
+            u.update(orig)
+            const set = u.get()
+            expect(isObservableSet(set)).toBe(true)
+            expect(Array.from(set.keys())).toEqual([1, 2])
+
+            orig.add(3)
+            u.update(orig)
+            expect(u.get()).toBe(set)
+            expect(isObservableSet(set)).toBe(true)
+            expect(Array.from(set.values())).toEqual([1, 2, 3])
+
+            u.update(new Set([1]))
+            expect(u.get()).toBe(set)
+            expect(isObservableSet(set)).toBe(true)
+            expect(Array.from(set.entries())).toEqual([[1, 1]])
         }
 
         {
