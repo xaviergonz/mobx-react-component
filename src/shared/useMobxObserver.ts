@@ -1,23 +1,13 @@
 import { getDependencyTree, Reaction } from "mobx"
-import { useCallback, useDebugValue, useLayoutEffect, useRef, useState } from "react"
+import { useDebugValue, useLayoutEffect, useRef, useState } from "react"
 import { isUsingStaticRendering } from "./staticRendering"
-
-function useForceUpdate() {
-    const [, setTick] = useState(0)
-
-    const update = useCallback(() => {
-        setTick(tick => tick + 1)
-    }, [])
-
-    return update
-}
 
 export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "observed"): T {
     if (isUsingStaticRendering()) {
         return fn()
     }
 
-    const update = useForceUpdate()
+    const [, setTick] = useState(0)
 
     const reaction = useRef<Reaction | null>(null)
     const oldReaction = useRef<Reaction | null>(null)
@@ -41,7 +31,7 @@ export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "obs
 
     reaction.current = new Reaction(`mobxObserver(${baseComponentName})`, function(this: Reaction) {
         if (reaction.current === this) {
-            update()
+            setTick(t => t + 1)
         }
     })
 
