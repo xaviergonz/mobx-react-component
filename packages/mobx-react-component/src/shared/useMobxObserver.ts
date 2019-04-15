@@ -9,12 +9,13 @@ export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "obs
 
     const [, setTick] = useState(0)
 
-    const reaction = useRef<Reaction | null>(null)
-    const oldReaction = useRef<Reaction | null>(null)
+    const reaction1 = useRef<Reaction | null>(null)
+    const reaction2 = useRef<Reaction | null>(null)
+    const currentReaction = useRef<1 | 2>(1)
     useEffect(
         () => () => {
-            disposeReaction(oldReaction)
-            disposeReaction(reaction)
+            disposeReaction(reaction1)
+            disposeReaction(reaction2)
         },
         []
     )
@@ -23,21 +24,32 @@ export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "obs
     // reaction track the observables, so that rendering
     // can be invalidated (see above) once a dependency changes
 
-    // we use a new reaction to ensure we don't react to observables set in the render phase
-    // this is different from how mobx-react-lite does, where it reuses the reaction
-    // however we will dispose of the old reaction after this one is done tracking so any
+    // we use two reactions to ensure we don't react to observables set in the render phase
+    // this is different from how mobx-react-lite does, where it uses a single reaction
+    // however we will reset the old reaction after this one is done tracking so any
     // cached computeds won't die early
-    oldReaction.current = reaction.current
+    if (!reaction1.current) {
+        reaction1.current = createReaction(baseComponentName, 1, currentReaction, setTick)
+    }
+    if (!reaction2.current) {
+        reaction2.current = createReaction(baseComponentName, 2, currentReaction, setTick)
+    }
 
-    reaction.current = new Reaction(`mobxObserver(${baseComponentName})`, function(this: Reaction) {
-        if (reaction.current === this) {
-            setTick(t => t + 1)
-        }
-    })
+    let reaction
+    let oldReaction
+    if (currentReaction.current === 1) {
+        currentReaction.current = 2
+        reaction = reaction2.current
+        oldReaction = reaction1.current
+    } else {
+        currentReaction.current = 1
+        reaction = reaction1.current
+        oldReaction = reaction2.current
+    }
 
     let rendering!: T
     let exception
-    reaction.current.track(() => {
+    reaction.track(() => {
         try {
             rendering = fn()
         } catch (e) {
@@ -47,20 +59,40 @@ export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "obs
 
     useDebugValue(reaction, printDebugValue)
 
-    disposeReaction(oldReaction)
+    // clear dependencies of old reaction
+    oldReaction.track(emptyFn)
 
     if (exception) {
-        disposeReaction(reaction)
+        disposeReaction(reaction1)
+        disposeReaction(reaction2)
         throw exception // re-throw any exceptions catched during rendering
     }
     return rendering
 }
 
-function printDebugValue(v: React.MutableRefObject<Reaction | null>) {
-    if (!v.current) {
+function createReaction(
+    baseComponentName: string,
+    reactionNumber: number,
+    currentReaction: React.MutableRefObject<number>,
+    setTick: (fn: (n: number) => number) => void
+) {
+    return new Reaction(`mobxObserver(${baseComponentName})`, () => {
+        if (currentReaction.current === reactionNumber) {
+            setTick(t => t + 1)
+        }
+    })
+}
+
+const emptyFn = () => {
+    // do nothing
+}
+
+function printDebugValue(v: Reaction) {
+    if (!v) {
         return "<unknown>"
     }
-    return getDependencyTree(v.current)
+    const deps = getDependencyTree(v).dependencies || []
+    return deps.map(d => d.name).join(", ")
 }
 
 function disposeReaction(reaction: React.MutableRefObject<Reaction | null>) {
