@@ -1,5 +1,4 @@
 const path = require("path")
-const filesize = require("rollup-plugin-filesize")
 const typescript = require("rollup-plugin-typescript2")
 const commonjs = require("rollup-plugin-commonjs")
 const resolve = require("rollup-plugin-node-resolve")
@@ -34,18 +33,13 @@ async function build(target, mode, filename) {
             check: true,
             useTsconfigDeclarationDir: true
         }),
-        resolve({
-            module: true,
-            main: true
-        }),
+        resolve(),
         commonjs()
     ]
 
     if (mode.endsWith(".min")) {
         plugins.push(terser())
     }
-
-    plugins.push(filesize())
 
     const bundle = await rollup({
         input: "src/index.ts",

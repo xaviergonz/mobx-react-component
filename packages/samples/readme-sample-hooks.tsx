@@ -1,13 +1,13 @@
 import { when } from "mobx"
-import * as React from "react"
-import { memo, useContext } from "react"
 import {
     mobxObserver,
     useMobxActions,
     useMobxAsObservableSource,
     useMobxEffects,
     useMobxStore
-} from "../src"
+} from "mobx-react-component"
+import * as React from "react"
+import { memo, useContext } from "react"
 
 interface IMyComponentProps {
     x: number
