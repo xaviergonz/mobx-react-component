@@ -2,7 +2,7 @@ import { ValidationMap, WeakValidationMap } from "react"
 import { setOriginalProps } from "../shared/originalProps"
 import { isUsingStaticRendering } from "../shared/staticRendering"
 import { useMobxObserver } from "../shared/useMobxObserver"
-import { useMobxObservableRefs } from "./useMobxObservableRefs"
+import { useMobxAsObservableSource } from "./useMobxAsObservableSource"
 
 export interface IMobxObserverComponent<P> {
     propTypes?: WeakValidationMap<P>
@@ -23,17 +23,10 @@ export function mobxObserver<T extends React.FC<any>>(
     const observerComponent = (props: any, ref: any) => {
         return useMobxObserver(() => {
             // turn props into a shallow observable object
-            const obs = useMobxObservableRefs(
-                {
-                    props
-                },
-                {
-                    props: "shallow"
-                }
-            )
-            setOriginalProps(obs.props, props)
+            const obsProps = useMobxAsObservableSource(props, "shallow")
+            setOriginalProps(obsProps(), props)
 
-            return baseComponent(obs.props, ref)
+            return baseComponent(obsProps(), ref)
         }, observerComponent.displayName)
     }
     observerComponent.displayName = baseComponentName

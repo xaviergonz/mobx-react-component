@@ -1,5 +1,5 @@
 import { getDependencyTree, Reaction } from "mobx"
-import { useDebugValue, useLayoutEffect, useRef, useState } from "react"
+import { useDebugValue, useEffect, useRef, useState } from "react"
 import { isUsingStaticRendering } from "./staticRendering"
 
 export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "observed"): T {
@@ -11,7 +11,7 @@ export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "obs
 
     const reaction = useRef<Reaction | null>(null)
     const oldReaction = useRef<Reaction | null>(null)
-    useLayoutEffect(
+    useEffect(
         () => () => {
             disposeReaction(oldReaction)
             disposeReaction(reaction)

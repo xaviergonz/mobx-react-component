@@ -1,7 +1,18 @@
-import { useLayoutEffect } from "react"
+import { useEffect } from "react"
 import { MobxEffects } from "./MobxEffects"
 import { useLazyInit } from "./useLazyInit"
 
+/**
+ * Registers some mobx effects.
+ *
+ * ```ts
+ * useMobxEffects(() => [
+ *   reaction(() => someObservable, () => {
+ *     // reaction code
+ *   })
+ * ])
+ * ```
+ */
 export function useMobxEffects(effectsFn: () => MobxEffects): void {
     const disposeEffects = useLazyInit(() => {
         let effects: MobxEffects | undefined = effectsFn()
@@ -13,5 +24,5 @@ export function useMobxEffects(effectsFn: () => MobxEffects): void {
         }
     })
 
-    useLayoutEffect(() => disposeEffects, [])
+    useEffect(() => disposeEffects, [])
 }

@@ -6,9 +6,9 @@ import {
     getOriginalProps,
     mobxObserver,
     useMobxActions,
+    useMobxAsObservableSource,
     useMobxEffects,
-    useMobxObservable,
-    useMobxObservableRefs
+    useMobxStore
 } from "../src"
 import { changesList } from "./utils"
 
@@ -40,7 +40,7 @@ it("with props and effects", () => {
 
     const TestComponent = memo(
         mobxObserver((props: IProps) => {
-            const state = useMobxObservable(() =>
+            const state = useMobxStore(() =>
                 observable({
                     get addXY() {
                         return props.x + props.y
@@ -153,17 +153,20 @@ it("with props and effects", () => {
 it("without props / effects", () => {
     const TestComponent = memo(
         mobxObserver(() => {
-            const state = useMobxObservable(() =>
+            const state = useMobxStore(() =>
                 observable({
                     x: 10
                 })
             )
+            const state2 = useMobxStore(() => ({
+                x: 20
+            }))
 
             const [s] = React.useState(5)
 
             return (
                 <div>
-                    {state.x} {s}
+                    {state.x} {state2.x} {s}
                 </div>
             )
         })
@@ -172,7 +175,7 @@ it("without props / effects", () => {
     const { container } = render(<TestComponent />)
     const div = container.querySelector("div")!
 
-    expect(div.textContent).toBe("10 5")
+    expect(div.textContent).toBe("10 20 5")
 })
 
 it("ref forwarding works", () => {
@@ -195,11 +198,9 @@ it("statics works", () => {
     }
 
     const WrappedTestComponent = (props: IProps2) => {
-        const obs = useMobxObservableRefs({
-            props
-        })
+        const obsProps = useMobxAsObservableSource(props)
 
-        return <div>{obs.props.x}</div>
+        return <div>{obsProps().x}</div>
     }
     WrappedTestComponent.defaultProps = {
         x: 5
@@ -221,7 +222,7 @@ it("statics works", () => {
 it("actions", () => {
     const TestComponent = memo(
         mobxObserver(() => {
-            const state = useMobxObservable(() =>
+            const state = useMobxStore(() =>
                 observable({
                     x: 1
                 })

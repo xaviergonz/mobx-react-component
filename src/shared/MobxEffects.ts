@@ -1,1 +1,2 @@
-export type MobxEffects = ReadonlyArray<() => any>
+export type MobxEffectDisposer = () => any
+export type MobxEffects = ReadonlyArray<MobxEffectDisposer>

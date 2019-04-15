@@ -24,16 +24,16 @@ If you know how to use mobx and how to use hooks the example should be pretty mu
 #### Using hooks
 
 ```tsx
-import { observable, when } from "mobx"
+import { when } from "mobx"
 import * as React from "react"
 import { memo, useContext } from "react"
 import {
     mobxObserver,
     useMobxActions,
+    useMobxAsObservableSource,
     useMobxEffects,
-    useMobxObservable,
-    useMobxObservableRefs
-} from "mobx-react-component"
+    useMobxStore
+} from "mobx-state-tree"
 
 interface IMyComponentProps {
     x: number
@@ -56,21 +56,20 @@ export const MyComponent = memo(
         // observable refs of the given data
 
         // note 1: do NOT ever destructure this when using or else the observability
-        // will be lost! (in other words, always use obs.X to access the value)
+        // will be lost! (in other words, always use obsContext().X to access the value)
         // note 2: if the context value is actually an observable that will never
         // change its ref then this is not needed
-        const obs = useMobxObservableRefs({
-            someContextValue: useContext(SomeContext)
-        })
+        const obsContext = useMobxAsObservableSource(useContext(SomeContext), "shallow")
 
-        const state = useMobxObservable(() =>
-            observable({
+        const state = useMobxStore(() =>
+            // alternatively observable(...) can be returned instead if you need to use decorators
+            ({
                 // observable value
                 y: 0,
 
                 // computed
                 get sum() {
-                    return props.x + this.y + obs.someContextValue.z
+                    return props.x + this.y + obsContext().z
                 }
             })
         )
@@ -94,7 +93,7 @@ export const MyComponent = memo(
         return (
             <div>
                 <div>
-                    x + y + z = {props.x} + {state.y} + {obs.someContextValue.z} = {state.sum}
+                    x + y + z = {props.x} + {state.y} + {obsContext().z} = {state.sum}
                 </div>
                 <button onClick={actions.incY}>Increment Y</button>
             </div>
