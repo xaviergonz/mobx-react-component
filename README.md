@@ -59,7 +59,7 @@ export const MyComponent = memo(
         // will be lost! (in other words, always use obsContext().X to access the value)
         // note 2: if the context value is actually an observable that will never
         // change its ref then this is not needed
-        const obsContext = useMobxAsObservableSource(useContext(SomeContext), "shallow")
+        const obsContext = useMobxAsObservableSource(useContext(SomeContext), "ref")
 
         const state = useMobxStore(() =>
             // alternatively observable(...) can be returned instead if you need to use decorators

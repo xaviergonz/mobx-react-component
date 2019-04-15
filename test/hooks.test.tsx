@@ -6,7 +6,6 @@ import {
     getOriginalProps,
     mobxObserver,
     useMobxActions,
-    useMobxAsObservableSource,
     useMobxEffects,
     useMobxStore
 } from "../src"
@@ -198,9 +197,7 @@ it("statics works", () => {
     }
 
     const WrappedTestComponent = (props: IProps2) => {
-        const obsProps = useMobxAsObservableSource(props)
-
-        return <div>{obsProps().x}</div>
+        return <div>{props.x}</div>
     }
     WrappedTestComponent.defaultProps = {
         x: 5

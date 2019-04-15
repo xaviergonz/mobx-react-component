@@ -4,7 +4,7 @@ import { useLazyInit } from "../shared/useLazyInit"
 
 /**
  * Transforms a value into an observable value.
- * The `mode` parameter can be either `"shallow"` (the default), `"deep"`, or `"ref"` indicating how
+ * The `mode` parameter can be either `"shallow"`, `"deep"`, or `"ref"` indicating how
  * the transformation should be performed.
  * The function will return a function that will return the observable value.
  * Note that in order for observability to work properly this getter must be used before accessing
@@ -19,10 +19,7 @@ import { useLazyInit } from "../shared/useLazyInit"
  * // then inside a computed, reaction, etc. use obsContext().name
  * ```
  */
-export function useMobxAsObservableSource<V>(
-    value: V,
-    mode: ObservableWrapperMode = "shallow"
-): () => V {
+export function useMobxAsObservableSource<V>(value: V, mode: ObservableWrapperMode): () => V {
     const data = useLazyInit(() => {
         const { get, update } = newObservableWrapper(value, mode)
         const updateAction = action("updateMobxObservableSource", update)
