@@ -1,6 +1,11 @@
 import { action, computed, observable, when } from "mobx"
+import {
+    injectContext,
+    MobxComponent,
+    mobxComponent,
+    ReactContextValue
+} from "mobx-react-component"
 import * as React from "react"
-import { injectContext, MobxComponent, mobxComponent, ReactContextValue } from "../src"
 
 interface IMyComponentProps {
     x: number

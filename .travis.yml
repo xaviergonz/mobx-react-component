@@ -1,9 +1,10 @@
 language: node_js
 cache: yarn
 install:
-    - yarn install
+    - yarn install --frozen-lockfile
 script:
+    - cd packages/mobx-react-component
     - CI=true yarn test:travis
-    - cat ./coverage/lcov.info|./node_modules/coveralls/bin/coveralls.js
+    - cat ./coverage/lcov.info|../../node_modules/coveralls/bin/coveralls.js
 node_js:
     - "node"

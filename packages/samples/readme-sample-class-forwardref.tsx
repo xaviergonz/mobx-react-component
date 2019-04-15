@@ -1,5 +1,5 @@
+import { MobxComponent, mobxComponent } from "mobx-react-component"
 import * as React from "react"
-import { MobxComponent, mobxComponent } from "../src"
 
 interface IMyComponentProps {
     children: React.ReactNode
