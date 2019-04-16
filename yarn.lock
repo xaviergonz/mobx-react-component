@@ -7376,6 +7376,11 @@ mkdirp@0.5.1, mkdirp@0.5.x, mkdirp@0.x, mkdirp@^0.5.0, mkdirp@^0.5.1, mkdirp@~0.
   dependencies:
     minimist "0.0.8"
 
+mobx-react-component@latest:
+  version "0.42.0"
+  resolved "https://registry.yarnpkg.com/mobx-react-component/-/mobx-react-component-0.42.0.tgz#8286e4d9cd23a47268d9f89557c45b9634945296"
+  integrity sha512-dGvReYgyYrk4p35I27hkIM2nV7zBY1yPzmxUx5Oen7Cqzp8iHoSeFup1S8vJwRP1QPeXd7cW6/xWnYEe8Y5PRA==
+
 mobx@^5.9.4:
   version "5.9.4"
   resolved "https://registry.yarnpkg.com/mobx/-/mobx-5.9.4.tgz#1dee92aba33f67b7baeeb679e3bd376a12e55812"
