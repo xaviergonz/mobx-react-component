@@ -1,7 +1,7 @@
 import { isObservable, remove, runInAction } from "mobx"
+import { useRef } from "react"
 import { ObservableWrapperMode } from "../shared/observableWrapper"
-import { useLazyInit } from "../shared/useLazyInit"
-import { useObservableRef } from "./useObservableRef"
+import { useMobxAsObservableSource } from "../shared/useMobxAsObservableSource"
 
 export function usePropertyInjection<T extends object>(
     state: T,
@@ -9,9 +9,10 @@ export function usePropertyInjection<T extends object>(
     value: T[typeof propName],
     mode: ObservableWrapperMode
 ): void {
-    const boxedObservable = useObservableRef(value, mode)
+    const inited = useRef<boolean>(false)
+    const boxedObservable = useMobxAsObservableSource(value, mode)
 
-    useLazyInit(() => {
+    if (!inited.current) {
         if (isObservable(state)) {
             runInAction(() => {
                 remove(state as any, propName)
@@ -25,8 +26,10 @@ export function usePropertyInjection<T extends object>(
             configurable: true,
             enumerable: true,
             get() {
-                return boxedObservable.current
+                return boxedObservable()
             }
         })
-    })
+
+        inited.current = true
+    }
 }

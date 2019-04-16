@@ -1,6 +1,6 @@
 import { action } from "mobx"
-import { newObservableWrapper, ObservableWrapperMode } from "../shared/observableWrapper"
-import { useLazyInit } from "../shared/useLazyInit"
+import { useRef } from "react"
+import { newObservableWrapper, ObservableWrapperMode } from "./observableWrapper"
 
 /**
  * Transforms a value into an observable value.
@@ -20,21 +20,18 @@ import { useLazyInit } from "../shared/useLazyInit"
  * ```
  */
 export function useMobxAsObservableSource<V>(value: V, mode: ObservableWrapperMode): () => V {
-    const data = useLazyInit(() => {
+    const data = useRef<{ get(): V; updateAction(newV: V): void } | null>(null)
+    if (!data.current) {
         const { get, update } = newObservableWrapper(value, mode)
         const updateAction = action("updateMobxObservableSource", update)
 
-        return {
+        data.current = {
             get,
-            updateAction,
-            needsUpdating: true
+            updateAction
         }
-    })
-
-    if (data.needsUpdating) {
-        data.updateAction(value)
+    } else {
+        data.current.updateAction(value)
     }
-    data.needsUpdating = true
 
-    return data.get
+    return data.current.get
 }

@@ -1,5 +1,5 @@
 import { action, observable } from "mobx"
-import { useLazyInit } from "../shared/useLazyInit"
+import { useRef } from "react"
 /**
  * Creates some mobx actions, which are already bound.
  *
@@ -15,7 +15,8 @@ import { useLazyInit } from "../shared/useLazyInit"
  * ```
  */
 export function useMobxActions<O extends object>(actionsFn: () => O): O {
-    const act = useLazyInit(() => {
+    const act = useRef<O | null>(null)
+    if (!act.current) {
         // create actions object
         const actions = actionsFn()
 
@@ -24,8 +25,8 @@ export function useMobxActions<O extends object>(actionsFn: () => O): O {
             decorators[k] = action.bound
         })
 
-        return observable(actions, decorators)
-    })
+        act.current = observable(actions, decorators)
+    }
 
-    return act
+    return act.current!
 }

@@ -1,7 +1,14 @@
-import { forwardRef, memo, ReactElement, useContext, ValidationMap, WeakValidationMap } from "react"
+import {
+    forwardRef,
+    memo,
+    ReactElement,
+    useContext,
+    useRef,
+    ValidationMap,
+    WeakValidationMap
+} from "react"
 import { MobxEffects } from "../shared/MobxEffects"
 import { setOriginalProps } from "../shared/originalProps"
-import { useLazyInit } from "../shared/useLazyInit"
 import { useMobxEffects } from "../shared/useMobxEffects"
 import { useMobxObserver } from "../shared/useMobxObserver"
 import { ReactManagedAttributes } from "./react-types"
@@ -103,7 +110,11 @@ export function mobxComponent<
 
     const funcComponent = (props: P2, ref: React.Ref<R>) => {
             return useMobxObserver(() => {
-                const { state, updateContexts, updateEffects } = useLazyInit(constructFn)
+                const classInstance = useRef<ReturnType<typeof constructFn> | null>(null)
+                if (!classInstance.current) {
+                    classInstance.current = constructFn()
+                }
+                const { state, updateContexts, updateEffects } = classInstance.current!
 
                 usePropertyInjection(state, "props", props as any, "shallow")
                 setOriginalProps(state.props, props)

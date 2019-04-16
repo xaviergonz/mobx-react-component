@@ -1,8 +1,8 @@
 import { ValidationMap, WeakValidationMap } from "react"
 import { setOriginalProps } from "../shared/originalProps"
 import { isUsingStaticRendering } from "../shared/staticRendering"
+import { useMobxAsObservableSource } from "../shared/useMobxAsObservableSource"
 import { useMobxObserver } from "../shared/useMobxObserver"
-import { useMobxAsObservableSource } from "./useMobxAsObservableSource"
 
 export interface IMobxObserverComponent<P> {
     propTypes?: WeakValidationMap<P>

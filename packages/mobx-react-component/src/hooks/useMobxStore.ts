@@ -1,5 +1,6 @@
-import { isObservable, observable } from "mobx"
-import { useLazyInit } from "../shared/useLazyInit"
+import { observable } from "mobx"
+import { useRef } from "react"
+
 /**
  * Uses an observable mobx store, which is an observable object.
  * The parameter can be either an observable, or if not an observable it will be
@@ -18,11 +19,10 @@ import { useLazyInit } from "../shared/useLazyInit"
  * ```
  */
 export function useMobxStore<O>(obsFn: () => O): O {
-    return useLazyInit(() => {
-        let obs = obsFn()
-        if (!isObservable(obs)) {
-            obs = observable(obs)
-        }
-        return obs
-    })
+    const store = useRef<O | null>(null)
+    if (!store.current) {
+        store.current = observable(obsFn())
+    }
+
+    return store.current
 }

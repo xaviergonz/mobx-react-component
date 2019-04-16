@@ -1,6 +1,5 @@
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { MobxEffects } from "./MobxEffects"
-import { useLazyInit } from "./useLazyInit"
 
 /**
  * Registers some mobx effects.
@@ -14,15 +13,16 @@ import { useLazyInit } from "./useLazyInit"
  * ```
  */
 export function useMobxEffects(effectsFn: () => MobxEffects): void {
-    const disposeEffects = useLazyInit(() => {
+    const disposeEffects = useRef<(() => void) | null>(null)
+    if (!disposeEffects.current) {
         let effects: MobxEffects | undefined = effectsFn()
-        return () => {
+        disposeEffects.current = () => {
             if (effects) {
                 effects.forEach(disposer => disposer())
                 effects = undefined
             }
         }
-    })
+    }
 
-    useEffect(() => disposeEffects, [])
+    useEffect(() => disposeEffects.current!, [])
 }
