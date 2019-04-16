@@ -62,16 +62,14 @@
     },
     "keywords": [
         "mobx",
-        "mobservable",
+        "observable",
         "react-component",
         "react",
         "reactjs",
         "reactive",
         "hooks",
         "observer",
-        "useObserver",
-        "MobxLocalState",
-        "useMobxLocalState"
+        "mobxObserver"
     ],
     "lint-staged": {
         "*.{ts,js}": [
