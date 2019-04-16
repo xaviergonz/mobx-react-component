@@ -182,7 +182,7 @@ class MyComponentClass extends MobxComponent<IMyComponentProps> {
 
 export const MyComponent = mobxComponent(
     MyComponentClass,
-    // statics (defaultProps, displayName, propTypes, etc. can be declared here)
+    // statics (defaultProps, displayName, propTypes, etc.) can be declared here
     {
         displayName: "MyComponent",
         defaultProps: {
