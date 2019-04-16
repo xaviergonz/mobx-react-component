@@ -22,7 +22,7 @@ let renders = 0
 function expectRendersToBe(n: number) {
     const r = renders
     renders = 0
-    expect(n).toBe(r)
+    expect(r).toBe(n)
 }
 
 it("with props and effects", () => {
