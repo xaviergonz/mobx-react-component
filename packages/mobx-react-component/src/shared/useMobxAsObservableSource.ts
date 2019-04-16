@@ -1,6 +1,7 @@
 import { action } from "mobx"
 import { useRef } from "react"
 import { newObservableWrapper, ObservableWrapperMode } from "./observableWrapper"
+import { withoutForceUpdate } from "./useMobxObserver"
 
 /**
  * Transforms a value into an observable value.
@@ -23,7 +24,7 @@ export function useMobxAsObservableSource<V>(value: V, mode: ObservableWrapperMo
     const data = useRef<{ get(): V; updateAction(newV: V): void } | null>(null)
     if (!data.current) {
         const { get, update } = newObservableWrapper(value, mode)
-        const updateAction = action("updateMobxObservableSource", update)
+        const updateAction = withoutForceUpdate(action("updateMobxObservableSource", update))
 
         data.current = {
             get,

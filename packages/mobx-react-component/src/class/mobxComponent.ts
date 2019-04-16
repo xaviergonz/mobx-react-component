@@ -109,26 +109,26 @@ export function mobxComponent<
     >
 
     const funcComponent = (props: P2, ref: React.Ref<R>) => {
+            const classInstance = useRef<ReturnType<typeof constructFn> | null>(null)
+            if (!classInstance.current) {
+                classInstance.current = constructFn()
+            }
+            const { state, updateContexts, updateEffects } = classInstance.current!
+
+            usePropertyInjection(state, "props", props as any, "shallow")
+            setOriginalProps(state.props, props)
+            ;(state as any).originalProps = props
+            ;(state as any).ref = ref
+
+            if (updateContexts) {
+                updateContexts()
+            }
+
+            if (updateEffects) {
+                updateEffects()
+            }
+
             return useMobxObserver(() => {
-                const classInstance = useRef<ReturnType<typeof constructFn> | null>(null)
-                if (!classInstance.current) {
-                    classInstance.current = constructFn()
-                }
-                const { state, updateContexts, updateEffects } = classInstance.current!
-
-                usePropertyInjection(state, "props", props as any, "shallow")
-                setOriginalProps(state.props, props)
-                ;(state as any).originalProps = props
-                ;(state as any).ref = ref
-
-                if (updateContexts) {
-                    updateContexts()
-                }
-
-                if (updateEffects) {
-                    updateEffects()
-                }
-
                 return state.render()
             }, displayName)
         }

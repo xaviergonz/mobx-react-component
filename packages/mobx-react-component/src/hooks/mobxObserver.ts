@@ -21,11 +21,11 @@ export function mobxObserver<T extends React.FC<any>>(
     const baseComponentName = baseComponent.displayName || baseComponent.name
 
     const observerComponent = (props: any, ref: any) => {
-        return useMobxObserver(() => {
-            // turn props into a shallow observable object
-            const obsProps = useMobxAsObservableSource(props, "shallow")()
-            setOriginalProps(obsProps, props)
+        // turn props into a shallow observable object
+        const obsProps = useMobxAsObservableSource(props, "shallow")()
+        setOriginalProps(obsProps, props)
 
+        return useMobxObserver(() => {
             return baseComponent(obsProps, ref)
         }, observerComponent.displayName)
     }

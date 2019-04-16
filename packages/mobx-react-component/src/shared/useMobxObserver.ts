@@ -2,6 +2,21 @@ import { getDependencyTree, Reaction } from "mobx"
 import { useDebugValue, useEffect, useRef, useState } from "react"
 import { isUsingStaticRendering } from "./staticRendering"
 
+let forceUpdateEnabled = true
+
+export function withoutForceUpdate<F extends (...args: any[]) => any>(fn: F): F {
+    const newFn = function(this: any) {
+        const old = forceUpdateEnabled
+        forceUpdateEnabled = false
+        try {
+            return fn.apply(this, arguments as any)
+        } finally {
+            forceUpdateEnabled = old
+        }
+    }
+    return newFn as F
+}
+
 export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "observed"): T {
     if (isUsingStaticRendering()) {
         return fn()
@@ -67,18 +82,18 @@ class RoundRobinReaction {
 
         const run = this.run
 
-        this.reactions = [
-            new Reaction(this.reactionName, () => {
-                if (this.current === 0) {
-                    run()
-                }
-            }),
-            new Reaction(this.reactionName, () => {
-                if (this.current === 1) {
-                    run()
-                }
-            })
-        ]
+        const reaction1 = new Reaction(this.reactionName, () => {
+            if (this.current === 0 && forceUpdateEnabled) {
+                run()
+            }
+        })
+        const reaction2 = new Reaction(this.reactionName, () => {
+            if (this.current === 1 && forceUpdateEnabled) {
+                run()
+            }
+        })
+
+        this.reactions = [reaction1, reaction2]
     }
 
     track<T>(fn: () => T): T {
