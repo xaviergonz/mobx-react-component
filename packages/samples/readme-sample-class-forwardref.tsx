@@ -14,3 +14,4 @@ class MyComponent extends MobxComponent<{}> {
 // You can now get a ref to the class instance:
 // const ref = React.createRef<MyComponent>();
 // <MyComponent ref={ref}/>
+// ref.current.someMethod()
