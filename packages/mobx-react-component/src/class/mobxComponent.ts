@@ -1,18 +1,9 @@
-import {
-    forwardRef,
-    memo,
-    ReactElement,
-    useContext,
-    useRef,
-    ValidationMap,
-    WeakValidationMap
-} from "react"
+import { forwardRef, memo, ReactElement, useContext, useLayoutEffect, useRef } from "react"
 import { MobxEffects } from "../shared/MobxEffects"
 import { ToObservableMode } from "../shared/observableWrapper"
 import { setOriginalProps } from "../shared/originalProps"
 import { useMobxEffects } from "../shared/useMobxEffects"
 import { useMobxObserver } from "../shared/useMobxObserver"
-import { ReactManagedAttributes } from "./react-types"
 import { ReactContextValue } from "./ReactContextValue"
 import { usePropertyInjection } from "./usePropertyInjection"
 
@@ -40,47 +31,46 @@ export function injectContext<C extends React.Context<any>>(
     }
 }
 
-export abstract class MobxComponent<P extends object = {}, TRef = {}> {
+export abstract class MobxComponent<P extends {} = {}> implements React.Component<P> {
+    // just to keep TS happy for the fake implementation of React.Component
+    context!: never
+    setState!: never
+    forceUpdate!: never
+    state!: never
+    refs!: never
+
     readonly props!: P
     readonly originalProps!: P
-    readonly ref!: React.Ref<TRef>
 
     abstract render(): ReactElement | null
 
     getEffects?(): MobxEffects
 }
 
+export interface IMobxComponentOptions<P> {
+    toObservablePropsMode?: ToObservableMode<P>
+}
+
+export const mobxComponent = (
+    options?: IMobxComponentOptions<any> // TODO: how to get P here?
+) => <C extends new () => MobxComponent<any>>(clazz: C): C => {
+    return _mobxComponent(clazz as any) as any
+}
+
 interface IInternalMobxComponent {
     [contextsToInjectSymbol]: IContextToInject[]
 }
 
-type MobxComponentProps<T extends MobxComponent<any, any>> = T extends MobxComponent<infer P, any>
-    ? P
-    : never
-type MobxComponentRef<T extends MobxComponent<any, any>> = T extends MobxComponent<any, infer TR>
-    ? TR
-    : never
-
-export function mobxComponent<
-    T extends MobxComponent<any, any>,
-    P extends MobxComponentProps<T>,
-    R extends MobxComponentRef<T>,
-    DP extends Partial<P>,
-    PT extends WeakValidationMap<P>,
-    CT extends ValidationMap<any>
->(clazz: {
-    new (): T
-    propTypes?: PT
-    contextTypes?: CT
-    defaultProps?: DP
-    displayName?: string
-
-    toObservablePropsMode?: ToObservableMode<P>
-}) {
+function _mobxComponent<
+    C extends React.ComponentClass<P> & { toObservablePropsMode?: ToObservableMode<P> },
+    P
+>(clazz: C, options?: IMobxComponentOptions<any>) {
     const displayName = clazz.displayName || clazz.name
 
     const constructFn = () => {
-        const state: MobxComponent<any, any> & IInternalMobxComponent = new clazz() as any
+        const state: MobxComponent<any> & IInternalMobxComponent = new clazz(
+            undefined as any
+        ) as any
 
         const contexts = state[contextsToInjectSymbol]
 
@@ -110,28 +100,36 @@ export function mobxComponent<
         return { state, updateContexts, updateEffects }
     }
 
-    // we use this trick to make defaultProps and propTypes behave correctly
-    type P2 = ReactManagedAttributes<
-        {
-            defaultProps: DP
-            propTypes: PT
-        },
-        P
-    >
+    const toObservablePropsMode = (options && options.toObservablePropsMode) || "shallow"
 
-    const toObservablePropsMode = clazz.toObservablePropsMode || "shallow"
-
-    const funcComponent = (props: P2, ref: React.Ref<R>) => {
+    const funcComponent = (props: any, ref: React.Ref<any>) => {
             const classInstance = useRef<ReturnType<typeof constructFn> | null>(null)
             if (!classInstance.current) {
                 classInstance.current = constructFn()
             }
+            const instance = classInstance.current!.state
+            useLayoutEffect(() => {
+                if (ref) {
+                    if (typeof ref === "function") {
+                        ref(instance)
+                        return () => {
+                            ref(null)
+                        }
+                    } else {
+                        ;(ref as any).current = instance
+                        return () => {
+                            ;(ref as any).current = null
+                        }
+                    }
+                }
+                return undefined
+            }, [ref, instance])
+
             const { state, updateContexts, updateEffects } = classInstance.current!
 
             usePropertyInjection(state, "props", props as any, toObservablePropsMode)
             setOriginalProps(state.props, props)
             ;(state as any).originalProps = props
-            ;(state as any).ref = ref
 
             if (updateContexts) {
                 updateContexts()
@@ -155,6 +153,19 @@ export function mobxComponent<
 
     const memoComponent = memo(forwardRefComponent)
     memoComponent.displayName = displayName
+
+    // make sure instanceof clazz keeps working
+    const originalHasInstance = memoComponent[Symbol.hasInstance]
+    memoComponent[Symbol.hasInstance] = function(this: any, instance) {
+        if (originalHasInstance) {
+            const result = originalHasInstance.apply(memoComponent, arguments as any)
+            if (result) {
+                return true
+            }
+        }
+
+        return instance instanceof clazz
+    }
 
     return memoComponent
 }

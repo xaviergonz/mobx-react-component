@@ -12,7 +12,8 @@ interface IMyComponentProps {
     x: number
 }
 
-class MyComponentClass extends MobxComponent<IMyComponentProps> {
+@mobxComponent()
+export class MyComponent extends MobxComponent<IMyComponentProps> {
     // statics (defaultProps, displayName, propTypes, etc.) can be declared here
     static displayName = "MyComponent"
     static defaultProps = {
@@ -72,8 +73,6 @@ class MyComponentClass extends MobxComponent<IMyComponentProps> {
         )
     }
 }
-
-export const MyComponent = mobxComponent(MyComponentClass)
 
 // usage
 // <MyComponent x={5}/>

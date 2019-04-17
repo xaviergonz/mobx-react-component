@@ -30,7 +30,8 @@ it("with props and effects", () => {
 
     let disposerCalled = 0
 
-    class MyComponent extends MobxComponent<IProps> {
+    @mobxComponent()
+    class TestComponent extends MobxComponent<IProps> {
         @computed
         get addXY() {
             return this.props.x + this.props.y
@@ -84,8 +85,6 @@ it("with props and effects", () => {
             )
         }
     }
-
-    const TestComponent = mobxComponent(MyComponent)
 
     let obj = {
         x: 9
@@ -145,7 +144,8 @@ it("with props and effects", () => {
 })
 
 it("without props / effects", () => {
-    class MyComponent extends MobxComponent {
+    @mobxComponent()
+    class TestComponent extends MobxComponent {
         @observable
         x!: number
 
@@ -166,26 +166,30 @@ it("without props / effects", () => {
         }
     }
 
-    const TestComponent = mobxComponent(MyComponent)
-
     const { container } = render(<TestComponent />)
     const div = container.querySelector("div")!
 
     expect(div.textContent).toBe("10 5")
 })
 
-it("ref forwarding works", () => {
-    class C extends MobxComponent<{}, HTMLInputElement> {
+it("ref works", () => {
+    @mobxComponent({
+        toObservablePropsMode: "shallow" // just to see this works
+    })
+    class TestComponent extends MobxComponent<{ forwardRef?: React.Ref<HTMLInputElement> }> {
         render() {
-            const { ref } = this
-            return <input ref={ref} />
+            const { forwardRef } = this.props
+            return <input ref={forwardRef} />
         }
     }
-    const TestComponent = mobxComponent(C)
 
     const inputRef = React.createRef<HTMLInputElement>()
-    render(<TestComponent ref={inputRef} />)
+    const cRef = React.createRef<TestComponent>()
+    render(<TestComponent ref={cRef} forwardRef={inputRef} />)
     expect(inputRef.current instanceof HTMLInputElement).toBeTruthy()
+    expect(cRef.current).toBeTruthy()
+    expect(cRef.current!.render).toBeTruthy()
+    expect(cRef.current instanceof TestComponent).toBeTruthy()
 })
 
 it("statics works", () => {
@@ -193,7 +197,8 @@ it("statics works", () => {
         x: number
     }
 
-    class C extends MobxComponent<IProps2> {
+    @mobxComponent()
+    class TestComponent extends MobxComponent<IProps2> {
         static defaultProps = {
             x: 5
         }
@@ -204,7 +209,6 @@ it("statics works", () => {
             return <div>{props.x}</div>
         }
     }
-    const TestComponent = mobxComponent(C)
     expect(TestComponent.displayName).toBe("My component")
 
     const { container, rerender } = render(<TestComponent />)
@@ -219,7 +223,8 @@ it("context injection", () => {
     const Context = React.createContext(5)
     const [obsChanges, expectObsChangesToBe] = changesList()
 
-    class C extends MobxComponent {
+    @mobxComponent()
+    class TestComponent extends MobxComponent {
         @injectContext(Context)
         contextValue!: number
 
@@ -240,7 +245,6 @@ it("context injection", () => {
             return <div>{this.contextValue}</div>
         }
     }
-    const TestComponent = mobxComponent(C)
 
     const { container, rerender } = render(<TestComponent />)
     let div = container.querySelector("div")!
@@ -261,7 +265,8 @@ it("context injection", () => {
 })
 
 it("actions", () => {
-    class MyComponent extends MobxComponent {
+    @mobxComponent()
+    class TestComponent extends MobxComponent {
         @observable
         x!: number
 
@@ -286,7 +291,6 @@ it("actions", () => {
             )
         }
     }
-    const TestComponent = mobxComponent(MyComponent)
 
     const { container } = render(<TestComponent />)
 

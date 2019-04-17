@@ -34,12 +34,11 @@ import {
 } from "mobx-react-component"
 import * as React from "react"
 import { memo, useContext } from "react"
+import { SomeContext } from "./SomeContext"
 
 interface IMyComponentProps {
     x: number
 }
-
-const SomeContext = React.createContext({ z: 2 }) // might be a root store
 
 export const MyComponent = memo(
     mobxObserver((props: IMyComponentProps) => {
@@ -118,14 +117,14 @@ import {
     ReactContextValue
 } from "mobx-react-component"
 import * as React from "react"
+import { SomeContext } from "./SomeContext"
 
 interface IMyComponentProps {
     x: number
 }
 
-const SomeContext = React.createContext({ z: 2 }) // might be a root store
-
-class MyComponentClass extends MobxComponent<IMyComponentProps> {
+@mobxComponent()
+export class MyComponent extends MobxComponent<IMyComponentProps> {
     // statics (defaultProps, displayName, propTypes, etc.) can be declared here
     static displayName = "MyComponent"
     static defaultProps = {
@@ -186,32 +185,28 @@ class MyComponentClass extends MobxComponent<IMyComponentProps> {
     }
 }
 
-export const MyComponent = mobxComponent(MyComponentClass)
-
 // usage
 // <MyComponent x={5}/>
 ```
 
-Forward references are supported as well
+References to the class instance are supported as well
 
 ```tsx
 import * as React from "react"
 import { MobxComponent, mobxComponent } from "mobx-react-component"
 
-interface IMyComponentProps {
-    children: React.ReactNode
-}
+@mobxComponent()
+class MyComponent extends MobxComponent<{}> {
+    someMethod() {
+        // some imperative method
+    }
 
-class MyComponentClass extends MobxComponent<IMyComponentProps, HTMLButtonElement> {
     render() {
-        const { ref, props } = this
-        return <button ref={ref}>{props.children}</button>
+        return null
     }
 }
 
-export const MyComponent = mobxComponent(MyComponentClass)
-
-// You can now get a ref directly to the DOM button:
-// const ref = React.createRef<HTMLButtonElement>();
+// You can now get a ref to the class instance:
+// const ref = React.createRef<MyComponent>();
 // <MyComponent ref={ref}/>
 ```

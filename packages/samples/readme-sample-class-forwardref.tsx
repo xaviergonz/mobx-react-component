@@ -1,19 +1,16 @@
 import { MobxComponent, mobxComponent } from "mobx-react-component"
-import * as React from "react"
 
-interface IMyComponentProps {
-    children: React.ReactNode
-}
+@mobxComponent()
+class MyComponent extends MobxComponent<{}> {
+    someMethod() {
+        // some imperative method
+    }
 
-class MyComponentClass extends MobxComponent<IMyComponentProps, HTMLButtonElement> {
     render() {
-        const { ref, props } = this
-        return <button ref={ref}>{props.children}</button>
+        return null
     }
 }
 
-export const MyComponent = mobxComponent(MyComponentClass)
-
-// You can now get a ref directly to the DOM button:
-// const ref = React.createRef<HTMLButtonElement>();
+// You can now get a ref to the class instance:
+// const ref = React.createRef<MyComponent>();
 // <MyComponent ref={ref}/>
