@@ -13,6 +13,12 @@ interface IMyComponentProps {
 }
 
 class MyComponentClass extends MobxComponent<IMyComponentProps> {
+    // statics (defaultProps, displayName, propTypes, etc.) can be declared here
+    static displayName = "MyComponent"
+    static defaultProps = {
+        x: 1
+    }
+
     // this.props will become an observable reference version of props
 
     // note: its ref will be kept immutable, so when using hooks pass the actual
@@ -67,16 +73,7 @@ class MyComponentClass extends MobxComponent<IMyComponentProps> {
     }
 }
 
-export const MyComponent = mobxComponent(
-    MyComponentClass,
-    // statics (defaultProps, displayName, propTypes, etc.) can be declared here
-    {
-        displayName: "MyComponent",
-        defaultProps: {
-            x: 1
-        }
-    }
-)
+export const MyComponent = mobxComponent(MyComponentClass)
 
 // usage
 // <MyComponent x={5}/>

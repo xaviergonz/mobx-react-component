@@ -1,11 +1,11 @@
 import { action } from "mobx"
 import { useRef } from "react"
-import { newObservableWrapper, ObservableWrapperMode } from "./observableWrapper"
+import { newObservableWrapper, ToObservableMode } from "./observableWrapper"
 import { withoutForceUpdate } from "./useMobxObserver"
 
 /**
  * Transforms a value into an observable value.
- * The `mode` parameter can be either `"shallow"`, `"deep"`, or `"ref"` indicating how
+ * The `toObservableMode` parameter can be either `"shallow"`, `"deep"`, or `"ref"` indicating how
  * the transformation should be performed.
  * The function will return a function that will return the observable value.
  * Note that in order for observability to work properly this getter must be used before accessing
@@ -20,10 +20,13 @@ import { withoutForceUpdate } from "./useMobxObserver"
  * // then inside a computed, reaction, etc. use obsContext().name
  * ```
  */
-export function useMobxAsObservableSource<V>(value: V, mode: ObservableWrapperMode): () => V {
+export function useMobxAsObservableSource<V>(
+    value: V,
+    toObservableMode: ToObservableMode<V>
+): () => V {
     const data = useRef<{ get(): V; updateAction(newV: V): void } | null>(null)
     if (!data.current) {
-        const { get, update } = newObservableWrapper(value, mode)
+        const { get, update } = newObservableWrapper(value, toObservableMode)
         const updateAction = withoutForceUpdate(action("updateMobxObservableSource", update))
 
         data.current = {

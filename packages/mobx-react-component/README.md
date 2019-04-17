@@ -25,15 +25,15 @@ If you know how to use mobx and how to use hooks the example should be pretty mu
 
 ```tsx
 import { when } from "mobx"
-import * as React from "react"
-import { memo, useContext } from "react"
 import {
     mobxObserver,
     useMobxActions,
     useMobxAsObservableSource,
     useMobxEffects,
     useMobxStore
-} from "mobx-state-tree"
+} from "mobx-react-component"
+import * as React from "react"
+import { memo, useContext } from "react"
 
 interface IMyComponentProps {
     x: number
@@ -85,7 +85,7 @@ export const MyComponent = memo(
             when(
                 () => state.sum === 10,
                 () => {
-                    // you reached ten!
+                    alert("you reached ten! (hooks)")
                 }
             )
         ])
@@ -95,7 +95,7 @@ export const MyComponent = memo(
                 <div>
                     x + y + z = {props.x} + {state.y} + {obsContext().z} = {state.sum}
                 </div>
-                <button onClick={actions.incY}>Increment Y</button>
+                <button onClick={actions.incY}>Increment Y (state)</button>
             </div>
         )
     })
@@ -111,13 +111,13 @@ MyComponent.displayName = "MyComponent"
 
 ```tsx
 import { action, computed, observable, when } from "mobx"
-import * as React from "react"
 import {
     injectContext,
     MobxComponent,
     mobxComponent,
     ReactContextValue
 } from "mobx-react-component"
+import * as React from "react"
 
 interface IMyComponentProps {
     x: number
@@ -126,6 +126,12 @@ interface IMyComponentProps {
 const SomeContext = React.createContext({ z: 2 }) // might be a root store
 
 class MyComponentClass extends MobxComponent<IMyComponentProps> {
+    // statics (defaultProps, displayName, propTypes, etc.) can be declared here
+    static displayName = "MyComponent"
+    static defaultProps = {
+        x: 1
+    }
+
     // this.props will become an observable reference version of props
 
     // note: its ref will be kept immutable, so when using hooks pass the actual
@@ -158,7 +164,7 @@ class MyComponentClass extends MobxComponent<IMyComponentProps> {
             when(
                 () => this.sum === 10,
                 () => {
-                    // you reached ten!
+                    alert("you reached 10! (class)")
                 }
             )
         ]
@@ -174,22 +180,13 @@ class MyComponentClass extends MobxComponent<IMyComponentProps> {
                 <div>
                     x + y + z = {props.x} + {this.y} + {this.someContext.z} = {this.sum}
                 </div>
-                <button onClick={this.incY}>Increment Y</button>
+                <button onClick={this.incY}>Increment Y (state)</button>
             </div>
         )
     }
 }
 
-export const MyComponent = mobxComponent(
-    MyComponentClass,
-    // statics (defaultProps, displayName, propTypes, etc.) can be declared here
-    {
-        displayName: "MyComponent",
-        defaultProps: {
-            x: 1
-        }
-    }
-)
+export const MyComponent = mobxComponent(MyComponentClass)
 
 // usage
 // <MyComponent x={5}/>

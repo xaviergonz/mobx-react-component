@@ -8,20 +8,26 @@ import {
     WeakValidationMap
 } from "react"
 import { MobxEffects } from "../shared/MobxEffects"
+import { ToObservableMode } from "../shared/observableWrapper"
 import { setOriginalProps } from "../shared/originalProps"
 import { useMobxEffects } from "../shared/useMobxEffects"
 import { useMobxObserver } from "../shared/useMobxObserver"
 import { ReactManagedAttributes } from "./react-types"
+import { ReactContextValue } from "./ReactContextValue"
 import { usePropertyInjection } from "./usePropertyInjection"
 
 interface IContextToInject {
     context: React.Context<any>
     propName: string
+    toObservableMode: ToObservableMode<any>
 }
 
 const contextsToInjectSymbol = Symbol("contextsToInject")
 
-export function injectContext(context: React.Context<any>) {
+export function injectContext<C extends React.Context<any>>(
+    context: C,
+    toObservableMode: ToObservableMode<ReactContextValue<C>> = "ref"
+) {
     return (targetComponent: MobxComponent, propertyKey: string) => {
         // target is the prototype
         const prototype = (targetComponent as unknown) as IInternalMobxComponent
@@ -30,7 +36,7 @@ export function injectContext(context: React.Context<any>) {
             contextsToInject = []
             prototype[contextsToInjectSymbol] = contextsToInject
         }
-        contextsToInject.push({ context, propName: propertyKey })
+        contextsToInject.push({ context, propName: propertyKey, toObservableMode })
     }
 }
 
@@ -62,16 +68,16 @@ export function mobxComponent<
     DP extends Partial<P>,
     PT extends WeakValidationMap<P>,
     CT extends ValidationMap<any>
->(
-    clazz: new () => T,
-    statics?: {
-        propTypes?: PT
-        contextTypes?: CT
-        defaultProps?: DP
-        displayName?: string
-    }
-) {
-    const displayName = (statics && statics.displayName) || clazz.name
+>(clazz: {
+    new (): T
+    propTypes?: PT
+    contextTypes?: CT
+    defaultProps?: DP
+    displayName?: string
+
+    toObservablePropsMode?: ToObservableMode<P>
+}) {
+    const displayName = clazz.displayName || clazz.name
 
     const constructFn = () => {
         const state: MobxComponent<any, any> & IInternalMobxComponent = new clazz() as any
@@ -82,7 +88,12 @@ export function mobxComponent<
         if (contexts) {
             updateContexts = () => {
                 contexts.forEach(c => {
-                    usePropertyInjection(state, c.propName as any, useContext(c.context), "ref")
+                    usePropertyInjection(
+                        state,
+                        c.propName as any,
+                        useContext(c.context),
+                        c.toObservableMode
+                    )
                 })
             }
         }
@@ -108,6 +119,8 @@ export function mobxComponent<
         P
     >
 
+    const toObservablePropsMode = clazz.toObservablePropsMode || "shallow"
+
     const funcComponent = (props: P2, ref: React.Ref<R>) => {
             const classInstance = useRef<ReturnType<typeof constructFn> | null>(null)
             if (!classInstance.current) {
@@ -115,7 +128,7 @@ export function mobxComponent<
             }
             const { state, updateContexts, updateEffects } = classInstance.current!
 
-            usePropertyInjection(state, "props", props as any, "shallow")
+            usePropertyInjection(state, "props", props as any, toObservablePropsMode)
             setOriginalProps(state.props, props)
             ;(state as any).originalProps = props
             ;(state as any).ref = ref
@@ -134,11 +147,11 @@ export function mobxComponent<
         }
 
         // as any to not destroy the types
-    ;(funcComponent as any).propTypes = statics && statics.propTypes
-    funcComponent.contextTypes = statics && statics.contextTypes
+    ;(funcComponent as any).propTypes = clazz.propTypes
+    funcComponent.contextTypes = clazz.contextTypes
 
     const forwardRefComponent = forwardRef(funcComponent)
-    forwardRefComponent.defaultProps = statics && statics.defaultProps
+    forwardRefComponent.defaultProps = clazz.defaultProps
 
     const memoComponent = memo(forwardRefComponent)
     memoComponent.displayName = displayName

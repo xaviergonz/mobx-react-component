@@ -194,17 +194,17 @@ it("statics works", () => {
     }
 
     class C extends MobxComponent<IProps2> {
+        static defaultProps = {
+            x: 5
+        }
+        static displayName = "My component"
+
         render() {
             const { props } = this
             return <div>{props.x}</div>
         }
     }
-    const TestComponent = mobxComponent(C, {
-        defaultProps: {
-            x: 5
-        },
-        displayName: "My component"
-    })
+    const TestComponent = mobxComponent(C)
     expect(TestComponent.displayName).toBe("My component")
 
     const { container, rerender } = render(<TestComponent />)
