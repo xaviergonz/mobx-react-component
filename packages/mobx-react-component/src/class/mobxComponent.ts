@@ -54,7 +54,7 @@ export interface IMobxComponentOptions<P> {
 export const mobxComponent = (
     options?: IMobxComponentOptions<any> // TODO: how to get P here?
 ) => <C extends new () => MobxComponent<any>>(clazz: C): C => {
-    return _mobxComponent(clazz as any) as any
+    return _mobxComponent(clazz as any, options || {}) as any
 }
 
 interface IInternalMobxComponent {
@@ -64,7 +64,7 @@ interface IInternalMobxComponent {
 function _mobxComponent<
     C extends React.ComponentClass<P> & { toObservablePropsMode?: ToObservableMode<P> },
     P
->(clazz: C, options?: IMobxComponentOptions<any>) {
+>(clazz: C, options: IMobxComponentOptions<any>) {
     const displayName = clazz.displayName || clazz.name
 
     const constructFn = () => {
@@ -100,7 +100,8 @@ function _mobxComponent<
         return { state, updateContexts, updateEffects }
     }
 
-    const toObservablePropsMode = (options && options.toObservablePropsMode) || "shallow"
+    const toObservablePropsMode =
+        options.toObservablePropsMode === undefined ? "shallow" : options.toObservablePropsMode
 
     const funcComponent = (props: any, ref: React.Ref<any>) => {
             const classInstance = useRef<ReturnType<typeof constructFn> | null>(null)
