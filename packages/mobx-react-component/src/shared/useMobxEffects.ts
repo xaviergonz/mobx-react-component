@@ -1,8 +1,9 @@
-import { useEffect, useRef } from "react"
+import { useLayoutEffect } from "react"
 import { MobxEffects } from "./MobxEffects"
 
 /**
- * Registers some mobx effects.
+ * Registers some mobx effects that will start once the component is mounted and
+ * get disposed once it is unmounted.
  *
  * ```ts
  * useMobxEffects(() => [
@@ -13,16 +14,14 @@ import { MobxEffects } from "./MobxEffects"
  * ```
  */
 export function useMobxEffects(effectsFn: () => MobxEffects): void {
-    const disposeEffects = useRef<(() => void) | null>(null)
-    if (!disposeEffects.current) {
-        let effects: MobxEffects | undefined = effectsFn()
-        disposeEffects.current = () => {
-            if (effects) {
+    useLayoutEffect(() => {
+        const effects = effectsFn()
+        if (effects) {
+            return () => {
                 effects.forEach(disposer => disposer())
-                effects = undefined
             }
+        } else {
+            return
         }
-    }
-
-    useEffect(() => disposeEffects.current!, [])
+    }, [])
 }
