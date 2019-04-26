@@ -17,6 +17,7 @@ type ReactComponentProps<T extends React.FC<any>> = T extends React.FC<infer P> 
 export function mobxObserver<T extends React.FC<any>>(
     baseComponent: T,
     options?: {
+        displayName?: string
         toObservablePropsMode?: ToObservableModeWithoutRef<ReactComponentProps<T>>
     }
 ): T & IMobxObserverComponent<ReactComponentProps<T>> {
@@ -24,7 +25,6 @@ export function mobxObserver<T extends React.FC<any>>(
         return baseComponent
     }
 
-    const baseComponentName = baseComponent.displayName || baseComponent.name
     const toObservablePropsMode = (options && options.toObservablePropsMode) || "shallow"
     if (toObservablePropsMode === "ref") {
         throw new Error(`'ref' is not a valid value for the toObservablePropsMode option`)
@@ -39,9 +39,13 @@ export function mobxObserver<T extends React.FC<any>>(
             return baseComponent(obsProps, ref)
         }, observerComponent.displayName)
     }
-    observerComponent.displayName = baseComponentName
 
     copyStaticProperties(baseComponent, observerComponent)
+
+    observerComponent.displayName =
+        (options ? options.displayName : undefined) ||
+        baseComponent.displayName ||
+        baseComponent.name
 
     return observerComponent as any
 }

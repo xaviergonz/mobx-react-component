@@ -147,9 +147,11 @@ function _mobxComponent<
 
         // as any to not destroy the types
     ;(funcComponent as any).propTypes = clazz.propTypes
+    funcComponent.displayName = `${displayName} (mobxComponent)`
     funcComponent.contextTypes = clazz.contextTypes
 
     const forwardRefComponent = forwardRef(funcComponent)
+    forwardRefComponent.displayName = `${displayName} (mobxComponent)`
     forwardRefComponent.defaultProps = clazz.defaultProps
 
     const memoComponent = memo(forwardRefComponent)

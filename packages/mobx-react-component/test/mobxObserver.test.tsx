@@ -571,7 +571,7 @@ it("should have the correct displayName", () => {
         return null
     })
 
-    expect((TestComponent as any).displayName).toBe("MyComponent")
+    expect(TestComponent.displayName).toBe("MyComponent")
 })
 
 // test("parent / childs render in the right order", done => {
