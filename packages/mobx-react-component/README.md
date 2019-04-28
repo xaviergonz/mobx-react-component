@@ -211,3 +211,9 @@ class MyComponent extends MobxComponent<{}> {
 // <MyComponent ref={ref}/>
 // ref.current.someMethod()
 ```
+
+If you are using SSR, then when using it do this:
+
+```tsx
+useMobxStaticRendering(true);
+```

@@ -1,4 +1,4 @@
-import { forwardRef, memo, ReactElement, useContext, useLayoutEffect, useRef } from "react"
+import { forwardRef, memo, ReactElement, useContext, useEffect, useRef } from "react"
 import { MobxEffects } from "../shared/MobxEffects"
 import { ToObservableMode } from "../shared/observableWrapper"
 import { setOriginalProps } from "../shared/originalProps"
@@ -31,7 +31,9 @@ export function injectContext<C extends React.Context<any>>(
     }
 }
 
-export abstract class MobxComponent<P extends {} = {}> implements React.Component<P> {
+// we use PropsWithChildren for typing compatibility with class components
+export abstract class MobxComponent<P extends {} = {}>
+    implements React.Component<React.PropsWithChildren<P>> {
     // just to keep TS happy for the fake implementation of React.Component
     context!: never
     setState!: never
@@ -39,8 +41,8 @@ export abstract class MobxComponent<P extends {} = {}> implements React.Componen
     state!: never
     refs!: never
 
-    readonly props!: P
-    readonly originalProps!: P
+    readonly props!: React.PropsWithChildren<P>
+    readonly originalProps!: React.PropsWithChildren<P>
 
     abstract render(): ReactElement | null
 
@@ -109,7 +111,7 @@ function _mobxComponent<
                 classInstance.current = constructFn()
             }
             const instance = classInstance.current!.state
-            useLayoutEffect(() => {
+            useEffect(() => {
                 if (ref) {
                     if (typeof ref === "function") {
                         ref(instance)

@@ -1,7 +1,7 @@
 import { ValidationMap, WeakValidationMap } from "react"
 import { ToObservableModeWithoutRef } from "../shared/observableWrapper"
 import { setOriginalProps } from "../shared/originalProps"
-import { isUsingStaticRendering } from "../shared/staticRendering"
+import { isUsingMobxStaticRendering } from "../shared/staticRendering"
 import { useMobxAsObservableSource } from "../shared/useMobxAsObservableSource"
 import { useMobxObserver } from "../shared/useMobxObserver"
 
@@ -21,7 +21,7 @@ export function mobxObserver<T extends React.FC<any>>(
         toObservablePropsMode?: ToObservableModeWithoutRef<ReactComponentProps<T>>
     }
 ): T & IMobxObserverComponent<ReactComponentProps<T>> {
-    if (isUsingStaticRendering()) {
+    if (isUsingMobxStaticRendering()) {
         return baseComponent
     }
 

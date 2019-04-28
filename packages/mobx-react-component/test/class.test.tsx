@@ -1,3 +1,4 @@
+import hoistNonReactStatics from "hoist-non-react-statics"
 import { action, computed, configure, observable, reaction, runInAction } from "mobx"
 import * as React from "react"
 import { act, cleanup, render } from "react-testing-library"
@@ -302,4 +303,29 @@ it("actions", () => {
 
     span = container.querySelector("span")!
     expect(span.textContent).toBe("2")
+})
+
+it("works inside a HOC", () => {
+    function hoc<T extends React.ComponentClass<P>, P>(WrappedComponent: T): T {
+        class HOC extends React.Component<P> {
+            render() {
+                return <WrappedComponent {...this.props as any} />
+            }
+        }
+
+        return hoistNonReactStatics(HOC, WrappedComponent) as any
+    }
+
+    @mobxComponent()
+    class TestComponent extends MobxComponent<{ x: number }> {
+        render() {
+            return <span>{this.props.x}</span>
+        }
+    }
+
+    const Wrapped = hoc(TestComponent)
+
+    const { container } = render(<Wrapped x={1} />)
+    const span = container.querySelector("span")!
+    expect(span.textContent).toBe("1")
 })
