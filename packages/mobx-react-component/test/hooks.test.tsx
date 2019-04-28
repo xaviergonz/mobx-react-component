@@ -66,22 +66,28 @@ it("with props and effects", () => {
                         obsChanges.push("obsProps.y changed")
                     }
                 ),
-                reaction(
-                    () => props.obj,
-                    () => {
-                        obsChanges.push("obsProps.obj changed")
-                    }
-                ),
-                reaction(
-                    () => props.obj.x,
-                    () => {
-                        obsChanges.push("obsProps.obj.x changed")
-                    }
-                ),
                 () => {
                     disposerCalled++
                 }
             ])
+
+            useMobxEffects(
+                () => [
+                    reaction(
+                        () => props.obj,
+                        () => {
+                            obsChanges.push("obsProps.obj changed")
+                        }
+                    ),
+                    reaction(
+                        () => props.obj.x,
+                        () => {
+                            obsChanges.push("obsProps.obj.x changed")
+                        }
+                    )
+                ],
+                { runBeforeMount: true }
+            )
 
             renders++
             return (
