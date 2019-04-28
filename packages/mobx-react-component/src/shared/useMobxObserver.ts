@@ -1,6 +1,6 @@
 import { getDependencyTree, Reaction } from "mobx"
 import { useDebugValue, useEffect, useRef, useState } from "react"
-import { isUsingStaticRendering } from "./staticRendering"
+import { isUsingMobxStaticRendering } from "./staticRendering"
 
 let forceUpdateEnabled = true
 
@@ -18,7 +18,7 @@ export function withoutForceUpdate<F extends (...args: any[]) => any>(fn: F): F 
 }
 
 export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "observed"): T {
-    if (isUsingStaticRendering()) {
+    if (isUsingMobxStaticRendering()) {
         return fn()
     }
 

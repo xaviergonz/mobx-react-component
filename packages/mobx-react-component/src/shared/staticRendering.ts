@@ -1,9 +1,9 @@
 let globalIsUsingStaticRendering = false
 
-export function useStaticRendering(enable: boolean) {
+export function useMobxStaticRendering(enable: boolean) {
     globalIsUsingStaticRendering = enable
 }
 
-export function isUsingStaticRendering(): boolean {
+export function isUsingMobxStaticRendering(): boolean {
     return globalIsUsingStaticRendering
 }
