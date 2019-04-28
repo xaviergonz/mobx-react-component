@@ -1,4 +1,4 @@
-import { forwardRef, memo, ReactElement, useContext, useLayoutEffect, useRef } from "react"
+import { forwardRef, memo, ReactElement, useContext, useEffect, useRef } from "react"
 import { MobxEffects } from "../shared/MobxEffects"
 import { ToObservableMode } from "../shared/observableWrapper"
 import { setOriginalProps } from "../shared/originalProps"
@@ -109,7 +109,7 @@ function _mobxComponent<
                 classInstance.current = constructFn()
             }
             const instance = classInstance.current!.state
-            useLayoutEffect(() => {
+            useEffect(() => {
                 if (ref) {
                     if (typeof ref === "function") {
                         ref(instance)
