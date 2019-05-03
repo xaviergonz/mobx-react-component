@@ -51,6 +51,7 @@ export abstract class MobxComponent<P extends {} = {}>
 
 export interface IMobxComponentOptions<P> {
     toObservablePropsMode?: ToObservableMode<P>
+    refEmulation?: boolean
 }
 
 export const mobxComponent = (
@@ -63,10 +64,11 @@ interface IInternalMobxComponent {
     [contextsToInjectSymbol]: IContextToInject[]
 }
 
-function _mobxComponent<
-    C extends React.ComponentClass<P> & { toObservablePropsMode?: ToObservableMode<P> },
-    P
->(clazz: C, options: IMobxComponentOptions<any>) {
+function _mobxComponent<C extends React.ComponentClass<P>, P>(
+    clazz: C,
+    options: IMobxComponentOptions<any>
+) {
+    const refEmulation = options.refEmulation !== undefined ? options.refEmulation : true
     const displayName = clazz.displayName || clazz.name
 
     const constructFn = () => {
@@ -106,11 +108,13 @@ function _mobxComponent<
         options.toObservablePropsMode === undefined ? "shallow" : options.toObservablePropsMode
 
     const funcComponent = (props: any, ref: React.Ref<any>) => {
-            const classInstance = useRef<ReturnType<typeof constructFn> | null>(null)
-            if (!classInstance.current) {
-                classInstance.current = constructFn()
-            }
-            const instance = classInstance.current!.state
+        const classInstance = useRef<ReturnType<typeof constructFn> | null>(null)
+        if (!classInstance.current) {
+            classInstance.current = constructFn()
+        }
+        const instance = classInstance.current!.state
+
+        if (refEmulation) {
             useEffect(() => {
                 if (ref) {
                     if (typeof ref === "function") {
@@ -127,50 +131,60 @@ function _mobxComponent<
                 }
                 return undefined
             }, [ref, instance])
-
-            const { state, updateContexts, updateEffects } = classInstance.current!
-
-            usePropertyInjection(state, "props", props as any, toObservablePropsMode)
-            setOriginalProps(state.props, props)
-            ;(state as any).originalProps = props
-
-            if (updateContexts) {
-                updateContexts()
-            }
-
-            if (updateEffects) {
-                updateEffects()
-            }
-
-            return useMobxObserver(() => {
-                return state.render()
-            }, displayName)
         }
 
-        // as any to not destroy the types
-    ;(funcComponent as any).propTypes = clazz.propTypes
-    funcComponent.displayName = `${displayName} (mobxComponent)`
-    funcComponent.contextTypes = clazz.contextTypes
+        const { state, updateContexts, updateEffects } = classInstance.current!
 
-    const forwardRefComponent = forwardRef(funcComponent)
-    forwardRefComponent.displayName = `${displayName} (mobxComponent)`
-    forwardRefComponent.defaultProps = clazz.defaultProps
+        usePropertyInjection(state, "props", props as any, toObservablePropsMode)
+        setOriginalProps(state.props, props)
+        ;(state as any).originalProps = props
 
-    const memoComponent = memo(forwardRefComponent)
-    memoComponent.displayName = displayName
-
-    // make sure instanceof clazz keeps working
-    const originalHasInstance = memoComponent[Symbol.hasInstance]
-    memoComponent[Symbol.hasInstance] = function(this: any, instance) {
-        if (originalHasInstance) {
-            const result = originalHasInstance.apply(memoComponent, arguments as any)
-            if (result) {
-                return true
-            }
+        if (updateContexts) {
+            updateContexts()
         }
 
-        return instance instanceof clazz
+        if (updateEffects) {
+            updateEffects()
+        }
+
+        return useMobxObserver(() => {
+            return state.render()
+        }, displayName)
     }
 
-    return memoComponent
+    funcComponent.displayName = `${displayName} (mobxComponent)`
+    funcComponent.contextTypes = clazz.contextTypes
+    // as any to not destroy the types
+    ;(funcComponent as any).propTypes = clazz.propTypes
+
+    if (!refEmulation) {
+        funcComponent.defaultProps = clazz.defaultProps
+
+        const memoComponent = memo(funcComponent)
+        memoComponent.displayName = displayName
+
+        return memoComponent
+    } else {
+        const forwardRefComponent = forwardRef(funcComponent)
+        forwardRefComponent.displayName = `${displayName} (mobxComponent)`
+        ;(forwardRefComponent as any).defaultProps = clazz.defaultProps
+
+        const memoComponent = memo(forwardRefComponent)
+        memoComponent.displayName = displayName
+
+        // make sure instanceof clazz keeps working for refs
+        const originalHasInstance = memoComponent[Symbol.hasInstance]
+        memoComponent[Symbol.hasInstance] = function(this: any, instance) {
+            if (originalHasInstance) {
+                const result = originalHasInstance.apply(memoComponent, arguments as any)
+                if (result) {
+                    return true
+                }
+            }
+
+            return instance instanceof clazz
+        }
+
+        return memoComponent
+    }
 }

@@ -1,3 +1,9 @@
+# mobx-react-component changelog
+
+## v0.52.0
+
+- Added a `refEmulation` option to `@mobxComponent` to be able to turn ref emulation via forwardRef off.
+
 ## v0.51.0
 
 - Fixed SSR warnings about useLayoutEffect

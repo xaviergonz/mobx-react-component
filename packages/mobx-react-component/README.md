@@ -212,6 +212,9 @@ class MyComponent extends MobxComponent<{}> {
 // ref.current.someMethod()
 ```
 
+If for some reason you want to turn off ref emulation (for example some incompability or a slight speed bump) you
+can do so using ```@mobxComponent({refEmulation: false})```
+
 If you are using SSR, then when using it do this:
 
 ```tsx
