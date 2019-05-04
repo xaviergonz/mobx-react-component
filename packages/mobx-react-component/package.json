@@ -21,7 +21,7 @@
         "coverage": "jest --coverage",
         "prebuild": "rimraf dist && yarn copydocs",
         "build": "node build-rollup.js",
-        "copydocs": "shx cp *.md ../.."
+        "copydocs": "shx cp ../../*.md ."
     },
     "author": "Javier González Garcés",
     "license": "MIT",
