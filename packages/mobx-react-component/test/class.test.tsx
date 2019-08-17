@@ -1,7 +1,7 @@
+import { act, cleanup, render } from "@testing-library/react"
 import hoistNonReactStatics from "hoist-non-react-statics"
 import { action, computed, configure, observable, reaction, runInAction } from "mobx"
 import * as React from "react"
-import { act, cleanup, render } from "react-testing-library"
 import { injectContext, MobxComponent, mobxComponent } from "../src"
 import { changesList } from "./utils"
 
@@ -309,7 +309,7 @@ it("works inside a HOC", () => {
     function hoc<T extends React.ComponentClass<P>, P>(WrappedComponent: T): T {
         class HOC extends React.Component<P> {
             render() {
-                return <WrappedComponent {...this.props as any} />
+                return <WrappedComponent {...(this.props as any)} />
             }
         }
 

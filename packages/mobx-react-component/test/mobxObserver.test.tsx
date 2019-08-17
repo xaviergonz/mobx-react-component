@@ -1,7 +1,7 @@
+import { act, cleanup, fireEvent, render } from "@testing-library/react"
 import mockConsole from "jest-mock-console"
 import * as mobx from "mobx"
 import * as React from "react"
-import { act, cleanup, fireEvent, render } from "react-testing-library"
 import { mobxObserver, useMobxStaticRendering } from "../src"
 import { useMobxObserver } from "../src/shared/useMobxObserver"
 
@@ -17,12 +17,12 @@ function runTestSuite(mode: "observer" | "useObserver") {
         if (mode === "observer") {
             return React.memo(mobxObserver(component))
         } else {
-            const c = (props: P) => {
+            const C = (props: P) => {
                 return useMobxObserver(() => {
                     return component(props)
                 })
             }
-            return forceMemo ? React.memo(c) : c
+            return forceMemo ? React.memo(C) : C
         }
     }
 
@@ -172,7 +172,7 @@ function runTestSuite(mode: "observer" | "useObserver") {
     })
 
     describe("does not keep views alive when using static rendering", () => {
-        const execute = () => {
+        const Execute = () => {
             useMobxStaticRendering(true)
             let renderCount = 0
             const data = mobx.observable({
@@ -192,13 +192,13 @@ function runTestSuite(mode: "observer" | "useObserver") {
         })
 
         test("init state is correct", () => {
-            const { getRenderCount, getByText } = execute()
+            const { getRenderCount, getByText } = Execute()
             expect(getRenderCount()).toBe(1)
             expect(getByText("hi")).toBeTruthy()
         })
 
         test("no re-rendering on static rendering", () => {
-            const { getRenderCount, getByText, data } = execute()
+            const { getRenderCount, getByText, data } = Execute()
             act(() => {
                 data.z = "hello"
             })
@@ -393,8 +393,7 @@ function runTestSuite(mode: "observer" | "useObserver") {
             }, true)
             const Parent = obsComponent(() => {
                 renderings.parent++
-                // tslint:disable-next-line no-unused-expression
-                odata.y /// depend
+                odata.y // eslint-disable-line no-unused-expressions
                 return <Child data={data} />
             }, true)
             return { ...render(<Parent />), renderings, odata }
@@ -560,7 +559,7 @@ it("should hoist known statics only", () => {
     expect(wrapped.displayName).toBe("MyHipsterComponent")
     expect((wrapped as any).randomStaticThing).toEqual(3)
     expect((wrapped as any).defaultProps).toEqual({ x: 3 })
-    expect((wrapped as any).propTypes).toEqual({ x: isNumber })
+    expect((wrapped as any).propTypes).toEqual({ x: isNumber }) // eslint-disable-line react/forbid-foreign-prop-types
     expect((wrappedMemo as any).type).toBeInstanceOf(Function) // And not "Nope!"; this is the wrapped component, the property is introduced by memo
     expect((wrappedMemo as any).compare).toBe(null) // another memo field
     expect((wrapped as any).render).toBe(undefined)

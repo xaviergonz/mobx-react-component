@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { MobxEffects } from "./MobxEffects"
 
 /**
@@ -25,29 +25,36 @@ export function useMobxEffects(
         ...options
     }
 
-    if (realOpts.runBeforeMount) {
-        const effects = useRef<MobxEffects | null>(null)
-        if (!effects.current) {
-            effects.current = effectsFn()
-        }
+    const memoEffectsFn = useCallback(effectsFn, [])
+    const runBeforeMount = useRef(realOpts.runBeforeMount)
+    if (runBeforeMount.current !== realOpts.runBeforeMount) {
+        throw new Error("runBeforeMount option cannot be changed in the lifetime of the component")
+    }
+
+    // ok to run them conditionally since the option won't change in the lifetime of the component
+    /* eslint-disable react-hooks/rules-of-hooks */
+
+    if (runBeforeMount.current) {
+        const [effects] = useState<MobxEffects>(memoEffectsFn)
         useEffect(() => {
-            const disposers = effects.current
-            if (!disposers) {
-                return
-            }
-            return () => {
-                disposers.forEach(disposer => disposer())
-            }
-        }, [effects, effects.current])
-    } else {
-        useEffect(() => {
-            const effects = effectsFn()
             if (!effects) {
                 return
             }
             return () => {
                 effects.forEach(disposer => disposer())
             }
-        }, [])
+        }, [effects])
+    } else {
+        useEffect(() => {
+            const effects = memoEffectsFn()
+            if (!effects) {
+                return
+            }
+            return () => {
+                effects.forEach(disposer => disposer())
+            }
+        }, [memoEffectsFn])
     }
+
+    /* eslint-enable react-hooks/rules-of-hooks */
 }

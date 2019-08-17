@@ -18,9 +18,15 @@ export function withoutForceUpdate<F extends (...args: any[]) => any>(fn: F): F 
 }
 
 export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "observed"): T {
+    if (typeof fn !== "function") {
+        return fn // for ObserverComponent
+    }
     if (isUsingMobxStaticRendering()) {
         return fn()
     }
+
+    /* eslint-disable react-hooks/rules-of-hooks */
+    // it is ok to call them only when static rendering is not being used
 
     const [, setTick] = useState(0)
 
@@ -63,6 +69,8 @@ export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "obs
         throw exception // re-throw any exceptions catched during rendering
     }
     return rendering
+
+    /* eslint-enable react-hooks/rules-of-hooks */
 }
 
 class RoundRobinReaction {

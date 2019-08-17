@@ -1,7 +1,7 @@
+import { act, cleanup, render } from "@testing-library/react"
 import { configure, observable, reaction, runInAction } from "mobx"
 import * as React from "react"
 import { memo } from "react"
-import { act, cleanup, render } from "react-testing-library"
 import {
     getOriginalProps,
     mobxObserver,

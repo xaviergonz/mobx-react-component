@@ -6,19 +6,16 @@ interface IObserverProps {
     render?(): ReactElement<any>
 }
 
-const observerWrapper = ({ children, render }: IObserverProps) => {
+const ObserverWrapper = ({ children, render }: IObserverProps) => {
     const component = children || render
-    if (typeof component !== "function") {
-        return null
-    }
-    return useMobxObserver(component)
+    return useMobxObserver(component!)
 }
-observerWrapper.propTypes = {
+ObserverWrapper.propTypes = {
     children: ObserverPropsCheck,
     render: ObserverPropsCheck
 }
 
-const Observer = memo(observerWrapper)
+const Observer = memo(ObserverWrapper)
 Observer.displayName = "Observer"
 
 export { Observer }

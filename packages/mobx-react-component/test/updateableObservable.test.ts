@@ -17,12 +17,10 @@ configure({
             expect(isObservable(u.getBoxed())).toBe(true)
         }
 
-        {
-            // plain values
-            check(10)
-            check(11)
-            check("str")
-        }
+        // plain values
+        check(10)
+        check(11)
+        check("str")
 
         {
             // simple objects

@@ -26,28 +26,28 @@ export function mobxObserver<T extends React.FC<any>>(
     }
 
     const toObservablePropsMode = (options && options.toObservablePropsMode) || "shallow"
-    if (toObservablePropsMode === "ref") {
+    if ((toObservablePropsMode as any) === "ref") {
         throw new Error(`'ref' is not a valid value for the toObservablePropsMode option`)
     }
 
-    const observerComponent = (props: any, ref: any) => {
+    const ObserverComponent = (props: any, ref: any) => {
         // turn props into a shallow observable object
         const obsProps = useMobxAsObservableSource(props, toObservablePropsMode)()
         setOriginalProps(obsProps, props)
 
         return useMobxObserver(() => {
             return baseComponent(obsProps, ref)
-        }, observerComponent.displayName)
+        }, ObserverComponent.displayName)
     }
 
-    copyStaticProperties(baseComponent, observerComponent)
+    copyStaticProperties(baseComponent, ObserverComponent)
 
-    observerComponent.displayName =
+    ObserverComponent.displayName =
         (options ? options.displayName : undefined) ||
         baseComponent.displayName ||
         baseComponent.name
 
-    return observerComponent as any
+    return ObserverComponent as any
 }
 
 // based on https://github.com/mridgway/hoist-non-react-statics/blob/master/src/index.js
