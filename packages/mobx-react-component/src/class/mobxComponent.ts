@@ -32,8 +32,7 @@ export function injectContext<C extends React.Context<any>>(
 }
 
 // we use PropsWithChildren for typing compatibility with class components
-export abstract class MobxComponent<P extends {} = {}>
-    implements React.Component<React.PropsWithChildren<P>> {
+export abstract class MobxComponent<P = {}> implements React.Component<P> {
     // just to keep TS happy for the fake implementation of React.Component
     context!: never
     setState!: never
@@ -41,12 +40,28 @@ export abstract class MobxComponent<P extends {} = {}>
     state!: never
     refs!: never
 
-    readonly props!: React.PropsWithChildren<P>
-    readonly originalProps!: React.PropsWithChildren<P>
+    readonly props!: React.Component<P>["props"]
+    readonly originalProps!: React.Component<P>["props"]
 
     abstract render(): ReactElement | null
 
     getEffects?(): MobxEffects
+
+    // disable some non-supported features
+    static contextType?: never
+    componentDidMount?: never
+    shouldComponentUpdate?: never
+    componentWillUnmount?: never
+    componentDidCatch?: never
+    getDerivedStateFromProps?: never
+    getDerivedStateFromError?: never
+    getSnapshotBeforeUpdate?: never
+    componentDidUpdate?: never
+    componentWillMount?: never
+    componentWillReceiveProps?: never
+    UNSAFE_componentWillReceiveProps?: never
+    componentWillUpdate?: never
+    UNSAFE_componentWillUpdate?: never
 }
 
 export interface IMobxComponentOptions<P> {

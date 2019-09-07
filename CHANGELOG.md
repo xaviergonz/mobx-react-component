@@ -1,5 +1,9 @@
 # mobx-react-component changelog
 
+## v1.0.1
+
+-   Fix some typings.
+
 ## v1.0.0
 
 -   Update some dev dependencies, up version to 1.0.0
