@@ -1,5 +1,9 @@
 # mobx-react-component changelog
 
+## v1.1.0
+
+-   Improved support for strict and concurrent mode.
+
 ## v1.0.1
 
 -   Fix some typings.

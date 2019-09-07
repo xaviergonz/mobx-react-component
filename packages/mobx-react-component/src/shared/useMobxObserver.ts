@@ -1,8 +1,17 @@
 import { getDependencyTree, Reaction } from "mobx"
-import { useDebugValue, useEffect, useRef, useState } from "react"
+import { useCallback, useDebugValue, useEffect, useRef, useState } from "react"
+import {
+    createTrackingData,
+    IReactionTracking,
+    recordReactionAsCommitted,
+    scheduleCleanupOfReactionIfLeaked
+} from "./reactionCleanupTracking"
+import { RoundRobinReaction } from "./RoundRobinReaction"
 import { isUsingMobxStaticRendering } from "./staticRendering"
 
 let forceUpdateEnabled = true
+
+const isForceUpdateEnabled = () => forceUpdateEnabled
 
 export function withoutForceUpdate<F extends (...args: any[]) => any>(fn: F): F {
     const newFn = function(this: any) {
@@ -17,6 +26,17 @@ export function withoutForceUpdate<F extends (...args: any[]) => any>(fn: F): F 
     return newFn as F
 }
 
+function observerComponentNameFor(baseComponentName: string) {
+    return `mobxObserver(${baseComponentName})`
+}
+
+function useForceUpdate() {
+    const [, setTick] = useState(0)
+    return useCallback(() => {
+        setTick(t => t + 1)
+    }, [])
+}
+
 export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "observed"): T {
     if (typeof fn !== "function") {
         return fn // for ObserverComponent
@@ -28,7 +48,7 @@ export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "obs
     /* eslint-disable react-hooks/rules-of-hooks */
     // it is ok to call them only when static rendering is not being used
 
-    const [, setTick] = useState(0)
+    const forceUpdate = useForceUpdate()
 
     // render the original component, but have the
     // reaction track the observables, so that rendering
@@ -38,23 +58,86 @@ export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "obs
     // this is different from how mobx-react-lite does, where it uses a single reaction
     // however we will reset the old reaction after this one is done tracking so any
     // cached computeds won't die early
-    const reactions = useRef<RoundRobinReaction | null>(null)
-    if (!reactions.current) {
-        reactions.current = new RoundRobinReaction(`mobxObserver(${baseComponentName})`, () =>
-            setTick(t => t + 1)
+
+    // StrictMode/ConcurrentMode/Suspense may mean that our component is
+    // rendered and abandoned multiple times, so we need to track leaked
+    // Reactions.
+    const reactionTrackingRef = useRef<IReactionTracking | null>(null)
+
+    if (!reactionTrackingRef.current) {
+        // First render for this component (or first time since a previous
+        // reaction from an abandoned render was disposed).
+
+        const newReaction = new RoundRobinReaction(
+            observerComponentNameFor(baseComponentName),
+            () => {
+                // Observable has changed, meaning we want to re-render
+                // BUT if we're a component that hasn't yet got to the useEffect()
+                // stage, we might be a component that _started_ to render, but
+                // got dropped, and we don't want to make state changes then.
+                // (It triggers warnings in StrictMode, for a start.)
+                if (trackingData.mounted) {
+                    // We have reached useEffect(), so we're mounted, and can trigger an update
+                    forceUpdate()
+                } else {
+                    // We haven't yet reached useEffect(), so we'll need to trigger a re-render
+                    // when (and if) useEffect() arrives.  The easiest way to do that is just to
+                    // drop our current reaction and allow useEffect() to recreate it.
+                    newReaction.dispose()
+                    reactionTrackingRef.current = null
+                    recordReactionAsCommitted(reactionTrackingRef)
+                }
+            },
+            isForceUpdateEnabled
         )
+
+        const trackingData = createTrackingData(newReaction)
+        reactionTrackingRef.current = trackingData
+        scheduleCleanupOfReactionIfLeaked(reactionTrackingRef)
     }
 
-    useEffect(
-        () => () => {
-            reactions.current!.dispose()
-        },
-        []
-    )
+    const { reaction } = reactionTrackingRef.current!
 
+    useEffect(() => {
+        // Called on first mount only
+        recordReactionAsCommitted(reactionTrackingRef)
+
+        if (reactionTrackingRef.current) {
+            // Great. We've already got our reaction from our render;
+            // all we need to do is to record that it's now mounted,
+            // to allow future observable changes to trigger re-renders
+            reactionTrackingRef.current.mounted = true
+        } else {
+            // The reaction we set up in our render has been disposed.
+            // This is either due to bad timings of renderings, e.g. our
+            // component was paused for a _very_ long time, and our
+            // reaction got cleaned up, or we got a observable change
+            // between render and useEffect
+
+            // Re-create the reaction
+            reactionTrackingRef.current = {
+                reaction: new RoundRobinReaction(
+                    observerComponentNameFor(baseComponentName),
+                    () => {
+                        // We've definitely already been mounted at this point
+                        forceUpdate()
+                    },
+                    isForceUpdateEnabled
+                ),
+                cleanAt: Infinity
+            }
+            forceUpdate()
+        }
+
+        return () => reactionTrackingRef.current!.reaction.dispose()
+    }, [baseComponentName, forceUpdate])
+
+    // render the original component, but have the
+    // reaction track the observables, so that rendering
+    // can be invalidated (see above) once a dependency changes
     let rendering!: T
     let exception
-    reactions.current!.track(() => {
+    reaction.track(() => {
         try {
             rendering = fn()
         } catch (e) {
@@ -62,76 +145,14 @@ export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "obs
         }
     })
 
-    useDebugValue(reactions.current!.currentReaction, printDebugValue)
+    useDebugValue(reaction.currentReaction, printDebugValue)
 
     if (exception) {
-        reactions.current!.dispose()
         throw exception // re-throw any exceptions catched during rendering
     }
     return rendering
 
     /* eslint-enable react-hooks/rules-of-hooks */
-}
-
-class RoundRobinReaction {
-    private reactions?: [Reaction, Reaction]
-    private current: 0 | 1 = 1
-
-    get currentReaction() {
-        return this.reactions ? this.reactions[this.current] : undefined
-    }
-
-    constructor(private readonly reactionName: string, private readonly run: () => any) {}
-
-    private createReactionsIfNeeded() {
-        if (this.reactions) {
-            return
-        }
-
-        const run = this.run
-
-        const reaction1 = new Reaction(this.reactionName, () => {
-            if (this.current === 0 && forceUpdateEnabled) {
-                run()
-            }
-        })
-        const reaction2 = new Reaction(this.reactionName, () => {
-            if (this.current === 1 && forceUpdateEnabled) {
-                run()
-            }
-        })
-
-        this.reactions = [reaction1, reaction2]
-    }
-
-    track<T>(fn: () => T): T {
-        this.createReactionsIfNeeded()
-
-        const oldReaction = this.currentReaction!
-        this.current = ((this.current + 1) % 2) as 0 | 1 // swap current reaction
-        const reaction = this.currentReaction!
-
-        let result!: T
-        reaction.track(() => {
-            result = fn()
-        })
-
-        // clear dependencies of old reaction
-        oldReaction.track(emptyFn)
-
-        return result
-    }
-
-    dispose() {
-        if (this.reactions) {
-            this.reactions.forEach(r => r.dispose())
-            this.reactions = undefined
-        }
-    }
-}
-
-const emptyFn = () => {
-    // do nothing
 }
 
 function printDebugValue(v: Reaction | undefined) {
