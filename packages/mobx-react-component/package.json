@@ -42,7 +42,7 @@
         "test": "tsdx test",
         "prettier": "prettier --write \"**/*.js\" \"**/*.ts\" \"**/*.tsx\"",
         "lint": "eslint \"src/**/*.ts\" \"test/**/*.ts\" \"test/**/*.tsx\"",
-        "travis": "yarn build && yarn lint && yarn test && yarn test -i --coverage"
+        "travis": "yarn build && yarn lint && yarn test -i --coverage"
     },
     "peerDependencies": {
         "mobx": "^4.0.0 || ^5.0.0",
