@@ -6,5 +6,10 @@
     "workspaces": [
         "packages/mobx-react-component",
         "packages/sample-app"
-    ]
+    ],
+    "devDependencies": {
+        "prettier": "^1.16.4",
+        "coveralls": "^3.0.3",
+        "eslint": "^6.1.0"
+    }
 }

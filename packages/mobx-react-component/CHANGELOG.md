@@ -1,9 +1,5 @@
 # mobx-react-component changelog
 
-## v1.1.1
-
--   Switched to TSDX.
-
 ## v1.1.0
 
 -   Improved support for strict and concurrent mode.
