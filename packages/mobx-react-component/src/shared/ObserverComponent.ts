@@ -24,7 +24,7 @@ function ObserverPropsCheck(
     props: { [k: string]: any },
     key: string,
     componentName: string,
-    location: any,
+    _location: any,
     propFullName: string
 ) {
     const extraKey = key === "children" ? "render" : "children"

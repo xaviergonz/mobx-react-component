@@ -186,7 +186,7 @@ it("without props / effects", () => {
 it("ref forwarding works", () => {
     const TestComponent = memo(
         React.forwardRef(
-            mobxObserver((props: {}, ref: React.Ref<HTMLInputElement>) => {
+            mobxObserver((_props: {}, ref: React.Ref<HTMLInputElement>) => {
                 return <input ref={ref} />
             })
         )

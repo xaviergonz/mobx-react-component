@@ -431,7 +431,7 @@ function runTestSuite(mode: "observer" | "useObserver") {
                     hasError: false
                 }
 
-                componentDidCatch(error: any, info: any) {
+                componentDidCatch(error: any) {
                     errorsSeen.push("" + error)
                 }
 

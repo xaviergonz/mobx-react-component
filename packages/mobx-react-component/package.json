@@ -1,68 +1,7 @@
 {
     "name": "mobx-react-component",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "description": "Write React functional components (with hooks) + MobX for local state in a fancy way",
-    "main": "dist/index.js",
-    "jsnext:main": "dist/index.module.js",
-    "module": "dist/index.module.js",
-    "react-native": "dist/native.js",
-    "typings": "dist/index.d.ts",
-    "types": "dist/index.d.ts",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/xaviergonz/mobx-react-component.git"
-    },
-    "scripts": {
-        "prettier": "prettier --write \"**/*.js\" \"**/*.ts\"",
-        "lint": "eslint \"src/**/*.ts\" \"test/**/*.ts\" \"test/**/*.tsx\"",
-        "validate": "tsc --noEmit",
-        "test": "jest --watch",
-        "test:travis": "yarn validate && yarn lint && yarn coverage",
-        "coverage": "jest --coverage",
-        "prebuild": "rimraf dist && yarn copydocs",
-        "build": "node build-rollup.js",
-        "copydocs": "shx cp ../../*.md ."
-    },
-    "author": "Javier González Garcés",
-    "license": "MIT",
-    "bugs": {
-        "url": "https://github.com/xaviergonz/mobx-react-component/issues"
-    },
-    "peerDependencies": {
-        "mobx": "^4.0.0 || ^5.0.0",
-        "react": "^16.8.0",
-        "react-dom": "^16.8.0"
-    },
-    "devDependencies": {
-        "@testing-library/react": "^9.1.3",
-        "@types/hoist-non-react-statics": "^3.3.1",
-        "@types/jest": "^24.0.11",
-        "@types/node": "^12.0.0",
-        "@types/react": "^16.8.10",
-        "@types/react-dom": "^16.8.3",
-        "coveralls": "^3.0.3",
-        "eslint": "^6.1.0",
-        "eslint-config-react-app": "^5.0.1",
-        "hoist-non-react-statics": "^3.3.0",
-        "husky": "^3.0.4",
-        "jest": "^24.5.0",
-        "jest-mock-console": "^1.0.0",
-        "mobx": "^5.9.4",
-        "prettier": "^1.16.4",
-        "react": "^16.8.6",
-        "react-dom": "^16.8.6",
-        "rimraf": "^3.0.0",
-        "rollup": "^1.7.4",
-        "rollup-plugin-alias": "^2.0.0",
-        "rollup-plugin-commonjs": "^10.0.2",
-        "rollup-plugin-node-resolve": "^5.2.0",
-        "rollup-plugin-replace": "^2.1.1",
-        "rollup-plugin-terser": "^5.1.1",
-        "rollup-plugin-typescript2": "^0.24.0",
-        "shx": "^0.3.2",
-        "ts-jest": "^24.0.1",
-        "typescript": "^3.4.1"
-    },
     "keywords": [
         "mobx",
         "observable",
@@ -74,12 +13,22 @@
         "observer",
         "mobxObserver"
     ],
-    "husky": {
-        "hooks": {
-            "pre-commit": "yarn validate && yarn lint & yarn copydocs"
-        }
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/xaviergonz/mobx-react-component.git"
     },
-    "dependencies": {},
+    "bugs": {
+        "url": "https://github.com/xaviergonz/mobx-react-component/issues"
+    },
+    "license": "MIT",
+    "author": "Javier González Garcés",
+    "main": "dist/index.js",
+    "typings": "dist/index.d.ts",
+    "types": "dist/index.d.ts",
+    "jsnext:main": "dist/mobxreactcomponent.esm.js",
+    "module": "dist/mobxreactcomponent.esm.js",
+    "unpkg": "dist/mobxreactcomponent.umd.production.min.js",
+    "react-native": "dist/mobxreactcomponent.esm.js",
     "files": [
         "package.json",
         "dist",
@@ -87,7 +36,36 @@
         "CHANGELOG.md",
         "LICENSE"
     ],
-    "eslintConfig": {
-        "extends": "react-app"
+    "scripts": {
+        "start": "tsdx watch",
+        "build": "shx cp ../../README.md . && shx cp ../../LICENSE . && tsdx build --name mobxReactComponent --format=cjs,esm,umd",
+        "test": "tsdx test",
+        "prettier": "prettier --write \"**/*.js\" \"**/*.ts\" \"**/*.tsx\"",
+        "lint": "eslint \"src/**/*.ts\" \"test/**/*.ts\" \"test/**/*.tsx\"",
+        "travis": "yarn build && yarn lint && yarn test -i --coverage"
+    },
+    "peerDependencies": {
+        "mobx": "^4.0.0 || ^5.0.0",
+        "react": "^16.8.0",
+        "react-dom": "^16.8.0"
+    },
+    "devDependencies": {
+        "@testing-library/react": "^9.1.3",
+        "@types/hoist-non-react-statics": "^3.3.1",
+        "@types/jest": "^24.0.11",
+        "@types/react": "^16.8.10",
+        "@types/react-dom": "^16.8.3",
+        "hoist-non-react-statics": "^3.3.0",
+        "jest-mock-console": "^1.0.0",
+        "mobx": "^5.9.4",
+        "react": "^16.8.6",
+        "react-dom": "^16.8.6",
+        "shx": "^0.3.2",
+        "tsdx": "^0.9.1",
+        "typescript": "^3.4.1"
+    },
+    "dependencies": {},
+    "directories": {
+        "test": "test"
     }
 }
