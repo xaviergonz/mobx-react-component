@@ -2,6 +2,9 @@ import { act, render } from "@testing-library/react"
 import * as mobx from "mobx"
 import * as React from "react"
 import { mobxObserver } from "../src"
+import { globalSetup } from "./utils"
+
+globalSetup()
 
 test("mobx issue 50", done => {
     const foo = {

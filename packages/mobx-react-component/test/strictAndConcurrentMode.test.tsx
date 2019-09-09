@@ -10,6 +10,9 @@ import {
     forceCleanupTimerToRunNowForTests,
     resetCleanupScheduleForTests
 } from "../src/shared/reactionCleanupTracking"
+import { globalSetup } from "./utils"
+
+globalSetup()
 
 afterEach(cleanup)
 

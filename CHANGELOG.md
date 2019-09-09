@@ -1,5 +1,9 @@
 # mobx-react-component changelog
 
+## 1.2.0
+
+-   Added `optimizeScheduler`. Make sure to read the README.md on how to use it and use it.
+
 ## v1.1.1
 
 -   Switched to TSDX.

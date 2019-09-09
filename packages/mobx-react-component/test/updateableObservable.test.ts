@@ -1,5 +1,8 @@
 import { configure, isObservable, isObservableMap, isObservableSet, observable } from "mobx"
 import { updateableObservable } from "../src/shared/updateableObservable"
+import { globalSetup } from "./utils"
+
+globalSetup()
 
 configure({
     enforceActions: "always"

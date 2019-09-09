@@ -9,7 +9,9 @@ import {
     useMobxEffects,
     useMobxStore
 } from "../src"
-import { changesList } from "./utils"
+import { changesList, globalSetup } from "./utils"
+
+globalSetup()
 
 configure({
     enforceActions: "always"

@@ -3,6 +3,9 @@ import mockConsole from "jest-mock-console"
 import * as mobx from "mobx"
 import * as React from "react"
 import { Observer } from "../src"
+import { globalSetup } from "./utils"
+
+globalSetup()
 
 afterEach(cleanup)
 

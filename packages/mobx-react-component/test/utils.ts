@@ -1,3 +1,6 @@
+import { unstable_batchedUpdates } from "react-dom"
+import { optimizeScheduler } from "../src"
+
 export function changesList(): [string[], (newChanges: string[]) => void] {
     const changes: string[] = []
     function expectChangesToBe(newChanges: string[]) {
@@ -8,4 +11,8 @@ export function changesList(): [string[], (newChanges: string[]) => void] {
         }
     }
     return [changes, expectChangesToBe]
+}
+
+export function globalSetup() {
+    optimizeScheduler(unstable_batchedUpdates)
 }

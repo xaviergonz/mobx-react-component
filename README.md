@@ -17,6 +17,22 @@ Project is written in TypeScript and provides type safety out of the box. No Flo
 
 If you know how to use mobx and how to use hooks the example should be pretty much self explanatory.
 
+### Setup
+
+In your entry point (usually `index.js/ts`) do this:
+
+```ts
+import { optimizeScheduler } from "mobx-react-component"
+// if using react-dom
+import { unstable_batchedUpdates } from "react-dom"
+// if using react-native
+import { unstable_batchedUpdates } from "react-native"
+
+optimizeScheduler(unstable_batchedUpdates)
+```
+
+For Jest tests you can utilize [setupFilesAfterEnv](https://jestjs.io/docs/en/configuration#setupfilesafterenv-array).
+
 ### Examples
 
 [Edit in CodeSandbox](https://stackblitz.com/edit/mobx-react-component-sample)
@@ -213,10 +229,10 @@ class MyComponent extends MobxComponent<{}> {
 ```
 
 If for some reason you want to turn off ref emulation (for example some incompability or a slight speed bump) you
-can do so using ```@mobxComponent({refEmulation: false})```
+can do so using `@mobxComponent({refEmulation: false})`
 
 If you are using SSR, then when using it do this:
 
 ```tsx
-useMobxStaticRendering(true);
+useMobxStaticRendering(true)
 ```

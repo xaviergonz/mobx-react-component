@@ -4,6 +4,9 @@ import * as mobx from "mobx"
 import * as React from "react"
 import { mobxObserver, useMobxStaticRendering } from "../src"
 import { useMobxObserver } from "../src/shared/useMobxObserver"
+import { globalSetup } from "./utils"
+
+globalSetup()
 
 const getDNode = (obj: any, prop?: string) => mobx._getAdministration(obj, prop)
 

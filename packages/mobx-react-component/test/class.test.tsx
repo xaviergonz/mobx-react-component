@@ -3,7 +3,9 @@ import hoistNonReactStatics from "hoist-non-react-statics"
 import { action, computed, configure, observable, reaction, runInAction } from "mobx"
 import * as React from "react"
 import { injectContext, MobxComponent, mobxComponent } from "../src"
-import { changesList } from "./utils"
+import { changesList, globalSetup } from "./utils"
+
+globalSetup()
 
 configure({
     enforceActions: "always"
