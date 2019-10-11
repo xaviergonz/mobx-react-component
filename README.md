@@ -96,14 +96,25 @@ export const MyComponent = memo(
         }))
 
         // effects will be started on first render and auto disposed on unmount
+        // NOTE: it is usually preferable just to use useEffect / useLayoutEffect
+        // with the observable property as a dependency instead as shown next
+        // since that allows to mix and match observable and unobservable
+        // values
         useMobxEffects(() => [
             when(
                 () => state.sum === 10,
                 () => {
-                    alert("you reached ten! (hooks)")
+                    alert("you reached ten! (hooks / useMobxEffects)")
                 }
             )
         ])
+
+        // or
+        React.useEffect(() => {
+            if (state.sum === 10) {
+                alert("you reached ten! (hooks / useEffect)")
+            }
+        }, [state.sum])
 
         return (
             <div>
