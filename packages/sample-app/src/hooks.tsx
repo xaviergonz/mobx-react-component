@@ -37,7 +37,7 @@ class MyComponentState extends MobxLocalState<IMyComponentProps & { z: number }>
             when(
                 () => this.sum === 10,
                 () => {
-                    alert("you reached ten! (hooks / useMobxEffects)")
+                    alert("you reached ten! (hooks / useMobxLocalState)")
                 }
             )
         ]
