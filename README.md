@@ -40,14 +40,8 @@ For Jest tests you can utilize [setupFilesAfterEnv](https://jestjs.io/docs/en/co
 #### Using hooks
 
 ```tsx
-import { when } from "mobx"
-import {
-    mobxObserver,
-    useMobxActions,
-    useMobxAsObservableSource,
-    useMobxEffects,
-    useMobxStore
-} from "mobx-react-component"
+import { action, computed, observable, when } from "mobx"
+import { MobxLocalState, mobxObserver, useMobxLocalState } from "mobx-react-component"
 import * as React from "react"
 import { memo, useContext } from "react"
 import { SomeContext } from "./SomeContext"
@@ -56,72 +50,64 @@ interface IMyComponentProps {
     x: number
 }
 
-export const MyComponent = memo(
-    mobxObserver((props: IMyComponentProps) => {
-        // props is a shallowly observable object
+// here we define the "mobx local state" of the component
+// dependencies (usually just props, but might include inputs from other hooks)
+// are declared here and are turned into observables accessible through either
+// this.props.NAME or this.NAME
 
-        // note 1: its ref will be kept immutable, so when using hooks pass the actual
-        // single props it depends on, not just "props"
-        // if you really need to access the original props object for some reason
-        // you can still use `getOriginalProps(props)`
+class MyComponentState extends MobxLocalState<IMyComponentProps & { z: number }>() {
+    @observable y = 0
 
-        // note 2: do NOT ever destructure this when using or else the observability
-        // will be lost! (in other words, always use props.X to access the value)
+    @computed
+    get sum() {
+        // x comes from component props
+        // y comes from local observable
+        // z comes from context
+        return this.x + this.y + this.z
+    }
 
-        // observable refs of the given data
+    @action
+    incY = () => {
+        this.y++
+    }
 
-        // note 1: do NOT ever destructure this when using or else the observability
-        // will be lost! (in other words, always use obsContext().X to access the value)
-        // note 2: if the context value is actually an observable that will never
-        // change its ref then this is not needed
-        const obsContext = useMobxAsObservableSource(useContext(SomeContext), "ref")
-
-        const state = useMobxStore(() =>
-            // alternatively observable(...) can be returned instead if you need to use decorators
-            ({
-                // observable value
-                y: 0,
-
-                // computed
-                get sum() {
-                    return props.x + this.y + obsContext().z
-                }
-            })
-        )
-
-        const actions = useMobxActions(() => ({
-            incY() {
-                state.y++
-            }
-        }))
-
+    getEffects() {
         // effects will be started on first render and auto disposed on unmount
-        // NOTE: it is usually preferable just to use useEffect / useLayoutEffect
-        // with the observable property as a dependency instead as shown next
-        // since that allows to mix and match observable and unobservable
-        // values
-        useMobxEffects(() => [
+        // you might use getBeforeMountEffects() instead if you want to run them
+        // before the component is first mounted
+        return [
             when(
-                () => state.sum === 10,
+                () => this.sum === 10,
                 () => {
                     alert("you reached ten! (hooks / useMobxEffects)")
                 }
             )
-        ])
+        ]
+    }
+}
 
-        // or
-        React.useEffect(() => {
-            if (state.sum === 10) {
-                alert("you reached ten! (hooks / useEffect)")
-            }
-        }, [state.sum])
+export const MyComponent = memo(
+    mobxObserver((props: IMyComponentProps) => {
+        const ctx = useContext(SomeContext)
+
+        const s = useMobxLocalState(
+            MyComponentState,
+            {
+                ...props,
+                ...ctx
+            },
+            // the way to turn the object above into an observable is shallow by default,
+            // but you can also specify "deep" or an object to cherry pick which properties
+            // need to be turned into deep observables
+            "shallow"
+        )
 
         return (
             <div>
                 <div>
-                    x + y + z = {props.x} + {state.y} + {obsContext().z} = {state.sum}
+                    x + y + z = {s.x} + {s.y} + {s.z} = {s.sum}
                 </div>
-                <button onClick={actions.incY}>Increment Y (state)</button>
+                <button onClick={s.incY}>Increment Y (state)</button>
             </div>
         )
     })

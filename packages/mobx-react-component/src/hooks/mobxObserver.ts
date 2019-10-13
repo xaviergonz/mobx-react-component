@@ -1,8 +1,5 @@
 import { ValidationMap, WeakValidationMap } from "react"
-import { ToObservableModeWithoutRef } from "../shared/observableWrapper"
-import { setOriginalProps } from "../shared/originalProps"
 import { isUsingMobxStaticRendering } from "../shared/staticRendering"
-import { useMobxAsObservableSource } from "../shared/useMobxAsObservableSource"
 import { useMobxObserver } from "../shared/useMobxObserver"
 
 export interface IMobxObserverComponent<P> {
@@ -18,25 +15,15 @@ export function mobxObserver<T extends React.FC<any>>(
     baseComponent: T,
     options?: {
         displayName?: string
-        toObservablePropsMode?: ToObservableModeWithoutRef<ReactComponentProps<T>>
     }
 ): T & IMobxObserverComponent<ReactComponentProps<T>> {
     if (isUsingMobxStaticRendering()) {
         return baseComponent
     }
 
-    const toObservablePropsMode = (options && options.toObservablePropsMode) || "shallow"
-    if ((toObservablePropsMode as any) === "ref") {
-        throw new Error(`'ref' is not a valid value for the toObservablePropsMode option`)
-    }
-
     const ObserverComponent = (props: any, ref: any) => {
-        // turn props into a shallow observable object
-        const obsProps = useMobxAsObservableSource(props, toObservablePropsMode)()
-        setOriginalProps(obsProps, props)
-
         return useMobxObserver(() => {
-            return baseComponent(obsProps, ref)
+            return baseComponent(props, ref)
         }, ObserverComponent.displayName)
     }
 
