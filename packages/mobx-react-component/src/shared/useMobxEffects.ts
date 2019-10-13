@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { MobxEffects } from "./MobxEffects"
 
 /**
+ * @deprecated Prefer `useMobxLocalState`
+ *
  * Registers some mobx effects that will start once the component is mounted and
  * get disposed once it is unmounted.
  *

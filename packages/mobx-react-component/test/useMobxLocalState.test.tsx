@@ -1,14 +1,8 @@
 import { act, cleanup, render } from "@testing-library/react"
-import { configure, observable, reaction, runInAction } from "mobx"
+import { action, computed, configure, observable, reaction, runInAction } from "mobx"
 import * as React from "react"
 import { memo } from "react"
-import {
-    getOriginalProps,
-    mobxObserver,
-    useMobxActions,
-    useMobxEffects,
-    useMobxStore
-} from "../src"
+import { MobxLocalState, mobxObserver, useMobxLocalState } from "../src"
 import { changesList, globalSetup } from "./utils"
 
 globalSetup()
@@ -39,31 +33,28 @@ it("with props and effects", () => {
 
     let disposerCalled = 0
 
-    const TestComponent = memo(
-        mobxObserver((props: IProps) => {
-            const state = useMobxStore(() =>
-                observable({
-                    get addXY() {
-                        return props.x + props.y
-                    }
-                })
-            )
+    class TestState extends MobxLocalState<IProps>() {
+        @computed
+        get addXY() {
+            return this.x + this.props.y
+        }
 
-            useMobxEffects(() => [
+        getEffects() {
+            return [
                 reaction(
-                    () => props,
+                    () => this.props,
                     () => {
                         obsChanges.push("obsProps changed")
                     }
                 ),
                 reaction(
-                    () => props.x,
+                    () => this.props.x,
                     () => {
                         obsChanges.push("obsProps.x changed")
                     }
                 ),
                 reaction(
-                    () => props.y,
+                    () => this.y,
                     () => {
                         obsChanges.push("obsProps.y changed")
                     }
@@ -71,25 +62,30 @@ it("with props and effects", () => {
                 () => {
                     disposerCalled++
                 }
-            ])
+            ]
+        }
 
-            useMobxEffects(
-                () => [
-                    reaction(
-                        () => props.obj,
-                        () => {
-                            obsChanges.push("obsProps.obj changed")
-                        }
-                    ),
-                    reaction(
-                        () => props.obj.x,
-                        () => {
-                            obsChanges.push("obsProps.obj.x changed")
-                        }
-                    )
-                ],
-                { runBeforeMount: true }
-            )
+        getBeforeMountEffects() {
+            return [
+                reaction(
+                    () => this.props.obj,
+                    () => {
+                        obsChanges.push("obsProps.obj changed")
+                    }
+                ),
+                reaction(
+                    () => this.props.obj.x,
+                    () => {
+                        obsChanges.push("obsProps.obj.x changed")
+                    }
+                )
+            ]
+        }
+    }
+
+    const TestComponent = memo(
+        mobxObserver((props: IProps) => {
+            const state = useMobxLocalState(TestState, props)
 
             renders++
             return (
@@ -158,22 +154,29 @@ it("with props and effects", () => {
 })
 
 it("without props / effects", () => {
+    class TestState1 extends MobxLocalState<{ s: number }>() {
+        @observable
+        x = 10
+    }
+    class TestState2 extends MobxLocalState() {
+        @observable
+        x = 20
+    }
+
+    let _setS: React.Dispatch<React.SetStateAction<number>>
+
     const TestComponent = memo(
         mobxObserver(() => {
-            const state = useMobxStore(() =>
-                observable({
-                    x: 10
-                })
-            )
-            const state2 = useMobxStore(() => ({
-                x: 20
-            }))
+            const [s, setS] = React.useState(5)
+            _setS = setS
+            const state = useMobxLocalState(TestState1, { s })
+            const state2 = useMobxLocalState(TestState2, {})
 
-            const [s] = React.useState(5)
+            renders++
 
             return (
                 <div>
-                    {state.x} {state2.x} {s}
+                    {state.x} {state2.x} {s} {state.s} {state.props.s}
                 </div>
             )
         })
@@ -182,7 +185,50 @@ it("without props / effects", () => {
     const { container } = render(<TestComponent />)
     const div = container.querySelector("div")!
 
-    expect(div.textContent).toBe("10 20 5")
+    expect(div.textContent).toBe("10 20 5 5 5")
+    expectRendersToBe(1)
+
+    act(() => {
+        _setS(6)
+    })
+    expect(div.textContent).toBe("10 20 6 6 6")
+    expectRendersToBe(1)
+})
+
+it("actions", () => {
+    class TestState extends MobxLocalState() {
+        @observable
+        x = 1
+
+        @action.bound
+        incX() {
+            this.x++
+        }
+    }
+
+    const TestComponent = memo(
+        mobxObserver(() => {
+            const state = useMobxLocalState(TestState, {})
+
+            return (
+                <div>
+                    <span>{state.x}</span>
+                    <button onClick={state.incX}>Inc</button>
+                </div>
+            )
+        })
+    )
+
+    const { container } = render(<TestComponent />)
+
+    let span = container.querySelector("span")!
+    expect(span.textContent).toBe("1")
+
+    const button = container.querySelector("button")!
+    button.click()
+
+    span = container.querySelector("span")!
+    expect(span.textContent).toBe("2")
 })
 
 it("ref forwarding works", () => {
@@ -222,55 +268,4 @@ it("statics works", () => {
     rerender(<TestComponent x={6} />)
     div = container.querySelector("div")!
     expect(div.textContent).toBe("6")
-})
-
-it("actions", () => {
-    const TestComponent = memo(
-        mobxObserver(() => {
-            const state = useMobxStore(() =>
-                observable({
-                    x: 1
-                })
-            )
-
-            const actions = useMobxActions(() => ({
-                incX() {
-                    state.x++
-                }
-            }))
-
-            return (
-                <div>
-                    <span>{state.x}</span>
-                    <button onClick={actions.incX}>Inc</button>
-                </div>
-            )
-        })
-    )
-
-    const { container } = render(<TestComponent />)
-
-    let span = container.querySelector("span")!
-    expect(span.textContent).toBe("1")
-
-    const button = container.querySelector("button")!
-    button.click()
-
-    span = container.querySelector("span")!
-    expect(span.textContent).toBe("2")
-})
-
-it("original props are there", () => {
-    interface IProps2 {
-        x: number
-    }
-
-    const TestComponent = mobxObserver((props: IProps2) => {
-        const originalProps = getOriginalProps(props)
-        expect(props.x).toBe(originalProps.x)
-        expect(props).not.toBe(originalProps)
-        return null
-    })
-
-    render(<TestComponent x={5} />)
 })

@@ -4,6 +4,8 @@ import { newObservableWrapper, ToObservableMode } from "./observableWrapper"
 import { withoutForceUpdate } from "./useMobxObserver"
 
 /**
+ * @deprecated Prefer `useMobxLocalState`
+ *
  * Transforms a value into an observable value.
  * The `toObservableMode` parameter can be either `"shallow"`, `"deep"`, or `"ref"` indicating how
  * the transformation should be performed.

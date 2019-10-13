@@ -1,5 +1,9 @@
 # mobx-react-component changelog
 
+## 2.0.0
+
+-   Deprecated `useMobxActions`, `useMobxStore`, `useMobxEffects`, `useMobxAsObservableSource` in favor of `useMobxLocalState`.
+
 ## 1.2.0
 
 -   Added `optimizeScheduler`. Make sure to read the README.md on how to use it and use it.

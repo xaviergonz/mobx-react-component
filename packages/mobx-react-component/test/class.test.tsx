@@ -60,6 +60,14 @@ it("with props and effects", () => {
                         obsChanges.push("obsProps.y changed")
                     }
                 ),
+                () => {
+                    disposerCalled++
+                }
+            ]
+        }
+
+        getBeforeMountEffects() {
+            return [
                 reaction(
                     () => this.props.obj,
                     () => {
@@ -71,10 +79,7 @@ it("with props and effects", () => {
                     () => {
                         obsChanges.push("obsProps.obj.x changed")
                     }
-                ),
-                () => {
-                    disposerCalled++
-                }
+                )
             ]
         }
 

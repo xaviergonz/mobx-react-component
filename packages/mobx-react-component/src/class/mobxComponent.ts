@@ -46,6 +46,7 @@ export abstract class MobxComponent<P = {}> implements React.Component<P> {
     abstract render(): ReactElement | null
 
     getEffects?(): MobxEffects
+    getBeforeMountEffects?(): MobxEffects
 
     // disable some non-supported features
     static contextType?: never
@@ -112,6 +113,15 @@ function _mobxComponent<C extends React.ComponentClass<P>, P>(
             }
         }
 
+        let useUpdateEffectsBeforeMount = emptyFunction
+        if (state.getBeforeMountEffects) {
+            const boundGetBeforeMountEffects = state.getBeforeMountEffects.bind(state)
+
+            useUpdateEffectsBeforeMount = () => {
+                useMobxEffects(boundGetBeforeMountEffects)
+            }
+        }
+
         let useUpdateEffects = emptyFunction
         if (state.getEffects) {
             const boundGetEffects = state.getEffects.bind(state)
@@ -121,7 +131,7 @@ function _mobxComponent<C extends React.ComponentClass<P>, P>(
             }
         }
 
-        return { state, useUpdateContexts, useUpdateEffects }
+        return { state, useUpdateContexts, useUpdateEffects, useUpdateEffectsBeforeMount }
     }
 
     const toObservablePropsMode =
@@ -157,7 +167,12 @@ function _mobxComponent<C extends React.ComponentClass<P>, P>(
             }, [ref, instance])
         }
 
-        const { state, useUpdateContexts, useUpdateEffects } = classInstance.current!
+        const {
+            state,
+            useUpdateContexts,
+            useUpdateEffects,
+            useUpdateEffectsBeforeMount
+        } = classInstance.current!
 
         usePropertyInjection(state, "props", props as any, toObservablePropsMode)
         setOriginalProps(state.props, props)
@@ -165,6 +180,7 @@ function _mobxComponent<C extends React.ComponentClass<P>, P>(
 
         useUpdateContexts()
 
+        useUpdateEffectsBeforeMount()
         useUpdateEffects()
 
         return useMobxObserver(() => {
