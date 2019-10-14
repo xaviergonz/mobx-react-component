@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { MobxEffects } from "./MobxEffects"
 
 /**
@@ -27,7 +27,7 @@ export function useMobxEffects(
         ...options
     }
 
-    const memoEffectsFn = useCallback(effectsFn, [])
+    const memoEffectsFn = useRef(effectsFn).current
     const runBeforeMount = useRef(realOpts.runBeforeMount)
     if (runBeforeMount.current !== realOpts.runBeforeMount) {
         throw new Error("runBeforeMount option cannot be changed in the lifetime of the component")

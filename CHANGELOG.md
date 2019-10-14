@@ -1,6 +1,6 @@
 # mobx-react-component changelog
 
-## 2.0.1
+## 2.0.2
 
 -   Small possible fix for React Native fast reloading.
 
