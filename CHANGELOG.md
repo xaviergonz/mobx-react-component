@@ -1,5 +1,9 @@
 # mobx-react-component changelog
 
+## 2.0.1
+
+-   Small possible fix for React Native fast reloading.
+
 ## 2.0.0
 
 -   Deprecated `useMobxActions`, `useMobxStore`, `useMobxEffects`, `useMobxAsObservableSource` in favor of `useMobxLocalState`.

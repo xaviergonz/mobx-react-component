@@ -129,7 +129,10 @@ export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "obs
             forceUpdate()
         }
 
-        return () => reactionTrackingRef.current!.reaction.dispose()
+        return () => {
+            reactionTrackingRef.current!.reaction.dispose()
+            reactionTrackingRef.current = null
+        }
     }, [baseComponentName, forceUpdate])
 
     // render the original component, but have the
