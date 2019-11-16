@@ -61,7 +61,7 @@
         "react": "^16.8.6",
         "react-dom": "^16.8.6",
         "shx": "^0.3.2",
-        "tsdx": "^0.9.1",
+        "tsdx": "^0.11.0",
         "typescript": "^3.4.1"
     },
     "dependencies": {},
