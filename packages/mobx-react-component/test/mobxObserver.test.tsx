@@ -396,7 +396,7 @@ function runTestSuite(mode: "observer" | "useObserver") {
             }, true)
             const Parent = obsComponent(() => {
                 renderings.parent++
-                odata.y // eslint-disable-line no-unused-expressions
+                odata.y // eslint-disable-line @typescript-eslint/no-unused-expressions
                 return <Child data={data} />
             }, true)
             return { ...render(<Parent />), renderings, odata }
