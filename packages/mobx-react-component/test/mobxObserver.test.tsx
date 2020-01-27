@@ -576,60 +576,66 @@ it("should have the correct displayName", () => {
     expect(TestComponent.displayName).toBe("MyComponent")
 })
 
-// test("parent / childs render in the right order", done => {
-//     // See: https://jsfiddle.net/gkaemmer/q1kv7hbL/13/
-//     let events = []
+test("parent / childs render in the right order", done => {
+    // See: https://jsfiddle.net/gkaemmer/q1kv7hbL/13/
+    const events: string[] = []
 
-//     class User {
-//         @mobx.observable
-//         name = "User's name"
-//     }
+    class User {
+        public name = "User's name"
+    }
 
-//     class Store {
-//         @mobx.observable
-//         user = new User()
-//         @mobx.action
-//         logout() {
-//             this.user = null
-//         }
-//     }
+    mobx.decorate(User, { name: mobx.observable })
 
-//     function tryLogout() {
-//         try {
-//             // ReactDOM.unstable_batchedUpdates(() => {
-//             store.logout()
-//             expect(true).toBeTruthy(true)
-//             // });
-//         } catch (e) {
-//             // t.fail(e)
-//         }
-//     }
+    class Store {
+        public user: User | null = new User()
+        public logout() {
+            this.user = null
+        }
+    }
 
-//     const store = new Store()
+    mobx.decorate(Store, {
+        user: mobx.observable,
+        logout: mobx.action
+    })
 
-//     const Parent = observer(() => {
-//         events.push("parent")
-//         if (!store.user) return <span>Not logged in.</span>
-//         return (
-//             <div>
-//                 <Child />
-//                 <button onClick={tryLogout}>Logout</button>
-//             </div>
-//         )
-//     })
+    const store = new Store()
 
-//     const Child = observer(() => {
-//         events.push("child")
-//         return <span>Logged in as: {store.user.name}</span>
-//     })
+    function tryLogout() {
+        try {
+            store.logout()
+            expect(true).toBeTruthy()
+        } catch (e) {
+            // t.fail(e)
+        }
+    }
 
-//     const container = TestUtils.renderIntoDocument(<Parent />)
+    const Parent = mobxObserver(() => {
+        events.push("parent")
+        if (!store.user) {
+            return <span>Not logged in.</span>
+        }
+        return (
+            <div>
+                <Child />
+                <button onClick={tryLogout}>Logout</button>
+            </div>
+        )
+    })
 
-//     debugger
-//     tryLogout()
-//     expect(events).toEqual(["parent", "child", "parent"])
-//     done()
-// })
+    const Child = mobxObserver(() => {
+        events.push("child")
+        if (!store.user) {
+            return null
+        }
+        return <span>Logged in as: {store.user.name}</span>
+    })
+
+    render(<Parent />)
+
+    tryLogout()
+    expect(events).toEqual(["parent", "child", "parent"])
+    done()
+})
 
 // describe("206 - @observer should produce usefull errors if it throws", () => {
 //     const data = mobx.observable({ x: 1 })

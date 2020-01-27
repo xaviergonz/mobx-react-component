@@ -1,5 +1,9 @@
 # mobx-react-component changelog
 
+## 2.0.4
+
+-   Just updated dev dependencies.
+
 ## 2.0.3
 
 -   Fix for `getBeforeMountEffects` so they actually run before mount.
