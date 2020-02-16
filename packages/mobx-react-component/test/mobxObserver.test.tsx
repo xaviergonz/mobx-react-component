@@ -560,12 +560,12 @@ it("should hoist known statics only", () => {
     const wrapped = mobxObserver(MyHipsterComponent)
     const wrappedMemo = React.memo(wrapped)
     expect(wrapped.displayName).toBe("MyHipsterComponent")
-    expect((wrapped as any).randomStaticThing).toEqual(3)
-    expect((wrapped as any).defaultProps).toEqual({ x: 3 })
-    expect((wrapped as any).propTypes).toEqual({ x: isNumber }) // eslint-disable-line react/forbid-foreign-prop-types
+    expect(wrapped.randomStaticThing).toEqual(3)
+    expect(wrapped.defaultProps).toEqual({ x: 3 })
+    expect(wrapped.propTypes).toEqual({ x: isNumber }) // eslint-disable-line react/forbid-foreign-prop-types
     expect((wrappedMemo as any).type).toBeInstanceOf(Function) // And not "Nope!"; this is the wrapped component, the property is introduced by memo
     expect((wrappedMemo as any).compare).toBe(null) // another memo field
-    expect((wrapped as any).render).toBe(undefined)
+    expect(wrapped.render).toBe(undefined)
 })
 
 it("should have the correct displayName", () => {
