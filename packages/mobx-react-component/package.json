@@ -1,6 +1,6 @@
 {
     "name": "mobx-react-component",
-    "version": "2.0.4",
+    "version": "2.0.5",
     "description": "Write React functional components (with hooks) + MobX for local state in a fancy way",
     "keywords": [
         "mobx",
@@ -38,7 +38,7 @@
     ],
     "scripts": {
         "start": "tsdx watch",
-        "build": "shx cp ../../README.md . && shx cp ../../LICENSE . && tsdx build --name mobxReactComponent --format=cjs,esm,umd",
+        "build": "shx cp ../../*.md . && shx cp ../../LICENSE . && tsdx build --name mobxReactComponent --format=cjs,esm,umd",
         "test": "tsdx test",
         "prettier": "prettier --write \"**/*.js\" \"**/*.ts\" \"**/*.tsx\"",
         "lint": "eslint \"src/**/*.ts\" \"test/**/*.ts\" \"test/**/*.tsx\"",
@@ -50,7 +50,7 @@
         "react-dom": "^16.8.0"
     },
     "devDependencies": {
-        "@testing-library/react": "^9.1.3",
+        "@testing-library/react": "^10.0.2",
         "@types/hoist-non-react-statics": "^3.3.1",
         "@types/jest": "^25.1.0",
         "@types/react": "^16.8.10",
@@ -61,7 +61,7 @@
         "react": "^16.8.6",
         "react-dom": "^16.8.6",
         "shx": "^0.3.2",
-        "tsdx": "^0.12.3",
+        "tsdx": "^0.13.1",
         "typescript": "^3.4.1"
     },
     "dependencies": {},

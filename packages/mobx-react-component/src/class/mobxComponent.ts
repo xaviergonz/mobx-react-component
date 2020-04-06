@@ -171,7 +171,7 @@ function _mobxComponent<C extends React.ComponentClass<P>, P>(
             state,
             useUpdateContexts,
             useUpdateEffects,
-            useUpdateEffectsBeforeMount
+            useUpdateEffectsBeforeMount,
         } = classInstance.current!
 
         usePropertyInjection(state, "props", props as any, toObservablePropsMode)
@@ -201,7 +201,7 @@ function _mobxComponent<C extends React.ComponentClass<P>, P>(
 
         return memoComponent
     } else {
-        const forwardRefComponent = forwardRef(FuncComponent)
+        const forwardRefComponent = forwardRef(FuncComponent as any)
         forwardRefComponent.displayName = `${displayName} (mobxComponent)`
         ;(forwardRefComponent as any).defaultProps = clazz.defaultProps
 
@@ -210,7 +210,7 @@ function _mobxComponent<C extends React.ComponentClass<P>, P>(
 
         // make sure instanceof clazz keeps working for refs
         const originalHasInstance = memoComponent[Symbol.hasInstance]
-        memoComponent[Symbol.hasInstance] = function(this: any, instance) {
+        memoComponent[Symbol.hasInstance] = function (this: any, instance) {
             if (originalHasInstance) {
                 const result = originalHasInstance.apply(memoComponent, arguments as any)
                 if (result) {
