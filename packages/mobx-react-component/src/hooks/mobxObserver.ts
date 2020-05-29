@@ -1,16 +1,17 @@
 import { isUsingMobxStaticRendering } from "../shared/staticRendering"
 import { useMobxObserver } from "../shared/useMobxObserver"
 
-export function mobxObserver<T>(
-    baseComponent: T,
+export function mobxObserver<C, DP>(
+    baseComponent: C,
     options?: {
         displayName?: string
+        defaultProps?: DP
     }
-): T & { displayName?: string } {
+): C & { displayName?: string; defaultProps: DP } {
     const baseComponentAsComponent = (baseComponent as unknown) as React.FC
 
     if (isUsingMobxStaticRendering()) {
-        return baseComponent
+        return baseComponent as any
     }
 
     const ObserverComponent = (props: any, ref: any) => {
@@ -22,9 +23,11 @@ export function mobxObserver<T>(
     copyStaticProperties(baseComponent, ObserverComponent)
 
     ObserverComponent.displayName =
-        (options ? options.displayName : undefined) ||
+        options?.displayName ||
         baseComponentAsComponent.displayName ||
         baseComponentAsComponent.name
+
+    ObserverComponent.defaultProps = options?.defaultProps || baseComponentAsComponent.defaultProps
 
     return ObserverComponent as any
 }

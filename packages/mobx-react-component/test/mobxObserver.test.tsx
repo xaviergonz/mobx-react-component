@@ -476,6 +476,28 @@ function runTestSuite(mode: "observer" | "useObserver") {
 runTestSuite("observer")
 runTestSuite("useObserver")
 
+test("defaultProps typings should be properly supported", () => {
+    const MyC = mobxObserver(
+        (props: { x: number; y: number }) => (
+            <span>
+                `${props.x} ${props.y}`
+            </span>
+        ),
+        {
+            defaultProps: { x: 10 },
+        }
+    )
+
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+    // @ts-expect-error
+    const element = (
+        <div>
+            <MyC y={6} />
+        </div>
+    )
+    /* eslint-enable @typescript-eslint/no-unused-vars */
+})
+
 test("useImperativeHandle and forwardRef should work with observer", () => {
     interface IMethods {
         focus(): void

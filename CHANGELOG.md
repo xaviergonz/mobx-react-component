@@ -1,5 +1,9 @@
 # mobx-react-component changelog
 
+## 2.2.0
+
+-   Added defaultProps option to mobxObserver.
+
 ## 2.1.0
 
 -   Improve the type returned by mobxObserver.

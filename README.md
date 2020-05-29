@@ -81,39 +81,45 @@ class MyComponentState extends MobxLocalState<IMyComponentProps & { z: number }>
                 () => {
                     alert("you reached ten! (hooks / useMobxLocalState)")
                 }
-            )
+            ),
         ]
     }
 }
 
 export const MyComponent = memo(
-    mobxObserver((props: IMyComponentProps) => {
-        const ctx = useContext(SomeContext)
+    mobxObserver(
+        (props: IMyComponentProps) => {
+            const ctx = useContext(SomeContext)
 
-        const s = useMobxLocalState(
-            MyComponentState,
-            {
-                ...props,
-                ...ctx
-            },
-            // the way to turn the object above into an observable is shallow by default,
-            // but you can also specify "deep" or an object to cherry pick which properties
-            // need to be turned into deep observables
-            "shallow"
-        )
+            const s = useMobxLocalState(
+                MyComponentState,
+                {
+                    ...props,
+                    ...ctx,
+                },
+                // the way to turn the object above into an observable is shallow by default,
+                // but you can also specify "deep" or an object to cherry pick which properties
+                // need to be turned into deep observables
+                "shallow"
+            )
 
-        return (
-            <div>
+            return (
                 <div>
-                    x + y + z = {s.x} + {s.y} + {s.z} = {s.sum}
+                    <div>
+                        x + y + z = {s.x} + {s.y} + {s.z} = {s.sum}
+                    </div>
+                    <button onClick={s.incY}>Increment Y (state)</button>
                 </div>
-                <button onClick={s.incY}>Increment Y (state)</button>
-            </div>
-        )
-    })
+            )
+        },
+        {
+            displayName: "MyComponent",
+            defaultProps: {
+                x: 1,
+            },
+        }
+    )
 )
-
-MyComponent.displayName = "MyComponent"
 
 // usage
 // <MyComponent x={5}/>
@@ -127,7 +133,7 @@ import {
     injectContext,
     MobxComponent,
     mobxComponent,
-    ReactContextValue
+    ReactContextValue,
 } from "mobx-react-component"
 import * as React from "react"
 import { SomeContext } from "./SomeContext"
@@ -141,7 +147,7 @@ export class MyComponent extends MobxComponent<IMyComponentProps> {
     // statics (defaultProps, displayName, propTypes, etc.) can be declared here
     static displayName = "MyComponent"
     static defaultProps = {
-        x: 1
+        x: 1,
     }
 
     // this.props will become an observable reference version of props
@@ -178,7 +184,7 @@ export class MyComponent extends MobxComponent<IMyComponentProps> {
                 () => {
                     alert("you reached 10! (class)")
                 }
-            )
+            ),
         ]
     }
 
