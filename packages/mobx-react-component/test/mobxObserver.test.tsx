@@ -36,14 +36,14 @@ function runTestSuite(mode: "observer" | "useObserver") {
                 todos: [
                     {
                         completed: false,
-                        title: "a"
-                    }
-                ]
+                        title: "a",
+                    },
+                ],
             })
 
             const renderings = {
                 item: 0,
-                list: 0
+                list: 0,
             }
 
             const TodoItem = obsComponent(({ todo }: { todo: typeof store.todos[0] }) => {
@@ -92,7 +92,7 @@ function runTestSuite(mode: "observer" | "useObserver") {
             act(() => {
                 store.todos.push({
                     completed: true,
-                    title: "b"
+                    title: "b",
                 })
             })
             expect(container.querySelectorAll("li").length).toBe(2)
@@ -145,7 +145,7 @@ function runTestSuite(mode: "observer" | "useObserver") {
                     this.yCalcCount++
                     return this.x * 2
                 },
-                z: "hi"
+                z: "hi",
             })
             const TestComponent = obsComponent(() => {
                 return (
@@ -179,7 +179,7 @@ function runTestSuite(mode: "observer" | "useObserver") {
             useMobxStaticRendering(true)
             let renderCount = 0
             const data = mobx.observable({
-                z: "hi"
+                z: "hi",
             })
 
             const TestComponent = obsComponent(() => {
@@ -217,12 +217,12 @@ function runTestSuite(mode: "observer" | "useObserver") {
                 selected: "coffee",
                 items: [
                     {
-                        name: "coffee"
+                        name: "coffee",
                     },
                     {
-                        name: "tea"
-                    }
-                ]
+                        name: "tea",
+                    },
+                ],
             })
 
         interface IItem {
@@ -232,7 +232,7 @@ function runTestSuite(mode: "observer" | "useObserver") {
             item: IItem
             selected: string
         }
-        const Row: React.FC<IRowProps> = props => {
+        const Row: React.FC<IRowProps> = (props) => {
             return (
                 <span>
                     {props.item.name}
@@ -241,10 +241,10 @@ function runTestSuite(mode: "observer" | "useObserver") {
             )
         }
         /** table stateles component */
-        const Table = obsComponent<{ data: { items: IItem[]; selected: string } }>(props => {
+        const Table = obsComponent<{ data: { items: IItem[]; selected: string } }>((props) => {
             return (
                 <div>
-                    {props.data.items.map(item => (
+                    {props.data.items.map((item) => (
                         <Row key={item.name} item={item} selected={props.data.selected} />
                     ))}
                 </div>
@@ -355,7 +355,7 @@ function runTestSuite(mode: "observer" | "useObserver") {
             return {
                 ...rendered,
                 getCount: () => renderCount,
-                span: rendered.container.querySelector("span")!
+                span: rendered.container.querySelector("span")!,
             }
         }
 
@@ -385,7 +385,7 @@ function runTestSuite(mode: "observer" | "useObserver") {
         const execute = () => {
             const renderings = {
                 child: 0,
-                parent: 0
+                parent: 0,
             }
             const data = { x: 1 }
             const odata = mobx.observable({ y: 1 })
@@ -431,7 +431,7 @@ function runTestSuite(mode: "observer" | "useObserver") {
                 }
 
                 state = {
-                    hasError: false
+                    hasError: false,
                 }
 
                 componentDidCatch(error: any) {
@@ -493,7 +493,7 @@ test("useImperativeHandle and forwardRef should work with observer", () => {
                 () => ({
                     focus: () => {
                         inputRef.current!.focus()
-                    }
+                    },
                 }),
                 []
             )
@@ -525,7 +525,7 @@ test("useImperativeHandle and forwardRef should work with useObserver", () => {
                 () => ({
                     focus: () => {
                         inputRef.current!.focus()
-                    }
+                    },
                 }),
                 []
             )
@@ -563,7 +563,7 @@ it("should hoist known statics only", () => {
     expect(wrapped.randomStaticThing).toEqual(3)
     expect(wrapped.defaultProps).toEqual({ x: 3 })
     expect(wrapped.propTypes).toEqual({ x: isNumber }) // eslint-disable-line react/forbid-foreign-prop-types
-    expect((wrappedMemo as any).type).toBeInstanceOf(Function) // And not "Nope!"; this is the wrapped component, the property is introduced by memo
+    expect(wrappedMemo.type).toBeInstanceOf(Function) // And not "Nope!"; this is the wrapped component, the property is introduced by memo
     expect((wrappedMemo as any).compare).toBe(null) // another memo field
     expect(wrapped.render).toBe(undefined)
 })
@@ -576,7 +576,7 @@ it("should have the correct displayName", () => {
     expect(TestComponent.displayName).toBe("MyComponent")
 })
 
-test("parent / childs render in the right order", done => {
+test("parent / childs render in the right order", (done) => {
     // See: https://jsfiddle.net/gkaemmer/q1kv7hbL/13/
     const events: string[] = []
 
@@ -595,7 +595,7 @@ test("parent / childs render in the right order", done => {
 
     mobx.decorate(Store, {
         user: mobx.observable,
-        logout: mobx.action
+        logout: mobx.action,
     })
 
     const store = new Store()

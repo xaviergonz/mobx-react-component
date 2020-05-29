@@ -4,7 +4,7 @@ import {
     createTrackingData,
     IReactionTracking,
     recordReactionAsCommitted,
-    scheduleCleanupOfReactionIfLeaked
+    scheduleCleanupOfReactionIfLeaked,
 } from "./reactionCleanupTracking"
 import { RoundRobinReaction } from "./RoundRobinReaction"
 import { isUsingMobxStaticRendering } from "./staticRendering"
@@ -14,7 +14,7 @@ let forceUpdateEnabled = true
 const isForceUpdateEnabled = () => forceUpdateEnabled
 
 export function withoutForceUpdate<F extends (...args: any[]) => any>(fn: F): F {
-    const newFn = function(this: any) {
+    const newFn = function (this: any) {
         const old = forceUpdateEnabled
         forceUpdateEnabled = false
         try {
@@ -33,7 +33,7 @@ function observerComponentNameFor(baseComponentName: string) {
 function useForceUpdate() {
     const [, setTick] = useState(0)
     return useCallback(() => {
-        setTick(t => t + 1)
+        setTick((t) => t + 1)
     }, [])
 }
 
@@ -124,7 +124,7 @@ export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "obs
                     },
                     isForceUpdateEnabled
                 ),
-                cleanAt: Infinity
+                cleanAt: Infinity,
             }
             forceUpdate()
         }
@@ -163,5 +163,5 @@ function printDebugValue(v: Reaction | undefined) {
         return "<unknown>"
     }
     const deps = getDependencyTree(v).dependencies || []
-    return deps.map(d => d.name).join(", ")
+    return deps.map((d) => d.name).join(", ")
 }

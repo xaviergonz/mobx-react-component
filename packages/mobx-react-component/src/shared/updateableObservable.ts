@@ -11,7 +11,7 @@ import {
     ObservableMap,
     ObservableSet,
     remove,
-    set
+    set,
 } from "mobx"
 
 type LocalObservables = WeakMap<any, boolean>
@@ -87,11 +87,11 @@ export function updateableObservable<T>(
 
         // convert array to object so lookup is faster
         const deepProps: { [pname: string]: boolean } = {}
-        modeDeepProps.forEach(propName => {
+        modeDeepProps.forEach((propName) => {
             deepProps[propName] = true
         })
 
-        isDeepProp = propName => deepProps[propName]
+        isDeepProp = (propName) => deepProps[propName]
     } else {
         // istanbul ignore next
         throw new Error(invalidModeError)
@@ -126,7 +126,7 @@ export function updateableObservable<T>(
         getBoxed() {
             return observed
         },
-        update
+        update,
     }
 }
 
@@ -206,7 +206,7 @@ function updateObservableMap(
     })
 
     // remove missing props
-    oldMapKeysToRemove.forEach(propName => {
+    oldMapKeysToRemove.forEach((propName) => {
         remove(oldMap, propName)
     })
 
@@ -224,14 +224,14 @@ function updateObservableSet(
     }
 
     // remove deleted items
-    oldSet.forEach(oldValue => {
+    oldSet.forEach((oldValue) => {
         if (!newSet.has(oldValue)) {
             remove(oldSet, oldValue)
         }
     })
 
     // add missing items
-    newSet.forEach(newValue => {
+    newSet.forEach((newValue) => {
         if (!oldSet.has(newValue)) {
             // TODO: mobx does not offer set for sets
             oldSet.add(updateObservableValue(undefined, newValue, undefined, localObservables))
@@ -255,7 +255,7 @@ function updateObservableObject(
     const oldObjKeysToRemove = new Set(Object.keys(oldObj))
 
     // add/update props
-    Object.keys(newObj).forEach(propName => {
+    Object.keys(newObj).forEach((propName) => {
         oldObjKeysToRemove.delete(propName)
         const maybeNewValue = newObj[propName]
         const oldValue = oldObj[propName]
@@ -271,7 +271,7 @@ function updateObservableObject(
     })
 
     // remove missing props
-    oldObjKeysToRemove.forEach(propName => {
+    oldObjKeysToRemove.forEach((propName) => {
         remove(oldObj, propName)
     })
 

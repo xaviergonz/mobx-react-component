@@ -8,7 +8,7 @@ import {
     CLEANUP_LEAKED_REACTIONS_AFTER_MILLIS,
     CLEANUP_TIMER_LOOP_MILLIS,
     forceCleanupTimerToRunNowForTests,
-    resetCleanupScheduleForTests
+    resetCleanupScheduleForTests,
 } from "../src/shared/reactionCleanupTracking"
 import { globalSetup } from "./utils"
 
@@ -51,7 +51,7 @@ test("uncommitted observing components should not attempt state changes", () => 
 })
 
 const strictModeValues = [true, false]
-strictModeValues.forEach(strictMode => {
+strictModeValues.forEach((strictMode) => {
     const modeName = strictMode ? "StrictMode" : "non-StrictMode"
 
     test(`observable changes before first commit are not lost (${modeName})`, () => {

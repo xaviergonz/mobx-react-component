@@ -18,9 +18,9 @@ function App() {
             </SomeContext.Provider>
             <br />
             <br />
-            <button onClick={() => setX(o => o + 1)}>Increment X (prop)</button>
+            <button onClick={() => setX((o) => o + 1)}>Increment X (prop)</button>
             <br />
-            <button onClick={() => setZ(o => o + 1)}>Increment Z (context)</button>
+            <button onClick={() => setZ((o) => o + 1)}>Increment Z (context)</button>
         </React.Fragment>
     )
 }

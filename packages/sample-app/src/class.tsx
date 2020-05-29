@@ -3,7 +3,7 @@ import {
     injectContext,
     MobxComponent,
     mobxComponent,
-    ReactContextValue
+    ReactContextValue,
 } from "mobx-react-component"
 import * as React from "react"
 import { SomeContext } from "./SomeContext"
@@ -17,7 +17,7 @@ export class MyComponent extends MobxComponent<IMyComponentProps> {
     // statics (defaultProps, displayName, propTypes, etc.) can be declared here
     static displayName = "MyComponent"
     static defaultProps = {
-        x: 1
+        x: 1,
     }
 
     // this.props will become an observable reference version of props
@@ -54,7 +54,7 @@ export class MyComponent extends MobxComponent<IMyComponentProps> {
                 () => {
                     alert("you reached 10! (class)")
                 }
-            )
+            ),
         ]
     }
 

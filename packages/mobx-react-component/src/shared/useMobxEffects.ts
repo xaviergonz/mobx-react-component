@@ -24,7 +24,7 @@ export function useMobxEffects(
 ): void {
     const realOpts = {
         runBeforeMount: false,
-        ...options
+        ...options,
     }
 
     const memoEffectsFn = useRef(effectsFn).current
@@ -43,7 +43,7 @@ export function useMobxEffects(
                 return
             }
             return () => {
-                effects.forEach(disposer => disposer())
+                effects.forEach((disposer) => disposer())
             }
         }, [effects])
     } else {
@@ -53,7 +53,7 @@ export function useMobxEffects(
                 return
             }
             return () => {
-                effects.forEach(disposer => disposer())
+                effects.forEach((disposer) => disposer())
             }
         }, [memoEffectsFn])
     }

@@ -39,7 +39,7 @@ class MyComponentState extends MobxLocalState<IMyComponentProps & { z: number }>
                 () => {
                     alert("you reached ten! (hooks / useMobxLocalState)")
                 }
-            )
+            ),
         ]
     }
 }
@@ -52,7 +52,7 @@ export const MyComponent = memo(
             MyComponentState,
             {
                 ...props,
-                ...ctx
+                ...ctx,
             },
             // the way to turn the object above into an observable is shallow by default,
             // but you can also specify "deep" or an object to cherry pick which properties

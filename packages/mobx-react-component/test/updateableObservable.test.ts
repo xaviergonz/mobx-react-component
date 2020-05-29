@@ -5,9 +5,9 @@ import { globalSetup } from "./utils"
 globalSetup()
 
 configure({
-    enforceActions: "always"
+    enforceActions: "always",
 })
-;["shallow", "deep"].forEach(m => {
+;["shallow", "deep"].forEach((m) => {
     const mode: "shallow" | "deep" = m as any
 
     test(`${mode} mode`, () => {
@@ -57,17 +57,27 @@ configure({
 
         {
             // maps
-            const orig = new Map([[1, 2], [3, 4]])
+            const orig = new Map([
+                [1, 2],
+                [3, 4],
+            ])
             u.update(orig)
             const map = u.get()
             expect(isObservableMap(map)).toBe(true)
-            expect(Array.from(map.entries())).toEqual([[1, 2], [3, 4]])
+            expect(Array.from(map.entries())).toEqual([
+                [1, 2],
+                [3, 4],
+            ])
 
             orig.set(5, 6)
             u.update(orig)
             expect(u.get()).toBe(map)
             expect(isObservableMap(map)).toBe(true)
-            expect(Array.from(map.entries())).toEqual([[1, 2], [3, 4], [5, 6]])
+            expect(Array.from(map.entries())).toEqual([
+                [1, 2],
+                [3, 4],
+                [5, 6],
+            ])
 
             u.update(new Map([[1, 2]]))
             expect(u.get()).toBe(map)
@@ -134,14 +144,14 @@ test("custom deep props", () => {
     }
     const val = {
         p1: {
-            x: 1
+            x: 1,
         },
         p2: {
-            x: 2
-        }
+            x: 2,
+        },
     }
     const u = updateableObservable<IObj>(val, {
-        deepProps: ["p1"]
+        deepProps: ["p1"],
     })
     expect(u.get()).toEqual(val)
 
@@ -149,11 +159,11 @@ test("custom deep props", () => {
     const p2 = u.get().p2
     const newVal = {
         p1: {
-            x: 10
+            x: 10,
         },
         p2: {
-            x: 20
-        }
+            x: 20,
+        },
     }
     u.update(newVal)
     expect(u.get()).toEqual(newVal)

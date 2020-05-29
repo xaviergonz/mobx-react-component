@@ -8,7 +8,7 @@ import { changesList, globalSetup } from "./utils"
 globalSetup()
 
 configure({
-    enforceActions: "always"
+    enforceActions: "always",
 })
 
 afterEach(cleanup)
@@ -62,7 +62,7 @@ it("with props and effects", () => {
                 ),
                 () => {
                     disposerCalled++
-                }
+                },
             ]
         }
 
@@ -79,7 +79,7 @@ it("with props and effects", () => {
                     () => {
                         obsChanges.push("obsProps.obj.x changed")
                     }
-                )
+                ),
             ]
         }
 
@@ -95,7 +95,7 @@ it("with props and effects", () => {
     }
 
     let obj = {
-        x: 9
+        x: 9,
     }
     const { container, rerender, unmount } = render(<TestComponent x={0} y={0} obj={obj} />)
     const div = container.querySelector("div")!
@@ -106,7 +106,7 @@ it("with props and effects", () => {
 
     // re-render with same props, but change deep prop
     obj = {
-        x: 10
+        x: 10,
     }
     rerender(<TestComponent x={0} y={0} obj={obj} />)
     expect(div.textContent).toBe("0-0 0-0 0 10")
@@ -127,7 +127,7 @@ it("with props and effects", () => {
 
     // use an observable object
     obj = observable({
-        x: 10
+        x: 10,
     })
     rerender(<TestComponent x={2} y={1} obj={obj} />)
     expect(div.textContent).toBe("2-2 1-1 3 10")
@@ -182,7 +182,7 @@ it("without props / effects", () => {
 
 it("ref works", () => {
     @mobxComponent({
-        toObservablePropsMode: "shallow" // just to see this works
+        toObservablePropsMode: "shallow", // just to see this works
     })
     class TestComponent extends MobxComponent<{ forwardRef?: React.Ref<HTMLInputElement> }> {
         render() {
@@ -208,7 +208,7 @@ it("statics works", () => {
     @mobxComponent()
     class TestComponent extends MobxComponent<IProps2> {
         static defaultProps = {
-            x: 5
+            x: 5,
         }
         static displayName = "My component"
 
@@ -240,11 +240,11 @@ it("context injection", () => {
             return [
                 reaction(
                     () => this.contextValue,
-                    v => {
+                    (v) => {
                         obsChanges.push(`contextValue changed to ${v}`)
                     },
                     { fireImmediately: true }
-                )
+                ),
             ]
         }
 

@@ -12,7 +12,7 @@ const ObserverWrapper = ({ children, render }: IObserverProps) => {
 }
 ObserverWrapper.propTypes = {
     children: ObserverPropsCheck,
-    render: ObserverPropsCheck
+    render: ObserverPropsCheck,
 }
 
 const Observer = memo(ObserverWrapper)

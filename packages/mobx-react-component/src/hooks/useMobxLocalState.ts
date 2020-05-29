@@ -55,7 +55,7 @@ function proxyPropName(target: any, propName: string, member: string | symbol) {
             configurable: true,
             get(this: any) {
                 return this[member][propName]
-            }
+            },
         })
     }
 }

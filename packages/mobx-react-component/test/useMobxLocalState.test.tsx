@@ -8,7 +8,7 @@ import { changesList, globalSetup } from "./utils"
 globalSetup()
 
 configure({
-    enforceActions: "always"
+    enforceActions: "always",
 })
 
 afterEach(cleanup)
@@ -61,7 +61,7 @@ it("with props and effects", () => {
                 ),
                 () => {
                     disposerCalled++
-                }
+                },
             ]
         }
 
@@ -78,7 +78,7 @@ it("with props and effects", () => {
                     () => {
                         obsChanges.push("obsProps.obj.x changed")
                     }
-                )
+                ),
             ]
         }
     }
@@ -97,7 +97,7 @@ it("with props and effects", () => {
     )
 
     let obj = {
-        x: 9
+        x: 9,
     }
     const { container, rerender, unmount } = render(<TestComponent x={0} y={0} obj={obj} />)
     const div = container.querySelector("div")!
@@ -108,7 +108,7 @@ it("with props and effects", () => {
 
     // re-render with same props, but change deep prop
     obj = {
-        x: 10
+        x: 10,
     }
     rerender(<TestComponent x={0} y={0} obj={obj} />)
     expect(div.textContent).toBe("0-0 0-0 0 10")
@@ -129,7 +129,7 @@ it("with props and effects", () => {
 
     // use an observable object
     obj = observable({
-        x: 10
+        x: 10,
     })
     rerender(<TestComponent x={2} y={1} obj={obj} />)
     expect(div.textContent).toBe("2-2 1-1 3 10")
@@ -254,7 +254,7 @@ it("statics works", () => {
         return <div>{props.x}</div>
     }
     WrappedTestComponent.defaultProps = {
-        x: 5
+        x: 5,
     }
 
     const TestComponent = mobxObserver(WrappedTestComponent)

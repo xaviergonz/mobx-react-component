@@ -17,13 +17,13 @@ export function newObservableWrapper<T>(val: T, mode: ToObservableMode<T>): IObs
         const obs = observable.box(val, { deep: false })
         return {
             get: obs.get.bind(obs),
-            update: obs.set.bind(obs)
+            update: obs.set.bind(obs),
         }
     } else {
         const obs = updateableObservable(val, mode)
         return {
             get: obs.get.bind(obs),
-            update: obs.update.bind(obs)
+            update: obs.update.bind(obs),
         }
     }
 }

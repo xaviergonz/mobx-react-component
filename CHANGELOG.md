@@ -1,5 +1,9 @@
 # mobx-react-component changelog
 
+## 2.1.0
+
+-   Improve the type returned by mobxObserver.
+
 ## 2.0.5
 
 -   Just updated dev dependencies.

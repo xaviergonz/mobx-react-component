@@ -25,7 +25,7 @@ export interface IReactionTracking {
 export function createTrackingData(reaction: RoundRobinReaction) {
     const trackingData: IReactionTracking = {
         cleanAt: Date.now() + CLEANUP_LEAKED_REACTIONS_AFTER_MILLIS,
-        reaction
+        reaction,
     }
     return trackingData
 }

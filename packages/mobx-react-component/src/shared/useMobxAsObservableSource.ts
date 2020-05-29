@@ -33,7 +33,7 @@ export function useMobxAsObservableSource<V>(
 
         data.current = {
             get,
-            updateAction
+            updateAction,
         }
     } else {
         data.current.updateAction(value)
