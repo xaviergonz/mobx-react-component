@@ -127,7 +127,7 @@ function _mobxComponent<C extends React.ComponentClass<P>, P>(
             const boundGetEffects = state.getEffects.bind(state)
 
             useUpdateEffects = () => {
-                useMobxEffects(boundGetEffects)
+                useMobxEffects(boundGetEffects, { runBeforeMount: false })
             }
         }
 

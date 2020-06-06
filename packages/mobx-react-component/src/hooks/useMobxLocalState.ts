@@ -165,12 +165,12 @@ export function useMobxLocalState<MLC extends MobxLocalState>(
 
     if (stateRef.current!.getBeforeMountEffects) {
         // eslint-disable-next-line react-hooks/rules-of-hooks
-        useMobxEffects(stateRef.current!.getBeforeMountEffects)
+        useMobxEffects(stateRef.current!.getBeforeMountEffects, { runBeforeMount: true })
     }
 
     if (stateRef.current!.getEffects) {
         // eslint-disable-next-line react-hooks/rules-of-hooks
-        useMobxEffects(stateRef.current!.getEffects)
+        useMobxEffects(stateRef.current!.getEffects, { runBeforeMount: false })
     }
 
     return stateRef.current as any
