@@ -1,5 +1,9 @@
 # mobx-react-component changelog
 
+## 2.2.2
+
+-   Just updated dev dependencies.
+
 ## 2.2.1
 
 -   Fixed local state class `getBeforeMountEffects` actually triggering after mount.
