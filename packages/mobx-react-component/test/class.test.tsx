@@ -7,7 +7,7 @@ import {
     makeObservable,
     observable,
     reaction,
-    runInAction
+    runInAction,
 } from "mobx"
 import * as React from "react"
 import { injectContext, MobxComponent, mobxComponent } from "../src"
@@ -290,7 +290,7 @@ it("actions", () => {
     @mobxComponent()
     class TestComponent extends MobxComponent {
         @observable
-        x: number = 0
+        x!: number
 
         constructor() {
             super()
