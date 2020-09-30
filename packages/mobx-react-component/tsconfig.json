@@ -27,7 +27,6 @@
         "skipLibCheck": true,
         "noEmit": true,
         "stripInternal": true,
-        "useDefineForClassFields": true,
-        "downlevelIteration": true
+        "useDefineForClassFields": true
     }
 }
