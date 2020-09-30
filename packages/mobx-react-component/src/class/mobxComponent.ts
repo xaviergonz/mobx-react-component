@@ -31,14 +31,13 @@ export function injectContext<C extends React.Context<any>>(
     }
 }
 
-// we use PropsWithChildren for typing compatibility with class components
 export abstract class MobxComponent<P = {}> implements React.Component<P> {
     // just to keep TS happy for the fake implementation of React.Component
-    context: never = undefined as never
-    setState: never = undefined as never
-    forceUpdate: never = undefined as never
-    state: never = undefined as never
-    refs: never = undefined as never
+    context!: never
+    setState!: never
+    forceUpdate!: never
+    state!: never
+    refs!: never
 
     readonly props!: React.Component<P>["props"]
     readonly originalProps!: React.Component<P>["props"]

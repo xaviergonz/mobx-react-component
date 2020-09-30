@@ -1,7 +1,7 @@
 {
     "include": ["src", "types"],
     "compilerOptions": {
-        "target": "esnext",
+        "target": "es2020",
         "module": "esnext",
         "lib": ["dom", "esnext"],
         "importHelpers": false,
@@ -27,6 +27,7 @@
         "skipLibCheck": true,
         "noEmit": true,
         "stripInternal": true,
-        "useDefineForClassFields": true
+        "useDefineForClassFields": true,
+        "downlevelIteration": true
     }
 }
