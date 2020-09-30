@@ -1,5 +1,10 @@
 # mobx-react-component changelog
 
+## 2.3.0
+
+-   Made changes so it is compatible with MobX 6.
+-   Renamed `useMobxStaticRendering` to `enableMobxStaticRendering`.
+
 ## 2.2.2
 
 -   Just updated dev dependencies.

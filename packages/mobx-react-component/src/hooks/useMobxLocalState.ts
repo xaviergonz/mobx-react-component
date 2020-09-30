@@ -9,9 +9,11 @@ import { withoutForceUpdate } from "../shared/useMobxObserver"
 const updateStateSymbol = Symbol("updateState")
 const updateProxiesSymbol = Symbol("updateProxies")
 const propsSymbol = Symbol("props")
+const initSymbol = Symbol("init")
 
 class MobxLocalStateBase<Props extends object = {}> {
-    private readonly [propsSymbol]!: IObservableWrapper<Readonly<Props>>
+    private [propsSymbol]!: IObservableWrapper<Readonly<Props>>
+    
     get props(): Props {
         return this[propsSymbol].get()
     }
@@ -25,7 +27,7 @@ class MobxLocalStateBase<Props extends object = {}> {
         proxyPropNames(this, Object.getOwnPropertyNames(props), "props")
     }
 
-    constructor(props: Props, mode: UpdateableObservableMode<Props>) {
+    [initSymbol](props: Props, mode: UpdateableObservableMode<Props>) {
         this[propsSymbol] = newObservableWrapper(props, mode)
 
         this[updateProxiesSymbol](props)
@@ -153,7 +155,8 @@ export function useMobxLocalState<MLC extends MobxLocalState>(
     if (!stateRef.current) {
         withoutForceUpdate(
             action(() => {
-                stateRef.current = new (stateClass as any)(props, mode)
+                stateRef.current = new (stateClass as any)()
+                stateRef.current![initSymbol](props, mode)
                 if (stateRef.current!.onInit) {
                     stateRef.current!.onInit()
                 }

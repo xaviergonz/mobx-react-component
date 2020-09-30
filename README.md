@@ -40,7 +40,7 @@ For Jest tests you can utilize [setupFilesAfterEnv](https://jestjs.io/docs/en/co
 #### Using hooks
 
 ```tsx
-import { action, computed, observable, when } from "mobx"
+import { action, computed, observable, when, makeObservable } from "mobx"
 import { MobxLocalState, mobxObserver, useMobxLocalState } from "mobx-react-component"
 import * as React from "react"
 import { memo, useContext } from "react"
@@ -56,6 +56,11 @@ interface IMyComponentProps {
 // this.props.NAME or this.NAME
 
 class MyComponentState extends MobxLocalState<IMyComponentProps & { z: number }>() {
+    // only required if using MobX 6
+    constructor() {
+        makeObservable(this)
+    }
+
     @observable y = 0
 
     @computed
@@ -144,6 +149,11 @@ interface IMyComponentProps {
 
 @mobxComponent()
 export class MyComponent extends MobxComponent<IMyComponentProps> {
+    // only required if using MobX 6
+    constructor() {
+        makeObservable(this)
+    }
+
     // statics (defaultProps, displayName, propTypes, etc.) can be declared here
     static displayName = "MyComponent"
     static defaultProps = {
@@ -237,5 +247,5 @@ can do so using `@mobxComponent({refEmulation: false})`
 If you are using SSR, then when using it do this:
 
 ```tsx
-useMobxStaticRendering(true)
+enableMobxStaticRendering(true)
 ```

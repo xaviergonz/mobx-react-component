@@ -2,13 +2,13 @@ import { act, cleanup, fireEvent, render } from "@testing-library/react"
 import mockConsole from "jest-mock-console"
 import * as mobx from "mobx"
 import * as React from "react"
-import { mobxObserver, useMobxStaticRendering } from "../src"
+import { enableMobxStaticRendering, mobxObserver } from "../src"
 import { useMobxObserver } from "../src/shared/useMobxObserver"
 import { globalSetup } from "./utils"
 
 globalSetup()
 
-const getDNode = (obj: any, prop?: string) => mobx._getAdministration(obj, prop)
+const getDNode = (obj: any, prop?: string) => mobx.getObserverTree(obj, prop)
 
 afterEach(cleanup)
 
@@ -83,8 +83,8 @@ function runTestSuite(mode: "observer" | "useObserver") {
             expect(renderings.item).toBe(2)
             expect(getAllByText("1")).toHaveLength(1)
             expect(getAllByText("|aa")).toHaveLength(1)
-            expect(getDNode(store, "todos").observers.size).toBe(1)
-            expect(getDNode(store.todos[0], "title").observers.size).toBe(1)
+            expect(getDNode(store, "todos").observers!.length).toBe(1)
+            expect(getDNode(store.todos[0], "title").observers!.length).toBe(1)
         })
 
         test("rerendering with outer store added", () => {
@@ -100,8 +100,8 @@ function runTestSuite(mode: "observer" | "useObserver") {
             expect(getAllByText("|b")).toHaveLength(1)
             expect(renderings.list).toBe(2)
             expect(renderings.item).toBe(2)
-            expect(getDNode(store.todos[1], "title").observers.size).toBe(1)
-            expect(getDNode(store.todos[1], "completed").observers.size).toBe(0)
+            expect(getDNode(store.todos[1], "title").observers!.length).toBe(1)
+            expect(getDNode(store.todos[1], "completed").observers).toBeFalsy()
         })
 
         test("rerendering with outer store pop", () => {
@@ -113,8 +113,8 @@ function runTestSuite(mode: "observer" | "useObserver") {
             expect(renderings.list).toBe(2)
             expect(renderings.item).toBe(1)
             expect(container.querySelectorAll("li").length).toBe(0)
-            expect(getDNode(oldTodo, "title").observers.size).toBe(0)
-            expect(getDNode(oldTodo, "completed").observers.size).toBe(0)
+            expect(getDNode(oldTodo, "title").observers).toBeFalsy()
+            expect(getDNode(oldTodo, "completed").observers).toBeFalsy()
         })
     })
 
@@ -176,7 +176,7 @@ function runTestSuite(mode: "observer" | "useObserver") {
 
     describe("does not keep views alive when using static rendering", () => {
         const Execute = () => {
-            useMobxStaticRendering(true)
+            enableMobxStaticRendering(true)
             let renderCount = 0
             const data = mobx.observable({
                 z: "hi",
@@ -191,7 +191,7 @@ function runTestSuite(mode: "observer" | "useObserver") {
         }
 
         afterEach(() => {
-            useMobxStaticRendering(false)
+            enableMobxStaticRendering(false)
         })
 
         test("init state is correct", () => {
@@ -207,7 +207,7 @@ function runTestSuite(mode: "observer" | "useObserver") {
             })
             expect(getRenderCount()).toBe(1)
             expect(getByText("hi")).toBeTruthy()
-            expect(getDNode(data, "z").observers.size).toBe(0)
+            expect(getDNode(data, "z").observers).toBeFalsy()
         })
     })
 
@@ -604,21 +604,23 @@ test("parent / childs render in the right order", (done) => {
 
     class User {
         public name = "User's name"
+        constructor() {
+            mobx.makeObservable(this, { name: mobx.observable })
+        }
     }
-
-    mobx.decorate(User, { name: mobx.observable })
 
     class Store {
         public user: User | null = new User()
         public logout() {
             this.user = null
         }
+        constructor() {
+            mobx.makeObservable(this, {
+                user: mobx.observable,
+                logout: mobx.action,
+            })
+        }
     }
-
-    mobx.decorate(Store, {
-        user: mobx.observable,
-        logout: mobx.action,
-    })
 
     const store = new Store()
 

@@ -1,4 +1,4 @@
-import { action, computed, observable, when } from "mobx"
+import { action, computed, makeObservable, observable, when } from "mobx"
 import {
     injectContext,
     MobxComponent,
@@ -14,6 +14,12 @@ interface IMyComponentProps {
 
 @mobxComponent()
 export class MyComponent extends MobxComponent<IMyComponentProps> {
+    // only required if using MobX 6
+    constructor() {
+        super()
+        makeObservable(this)
+    }
+
     // statics (defaultProps, displayName, propTypes, etc.) can be declared here
     static displayName = "MyComponent"
     static defaultProps = {

@@ -1,4 +1,4 @@
-import { action, computed, observable, when } from "mobx"
+import { action, computed, makeObservable, observable, when } from "mobx"
 import { MobxLocalState, mobxObserver, useMobxLocalState } from "mobx-react-component"
 import * as React from "react"
 import { memo, useContext } from "react"
@@ -14,6 +14,12 @@ interface IMyComponentProps {
 // this.props.NAME or this.NAME
 
 class MyComponentState extends MobxLocalState<IMyComponentProps & { z: number }>() {
+    // only required if using MobX 6
+    constructor() {
+        super()
+        makeObservable(this)
+    }
+
     @observable y = 0
 
     @computed

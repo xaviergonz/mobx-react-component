@@ -11,7 +11,7 @@ import {
     ObservableMap,
     ObservableSet,
     remove,
-    set,
+    set
 } from "mobx"
 
 type LocalObservables = WeakMap<any, boolean>
@@ -34,7 +34,7 @@ export interface IUpdateableObservable<T> {
 const alwaysDeep = () => true
 const alwaysShallow = () => false
 
-const invalidModeError = "mode has to be one of 'shallow', 'deep' or '{ deepProps }'"
+const invalidModeError = (mode: any) => `mode has to be one of 'shallow', 'deep' or '{ deepProps }', but was ${JSON.stringify(mode)}`
 
 /**
  * `updateableObservable` takes a non observable (or observable) value and turns it into
@@ -82,7 +82,7 @@ export function updateableObservable<T>(
         const modeDeepProps = mode.deepProps as string[]
         if (!Array.isArray(modeDeepProps)) {
             // istanbul ignore next
-            throw new Error(invalidModeError)
+            throw new Error(invalidModeError(mode))
         }
 
         // convert array to object so lookup is faster
@@ -94,7 +94,7 @@ export function updateableObservable<T>(
         isDeepProp = (propName) => deepProps[propName]
     } else {
         // istanbul ignore next
-        throw new Error(invalidModeError)
+        throw new Error(invalidModeError(mode))
     }
 
     // keeps track of which observable comes from props and which were generated locally
