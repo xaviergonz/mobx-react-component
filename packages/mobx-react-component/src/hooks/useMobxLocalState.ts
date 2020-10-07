@@ -13,9 +13,14 @@ const initSymbol = Symbol("init")
 
 class MobxLocalStateBase<Props extends object = {}> {
     private [propsSymbol]!: IObservableWrapper<Readonly<Props>>
-    
+
     get props(): Props {
-        return this[propsSymbol].get()
+        const props = this[propsSymbol]
+        if (!props) {
+            throw fail("props are not available in the constructor")
+        }
+
+        return props.get()
     }
 
     getEffects?(): MobxEffects
