@@ -1,5 +1,9 @@
 # mobx-react-component changelog
 
+## 2.3.1
+
+-   If observable data changed between mount and useEffect, the render reaction would incorrectly be disposed causing incorrect suspension of upstream computed values
+
 ## 2.3.0
 
 -   Made changes so it is compatible with MobX 6.

@@ -50,15 +50,6 @@ export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "obs
 
     const forceUpdate = useForceUpdate()
 
-    // render the original component, but have the
-    // reaction track the observables, so that rendering
-    // can be invalidated (see above) once a dependency changes
-
-    // we use two reactions to ensure we don't react to observables set in the render phase
-    // this is different from how mobx-react-lite does, where it uses a single reaction
-    // however we will reset the old reaction after this one is done tracking so any
-    // cached computeds won't die early
-
     // StrictMode/ConcurrentMode/Suspense may mean that our component is
     // rendered and abandoned multiple times, so we need to track leaked
     // Reactions.
@@ -81,11 +72,8 @@ export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "obs
                     forceUpdate()
                 } else {
                     // We haven't yet reached useEffect(), so we'll need to trigger a re-render
-                    // when (and if) useEffect() arrives.  The easiest way to do that is just to
-                    // drop our current reaction and allow useEffect() to recreate it.
-                    newReaction.dispose()
-                    reactionTrackingRef.current = null
-                    recordReactionAsCommitted(reactionTrackingRef)
+                    // when (and if) useEffect() arrives.
+                    trackingData.changedBeforeMount = true
                 }
             },
             isForceUpdateEnabled
@@ -107,12 +95,16 @@ export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "obs
             // all we need to do is to record that it's now mounted,
             // to allow future observable changes to trigger re-renders
             reactionTrackingRef.current.mounted = true
+            // Got a change before first mount, force an update
+            if (reactionTrackingRef.current.changedBeforeMount) {
+                reactionTrackingRef.current.changedBeforeMount = false
+                forceUpdate()
+            }
         } else {
             // The reaction we set up in our render has been disposed.
-            // This is either due to bad timings of renderings, e.g. our
+            // This can be due to bad timings of renderings, e.g. our
             // component was paused for a _very_ long time, and our
-            // reaction got cleaned up, or we got a observable change
-            // between render and useEffect
+            // reaction got cleaned up
 
             // Re-create the reaction
             reactionTrackingRef.current = {
@@ -124,6 +116,8 @@ export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "obs
                     },
                     isForceUpdateEnabled
                 ),
+                mounted: true,
+                changedBeforeMount: false,
                 cleanAt: Infinity,
             }
             forceUpdate()
