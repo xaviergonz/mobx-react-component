@@ -12,7 +12,7 @@ const ObserverWrapper = ({ children, render }: IObserverProps) => {
 }
 ObserverWrapper.propTypes = {
     children: ObserverPropsCheck,
-    render: ObserverPropsCheck,
+    render: ObserverPropsCheck
 }
 
 const Observer = memo(ObserverWrapper)
@@ -32,7 +32,7 @@ function ObserverPropsCheck(
     const hasExtraProp = typeof props[extraKey] === "function"
     if (hasProp && hasExtraProp) {
         return new Error(
-            "MobX Observer: Do not use children and render in the same time in`" + componentName
+            `MobX Observer: Do not use children and render at the same time in "${componentName}"`
         )
     }
 

@@ -1,13 +1,17 @@
 import { getDependencyTree, Reaction } from "mobx"
 import { useCallback, useDebugValue, useEffect, useRef, useState } from "react"
 import {
-    createTrackingData,
+    addReactionToTrack,
     IReactionTracking,
-    recordReactionAsCommitted,
-    scheduleCleanupOfReactionIfLeaked,
+    recordReactionAsCommitted
 } from "./reactionCleanupTracking"
 import { RoundRobinReaction } from "./RoundRobinReaction"
 import { isUsingMobxStaticRendering } from "./staticRendering"
+
+/**
+ * We use class to make it easier to detect in heap snapshots by name
+ */
+class ObjectToBeRetainedByReact {}
 
 let forceUpdateEnabled = true
 
@@ -39,7 +43,7 @@ function useForceUpdate() {
 
 export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "observed"): T {
     if (typeof fn !== "function") {
-        return fn // for ObserverComponent
+        return fn || null // for ObserverComponent
     }
     if (isUsingMobxStaticRendering()) {
         return fn()
@@ -47,6 +51,8 @@ export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "obs
 
     /* eslint-disable react-hooks/rules-of-hooks */
     // it is ok to call them only when static rendering is not being used
+
+    const [objectRetainedByReact] = useState(() => new ObjectToBeRetainedByReact())
 
     const forceUpdate = useForceUpdate()
 
@@ -79,9 +85,11 @@ export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "obs
             isForceUpdateEnabled
         )
 
-        const trackingData = createTrackingData(newReaction)
-        reactionTrackingRef.current = trackingData
-        scheduleCleanupOfReactionIfLeaked(reactionTrackingRef)
+        const trackingData = addReactionToTrack(
+            reactionTrackingRef,
+            newReaction,
+            objectRetainedByReact
+        )
     }
 
     const { reaction } = reactionTrackingRef.current!

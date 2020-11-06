@@ -1,5 +1,10 @@
 # mobx-react-component changelog
 
+## 2.4.0
+
+-   Made it compatible with react v17.
+-   Use FinalizationRegistry rather than a cleanup timer whenever possible.
+
 ## 2.3.1
 
 -   If observable data changed between mount and useEffect, the render reaction would incorrectly be disposed causing incorrect suspension of upstream computed values
