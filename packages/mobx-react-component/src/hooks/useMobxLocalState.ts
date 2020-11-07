@@ -87,6 +87,7 @@ export type MobxLocalState<Props extends object = {}> = {
 
 export type MobxLocalStateProps<MLC> = MLC extends MobxLocalState<infer P> ? P : never
 
+// eslint-disable-next-line @typescript-eslint/no-redeclare
 export function MobxLocalState<Props extends object = {}>(): MobxLocalState<Props> {
     return MobxLocalStateBase as any
 }

@@ -1,5 +1,13 @@
 import { act, cleanup, render } from "@testing-library/react"
-import { action, computed, configure, makeObservable, observable, reaction, runInAction } from "mobx"
+import {
+    action,
+    computed,
+    configure,
+    makeObservable,
+    observable,
+    reaction,
+    runInAction,
+} from "mobx"
 import * as React from "react"
 import { memo } from "react"
 import { MobxLocalState, mobxObserver, useMobxLocalState } from "../src"
@@ -90,6 +98,7 @@ it("with props and effects", () => {
 
     const TestComponent = memo(
         mobxObserver((props: IProps) => {
+            // eslint-disable-next-line react-hooks/rules-of-hooks
             const state = useMobxLocalState(TestState, props)
 
             renders++
@@ -182,9 +191,12 @@ it("without props / effects", () => {
 
     const TestComponent = memo(
         mobxObserver(() => {
+            // eslint-disable-next-line react-hooks/rules-of-hooks
             const [s, setS] = React.useState(5)
             _setS = setS
+            // eslint-disable-next-line react-hooks/rules-of-hooks
             const state = useMobxLocalState(TestState1, { s })
+            // eslint-disable-next-line react-hooks/rules-of-hooks
             const state2 = useMobxLocalState(TestState2, {})
 
             renders++
@@ -228,6 +240,7 @@ it("actions", () => {
 
     const TestComponent = memo(
         mobxObserver(() => {
+            // eslint-disable-next-line react-hooks/rules-of-hooks
             const state = useMobxLocalState(TestState, {})
 
             return (

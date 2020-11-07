@@ -179,6 +179,7 @@ it("without props / effects", () => {
         }
 
         render() {
+            // eslint-disable-next-line react-hooks/rules-of-hooks
             const [s] = React.useState(5)
             return (
                 <div>

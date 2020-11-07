@@ -509,7 +509,9 @@ test("useImperativeHandle and forwardRef should work with observer", () => {
 
     const FancyInput = React.forwardRef(
         mobxObserver((props: IProps, ref: React.Ref<IMethods>) => {
+            // eslint-disable-next-line react-hooks/rules-of-hooks
             const inputRef = React.useRef<HTMLInputElement>(null)
+            // eslint-disable-next-line react-hooks/rules-of-hooks
             React.useImperativeHandle(
                 ref,
                 () => ({
