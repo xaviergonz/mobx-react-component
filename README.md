@@ -91,39 +91,37 @@ class MyComponentState extends MobxLocalState<IMyComponentProps & { z: number }>
     }
 }
 
-export const MyComponent = memo(
-    mobxObserver(
-        (props: IMyComponentProps) => {
-            const ctx = useContext(SomeContext)
+export const MyComponent = mobxObserver(
+    memo((props: IMyComponentProps) => {
+        const ctx = useContext(SomeContext)
 
-            const s = useMobxLocalState(
-                MyComponentState,
-                {
-                    ...props,
-                    ...ctx,
-                },
-                // the way to turn the object above into an observable is shallow by default,
-                // but you can also specify "deep" or an object to cherry pick which properties
-                // need to be turned into deep observables
-                "shallow"
-            )
-
-            return (
-                <div>
-                    <div>
-                        x + y + z = {s.x} + {s.y} + {s.z} = {s.sum}
-                    </div>
-                    <button onClick={s.incY}>Increment Y (state)</button>
-                </div>
-            )
-        },
-        {
-            displayName: "MyComponent",
-            defaultProps: {
-                x: 1,
+        const s = useMobxLocalState(
+            MyComponentState,
+            {
+                ...props,
+                ...ctx,
             },
-        }
-    )
+            // the way to turn the object above into an observable is shallow by default,
+            // but you can also specify "deep" or an object to cherry pick which properties
+            // need to be turned into deep observables
+            "shallow"
+        )
+
+        return (
+            <div>
+                <div>
+                    x + y + z = {s.x} + {s.y} + {s.z} = {s.sum}
+                </div>
+                <button onClick={s.incY}>Increment Y (state)</button>
+            </div>
+        )
+    }),
+    {
+        displayName: "MyComponent",
+        defaultProps: {
+            x: 1,
+        },
+    }
 )
 
 // usage

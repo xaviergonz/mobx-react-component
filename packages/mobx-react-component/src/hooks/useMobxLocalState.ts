@@ -141,7 +141,7 @@ export function MobxLocalState<Props extends object = {}>(): MobxLocalState<Prop
  *   }
  * }
  *
- * const Comp = React.memo(mobxObserver((props: CompProps) => {
+ * const Comp = mobxObserver(React.memo((props: CompProps) => {
  *   const [ y, setY ] = React.useState(5)
  *   const state = useMobxLocalState(CompState, { ...props, y })
  *

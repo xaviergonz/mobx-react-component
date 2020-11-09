@@ -18,7 +18,7 @@ function runTestSuite(mode: "observer" | "useObserver") {
         forceMemo = false
     ) {
         if (mode === "observer") {
-            return React.memo(mobxObserver(component))
+            return mobxObserver(React.memo(component))
         } else {
             const C = (props: P) => {
                 return useMobxObserver(() => {
@@ -507,11 +507,9 @@ test("useImperativeHandle and forwardRef should work with observer", () => {
         value: string
     }
 
-    const FancyInput = React.forwardRef(
-        mobxObserver((props: IProps, ref: React.Ref<IMethods>) => {
-            // eslint-disable-next-line react-hooks/rules-of-hooks
+    const FancyInput = mobxObserver(
+        React.forwardRef((props: IProps, ref: React.Ref<IMethods>) => {
             const inputRef = React.useRef<HTMLInputElement>(null)
-            // eslint-disable-next-line react-hooks/rules-of-hooks
             React.useImperativeHandle(
                 ref,
                 () => ({
@@ -577,9 +575,6 @@ it("should hoist known statics only", () => {
     MyHipsterComponent.defaultProps = { x: 3 }
     MyHipsterComponent.propTypes = { x: isNumber }
     MyHipsterComponent.randomStaticThing = 3
-    MyHipsterComponent.type = "Nope!"
-    MyHipsterComponent.compare = "Nope!"
-    MyHipsterComponent.render = "Nope!"
 
     const wrapped = mobxObserver(MyHipsterComponent)
     const wrappedMemo = React.memo(wrapped)
@@ -589,7 +584,7 @@ it("should hoist known statics only", () => {
     expect(wrapped.propTypes).toEqual({ x: isNumber }) // eslint-disable-line react/forbid-foreign-prop-types
     expect(wrappedMemo.type).toBeInstanceOf(Function) // And not "Nope!"; this is the wrapped component, the property is introduced by memo
     expect((wrappedMemo as any).compare).toBe(null) // another memo field
-    expect(wrapped.render).toBe(undefined)
+    expect((wrapped as any).render).toBe(undefined)
 })
 
 it("should have the correct displayName", () => {

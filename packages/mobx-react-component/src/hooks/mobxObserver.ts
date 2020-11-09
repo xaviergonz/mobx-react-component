@@ -1,3 +1,4 @@
+import * as React from "react"
 import { isUsingMobxStaticRendering } from "../shared/staticRendering"
 import { useMobxObserver } from "../shared/useMobxObserver"
 
@@ -8,19 +9,47 @@ export function mobxObserver<C, DP>(
         defaultProps?: DP
     }
 ): C & { displayName?: string; defaultProps: DP } {
-    const baseComponentAsComponent = (baseComponent as unknown) as React.FC
-
     if (isUsingMobxStaticRendering()) {
         return baseComponent as any
     }
 
-    const ObserverComponent = (props: any, ref: any) => {
+    const baseComponentAsComponent = (baseComponent as unknown) as React.FC
+    let renderComponent: any = baseComponentAsComponent
+
+    // extract memo
+    const memoFn = renderComponent.type
+    const isMemo = !!memoFn
+    const memoCompare = isMemo ? renderComponent.compare : null
+
+    if (isMemo) {
+        renderComponent = memoFn
+    }
+
+    // extract forward ref
+    const forwardRefFn = renderComponent.render
+    const isForwardRef = !!forwardRefFn
+
+    if (isForwardRef) {
+        renderComponent = forwardRefFn
+    }
+
+    let ObserverComponent: any = (props: any, ref: any) => {
         return useMobxObserver(() => {
-            return baseComponentAsComponent(props, ref)
+            return renderComponent(props, ref)
         }, ObserverComponent.displayName)
     }
 
-    copyStaticProperties(baseComponent, ObserverComponent)
+    // re-apply forward ref if needed
+    if (isForwardRef) {
+        ObserverComponent = React.forwardRef(ObserverComponent)
+    }
+
+    // re-apply memo if needed
+    if (isMemo) {
+        ObserverComponent = React.memo(ObserverComponent, memoCompare)
+    }
+
+    copyStaticProperties(baseComponentAsComponent, ObserverComponent)
 
     ObserverComponent.displayName =
         options?.displayName ||

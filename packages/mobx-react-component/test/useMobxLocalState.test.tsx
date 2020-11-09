@@ -96,9 +96,8 @@ it("with props and effects", () => {
         }
     }
 
-    const TestComponent = memo(
-        mobxObserver((props: IProps) => {
-            // eslint-disable-next-line react-hooks/rules-of-hooks
+    const TestComponent = mobxObserver(
+        memo((props: IProps) => {
             const state = useMobxLocalState(TestState, props)
 
             renders++
@@ -189,14 +188,11 @@ it("without props / effects", () => {
 
     let _setS: React.Dispatch<React.SetStateAction<number>>
 
-    const TestComponent = memo(
-        mobxObserver(() => {
-            // eslint-disable-next-line react-hooks/rules-of-hooks
+    const TestComponent = mobxObserver(
+        memo(() => {
             const [s, setS] = React.useState(5)
             _setS = setS
-            // eslint-disable-next-line react-hooks/rules-of-hooks
             const state = useMobxLocalState(TestState1, { s })
-            // eslint-disable-next-line react-hooks/rules-of-hooks
             const state2 = useMobxLocalState(TestState2, {})
 
             renders++
@@ -238,9 +234,8 @@ it("actions", () => {
         }
     }
 
-    const TestComponent = memo(
-        mobxObserver(() => {
-            // eslint-disable-next-line react-hooks/rules-of-hooks
+    const TestComponent = mobxObserver(
+        memo(() => {
             const state = useMobxLocalState(TestState, {})
 
             return (
@@ -265,9 +260,9 @@ it("actions", () => {
 })
 
 it("ref forwarding works", () => {
-    const TestComponent = memo(
-        React.forwardRef(
-            mobxObserver((_props: {}, ref: React.Ref<HTMLInputElement>) => {
+    const TestComponent = mobxObserver(
+        memo(
+            React.forwardRef((_props: {}, ref: React.Ref<HTMLInputElement>) => {
                 return <input ref={ref} />
             })
         )
