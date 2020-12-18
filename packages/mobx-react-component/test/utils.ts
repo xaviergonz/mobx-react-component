@@ -1,6 +1,4 @@
 import { configure } from "mobx"
-import { unstable_batchedUpdates } from "react-dom"
-import { optimizeScheduler } from "../src"
 
 export function changesList(): [string[], (newChanges: string[]) => void] {
     const changes: string[] = []
@@ -15,7 +13,6 @@ export function changesList(): [string[], (newChanges: string[]) => void] {
 }
 
 export function globalSetup() {
-    optimizeScheduler(unstable_batchedUpdates)
     configure({ enforceActions: "never" })
 }
 

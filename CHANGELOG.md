@@ -1,5 +1,9 @@
 # mobx-react-component changelog
 
+## 2.6.0
+
+- Removed `optimizeScheduler` as it is no longer necessary.
+
 ## 2.5.0
 
 -   `mobxObserver(memo(() => ...))` is now supported and preferred over `memo(mobxObserver(() => ...))` in order to avoid false errors with rules of hooks in eslint.

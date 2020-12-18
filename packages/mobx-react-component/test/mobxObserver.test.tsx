@@ -764,7 +764,7 @@ it("dependencies should not become temporarily unobserved", async () => {
     React.useEffect.mockImplementation((effect) => {
         console.warn("delaying useEffect call")
         p.push(
-            new Promise((resolve) => {
+            new Promise<void>((resolve) => {
                 setTimeout(() => {
                     act(() => {
                         cleanups.push(effect())

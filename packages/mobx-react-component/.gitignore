@@ -3,6 +3,7 @@
 /node_modules/
 /.rts2_cache_*/
 /dist/
+/dist-es/
 /coverage/
 /README.md
 /CHANGELOG.md

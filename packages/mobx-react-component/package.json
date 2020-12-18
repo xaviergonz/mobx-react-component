@@ -1,6 +1,6 @@
 {
     "name": "mobx-react-component",
-    "version": "2.5.0",
+    "version": "2.6.0",
     "description": "Write React functional components (with hooks) + MobX for local state in a fancy way",
     "keywords": [
         "mobx",
@@ -23,22 +23,28 @@
     "license": "MIT",
     "author": "Javier González Garcés",
     "main": "dist/index.js",
-    "typings": "dist/index.d.ts",
-    "types": "dist/index.d.ts",
-    "jsnext:main": "dist/mobxreactcomponent.esm.js",
-    "module": "dist/mobxreactcomponent.esm.js",
+    "umd:main": "dist/mobxreactcomponent.umd.production.min.js",
     "unpkg": "dist/mobxreactcomponent.umd.production.min.js",
-    "react-native": "dist/mobxreactcomponent.esm.js",
+    "jsdelivr": "dist/mobxreactcomponent.umd.production.min.js",
+    "jsnext:main": "dist/mobxreactcomponent.esm.js",
+    "module": "dist-es/index.js",
+    "react-native": "dist-es/index.js",
+    "types": "dist/index.d.ts",
+    "typings": "dist/index.d.ts",
     "files": [
         "package.json",
-        "dist",
+        "dist/",
+        "dist-es/",
         "README.md",
         "CHANGELOG.md",
         "LICENSE"
     ],
     "scripts": {
         "start": "tsdx watch",
-        "build": "shx cp ../../*.md . && shx cp ../../LICENSE . && tsdx build --name mobxReactComponent --format=cjs,esm,umd",
+        "build:copy-files": "shx cp ../../*.md . && shx cp ../../LICENSE .",
+        "build:es": "shx rm -rf dist-es && tsc -p . && shx rm -rf dist-es/**/*.d.ts",
+        "build:others": "tsdx build --name mobxReactComponent --format=cjs,esm,umd",
+        "build": "yarn build:copy-files && yarn build:es && yarn build:others",
         "test": "tsdx test",
         "prettier": "prettier --write \"**/*.js\" \"**/*.ts\" \"**/*.tsx\"",
         "lint": "eslint \"src/**/*.ts\" \"test/**/*.ts\" \"test/**/*.tsx\"",
@@ -46,19 +52,34 @@
     },
     "peerDependencies": {
         "mobx": "^4.0.0 || ^5.0.0 || ^6.0.0",
-        "react": "^16.8.0 || ^17.0.0",
-        "react-dom": "^16.8.0 || ^17.0.0"
+        "react": "^16.8.0 || ^17.0.0"
+    },
+    "peerDependenciesMeta": {
+        "react-dom": {
+            "optional": true
+        },
+        "react-native": {
+            "optional": true
+        }
     },
     "devDependencies": {
         "@testing-library/react": "^11.0.4",
         "@types/hoist-non-react-statics": "^3.3.1",
         "@types/jest": "^26.0.10",
-        "@types/react": "^16.8.10",
-        "@types/react-dom": "^16.8.3",
+        "@types/react": "^17.0.0",
+        "@types/react-dom": "^17.0.0",
+        "@typescript-eslint/eslint-plugin": "^4.5.0",
+        "@typescript-eslint/parser": "^4.5.0",
+        "eslint": "^7.11.0",
+        "eslint-config-prettier": "^7.0.0",
+        "eslint-plugin-jest": "^24.1.0",
+        "eslint-plugin-testing-library": "^3.9.2",
+        "eslint-webpack-plugin": "^2.1.0",
         "expose-gc": "^1.0.0",
         "hoist-non-react-statics": "^3.3.0",
         "jest-mock-console": "^1.0.0",
         "mobx": "^6.0.0",
+        "prettier": "^2.0.4",
         "react": "^17.0.1",
         "react-dom": "^17.0.1",
         "shx": "^0.3.2",
