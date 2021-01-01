@@ -1,8 +1,12 @@
 # mobx-react-component changelog
 
+## 2.6.1
+
+-   Set compilation target to `es5`.
+
 ## 2.6.0
 
-- Removed `optimizeScheduler` as it is no longer necessary.
+-   Removed `optimizeScheduler` as it is no longer necessary.
 
 ## 2.5.0
 
