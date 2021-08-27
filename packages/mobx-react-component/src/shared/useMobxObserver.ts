@@ -3,7 +3,7 @@ import { useCallback, useDebugValue, useEffect, useRef, useState } from "react"
 import {
     addReactionToTrack,
     IReactionTracking,
-    recordReactionAsCommitted
+    recordReactionAsCommitted,
 } from "./reactionCleanupTracking"
 import { RoundRobinReaction } from "./RoundRobinReaction"
 import { isUsingMobxStaticRendering } from "./staticRendering"
@@ -35,10 +35,8 @@ function observerComponentNameFor(baseComponentName: string) {
 }
 
 function useForceUpdate() {
-    const [, setTick] = useState(0)
-    return useCallback(() => {
-        setTick((t) => t + 1)
-    }, [])
+    const [, setState] = useState<[]>()
+    return useCallback(() => setState([] as any), [])
 }
 
 export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "observed"): T {

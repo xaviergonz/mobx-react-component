@@ -280,7 +280,9 @@ function runTestSuite(mode: "observer" | "useObserver") {
                     data.set(4) // wouldn't throw first time for lack of observers.. (could we tighten this?)
                 } catch (err) {
                     expect(
-                        /Side effects like changing state are not allowed at this point/.test(err)
+                        /Side effects like changing state are not allowed at this point/.test(
+                            err as string
+                        )
                     ).toBeTruthy()
                 }
             }
