@@ -31,7 +31,7 @@ test("mobx issue 50", (done) => {
 
     render(<Test />)
 
-    setImmediate(() => {
+    setTimeout(() => {
         act(() => {
             flipStuff()
         })
@@ -39,7 +39,7 @@ test("mobx issue 50", (done) => {
         expect(document.getElementById("x")!.innerHTML).toBe("false,true,true")
         expect(willReactCount).toBe(2)
         done()
-    })
+    }, 1)
 })
 
 it("should respect transaction", async () => {
