@@ -1,5 +1,5 @@
 import * as React from "react"
-import { render } from "react-dom"
+import { createRoot } from "react-dom/client"
 import { MyComponent as ClassComponent } from "./class"
 import { MyComponent as HooksComponent } from "./hooks"
 import { SomeContext } from "./SomeContext"
@@ -26,4 +26,5 @@ function App() {
 }
 
 const rootElement = document.getElementById("root")
-render(<App />, rootElement)
+const root = createRoot(rootElement!)
+root.render(<App />)

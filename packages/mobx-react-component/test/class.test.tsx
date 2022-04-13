@@ -322,7 +322,9 @@ it("actions", () => {
     expect(span.textContent).toBe("1")
 
     const button = container.querySelector("button")!
-    button.click()
+    act(() => {
+        button.click()
+    })
 
     span = container.querySelector("span")!
     expect(span.textContent).toBe("2")

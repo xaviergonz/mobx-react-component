@@ -427,7 +427,7 @@ function runTestSuite(mode: "observer" | "useObserver") {
             const x = mobx.observable.box(1)
             const errorsSeen: any[] = []
 
-            class ErrorBoundary extends React.Component {
+            class ErrorBoundary extends React.Component<{ children: React.ReactNode }> {
                 static getDerivedStateFromError() {
                     return { hasError: true }
                 }
@@ -597,7 +597,7 @@ it("should have the correct displayName", () => {
     expect(TestComponent.displayName).toBe("MyComponent")
 })
 
-test("parent / childs render in the right order", (done) => {
+test("parent / childs render in the right order", async () => {
     // See: https://jsfiddle.net/gkaemmer/q1kv7hbL/13/
     const events: string[] = []
 
@@ -654,10 +654,13 @@ test("parent / childs render in the right order", (done) => {
     })
 
     render(<Parent />)
+    expect(events).toEqual(["parent", "child"])
+    events.length = 0
 
-    tryLogout()
-    expect(events).toEqual(["parent", "child", "parent"])
-    done()
+    act(() => {
+        tryLogout()
+    })
+    expect(events).toEqual(["parent"])
 })
 
 // describe("206 - @observer should produce usefull errors if it throws", () => {

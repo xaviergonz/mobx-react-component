@@ -10,8 +10,8 @@
     "devDependencies": {
         "coveralls": "^3.0.3",
         "eslint-config-prettier": "^8.3.0",
-        "prettier": "^2.0.4",
-        "react-scripts": "^5.0.0"
+        "prettier": "^2.6.2",
+        "react-scripts": "^5.0.1"
     },
     "dependencies": {}
 }

@@ -6,15 +6,15 @@ const {
     addReactionToTrack,
     recordReactionAsCommitted,
     resetCleanupScheduleForTests,
-    forceCleanupTimerToRunNowForTests
+    forceCleanupTimerToRunNowForTests,
 } = FinalizationRegistryMaybeUndefined
     ? createReactionCleanupTrackingUsingFinalizationRegistry(FinalizationRegistryMaybeUndefined)
     : createTimerBasedReactionCleanupTracking()
 
-export { IReactionTracking } from "./reactionCleanupTrackingCommon"
+export type { IReactionTracking } from "./reactionCleanupTrackingCommon"
 export {
     addReactionToTrack,
     recordReactionAsCommitted,
     resetCleanupScheduleForTests,
-    forceCleanupTimerToRunNowForTests
+    forceCleanupTimerToRunNowForTests,
 }

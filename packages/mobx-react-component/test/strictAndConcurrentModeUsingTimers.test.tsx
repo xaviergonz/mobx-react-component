@@ -1,33 +1,38 @@
-import "./killFinalizationRegistry"
-
 import { act, cleanup, render } from "@testing-library/react"
 import * as mobx from "mobx"
 import * as React from "react"
-import ReactDOM from "react-dom"
+import { createRoot } from "react-dom/client"
 import {
     forceCleanupTimerToRunNowForTests,
-    resetCleanupScheduleForTests
+    resetCleanupScheduleForTests,
 } from "../src/shared/reactionCleanupTracking"
 import {
     CLEANUP_LEAKED_REACTIONS_AFTER_MILLIS,
-    CLEANUP_TIMER_LOOP_MILLIS
+    CLEANUP_TIMER_LOOP_MILLIS,
 } from "../src/shared/reactionCleanupTrackingCommon"
 import { useMobxObserver } from "../src/shared/useMobxObserver"
+import "./killFinalizationRegistry"
 import { globalSetup } from "./utils"
-
 
 globalSetup()
 
 afterEach(cleanup)
 
+const maxSkip = Math.max(CLEANUP_LEAKED_REACTIONS_AFTER_MILLIS, CLEANUP_TIMER_LOOP_MILLIS)
+jest.setTimeout(maxSkip * 2)
+
+const sleep = (ms: number) =>
+    new Promise<void>((resolve) =>
+        setTimeout(() => {
+            resolve()
+            act(() => {
+                // no-op, but triggers effect flushing
+            })
+        }, ms)
+    )
+
 test("uncommitted components should not leak observations", async () => {
     resetCleanupScheduleForTests()
-
-    // Unfortunately, Jest fake timers don't mock out Date.now, so we fake
-    // that out in parallel to Jest useFakeTimers
-    let fakeNow = Date.now()
-    jest.useFakeTimers()
-    jest.spyOn(Date, "now").mockImplementation(() => fakeNow)
 
     const store = mobx.observable({ count1: 0, count2: 0 })
 
@@ -56,9 +61,7 @@ test("uncommitted components should not leak observations", async () => {
     )
 
     // Allow any reaction-disposal cleanup timers to run
-    const skip = Math.max(CLEANUP_LEAKED_REACTIONS_AFTER_MILLIS, CLEANUP_TIMER_LOOP_MILLIS)
-    fakeNow += skip
-    jest.advanceTimersByTime(skip)
+    await sleep(maxSkip + 100)
 
     // count1 should still be being observed by Component1,
     // but count2 should have had its reaction cleaned up.
@@ -66,7 +69,7 @@ test("uncommitted components should not leak observations", async () => {
     expect(count2IsObserved).toBeFalsy()
 })
 
-test("cleanup timer should not clean up recently-pended reactions", () => {
+test("cleanup timer should not clean up recently-pended reactions", async () => {
     // If we're not careful with timings, it's possible to get the
     // following scenario:
     // 1. Component instance A is being created; it renders, we put its reaction R1 into the cleanup list
@@ -78,12 +81,6 @@ test("cleanup timer should not clean up recently-pended reactions", () => {
 
     // This unit test attempts to replicate that scenario:
     resetCleanupScheduleForTests()
-
-    // Unfortunately, Jest fake timers don't mock out Date.now, so we fake
-    // that out in parallel to Jest useFakeTimers
-    const fakeNow = Date.now()
-    jest.useFakeTimers()
-    jest.spyOn(Date, "now").mockImplementation(() => fakeNow)
 
     const store = mobx.observable({ count: 0 })
 
@@ -99,14 +96,14 @@ test("cleanup timer should not clean up recently-pended reactions", () => {
     // and react-testing-library waits for all that, using act().
 
     const rootNode = document.createElement("div")
-    ReactDOM.render(
+    const root = createRoot(rootNode)
+    root.render(
         // We use StrictMode here, but it would be helpful to switch this to use real
         // concurrent mode: we don't have a true async render right now so this test
         // isn't as thorough as it could be.
         <React.StrictMode>
             <TestComponent1 />
-        </React.StrictMode>,
-        rootNode
+        </React.StrictMode>
     )
 
     // We need to trigger our cleanup timer to run. We can't do this simply
@@ -120,87 +117,8 @@ test("cleanup timer should not clean up recently-pended reactions", () => {
     forceCleanupTimerToRunNowForTests()
 
     // Advance time enough to allow any timer-queued effects to run
-    jest.advanceTimersByTime(500)
-
-    // Now allow the useEffect calls to run to completion.
-    act(() => {
-        // no-op, but triggers effect flushing
-    })
+    await sleep(500)
 
     // count should still be observed
     expect(countIsObserved).toBeTruthy()
-})
-
-test("component should recreate reaction if necessary", () => {
-    // There _may_ be very strange cases where the reaction gets tidied up
-    // but is actually still needed.  This _really_ shouldn't happen.
-    // e.g. if we're using Suspense and the component starts to render,
-    // but then gets paused for 60 seconds, and then comes back to life.
-    // With the implementation of React at the time of writing this, React
-    // will actually fully re-render that component (discarding previous
-    // hook slots) before going ahead with a commit, but it's unwise
-    // to depend on such an implementation detail.  So we must cope with
-    // the component having had its reaction tidied and still going on to
-    // be committed.  In that case we recreate the reaction and force
-    // an update.
-
-    // This unit test attempts to replicate that scenario:
-
-    resetCleanupScheduleForTests()
-
-    // Unfortunately, Jest fake timers don't mock out Date.now, so we fake
-    // that out in parallel to Jest useFakeTimers
-    let fakeNow = Date.now()
-    jest.useFakeTimers()
-    jest.spyOn(Date, "now").mockImplementation(() => fakeNow)
-
-    const store = mobx.observable({ count: 0 })
-
-    // Track whether the count is observed
-    let countIsObserved = false
-    mobx.onBecomeObserved(store, "count", () => (countIsObserved = true))
-    mobx.onBecomeUnobserved(store, "count", () => (countIsObserved = false))
-
-    const TestComponent1 = () => useMobxObserver(() => <div>{store.count}</div>)
-
-    // We're going to render directly using ReactDOM, not react-testing-library, because we want
-    // to be able to get in and do nasty things before everything (including useEffects) have completed,
-    // and react-testing-library waits for all that, using act().
-    const rootNode = document.createElement("div")
-    ReactDOM.render(
-        <React.StrictMode>
-            <TestComponent1 />
-        </React.StrictMode>,
-        rootNode
-    )
-
-    // We need to trigger our cleanup timer to run. We don't want
-    // to allow Jest's effects to run, however: we want to simulate the
-    // case where the component is rendered, then the reaction gets cleaned up,
-    // and _then_ the component commits.
-
-    // Force everything to be disposed.
-    const skip = Math.max(CLEANUP_LEAKED_REACTIONS_AFTER_MILLIS, CLEANUP_TIMER_LOOP_MILLIS)
-    fakeNow += skip
-    forceCleanupTimerToRunNowForTests()
-
-    // The reaction should have been cleaned up.
-    expect(countIsObserved).toBeFalsy()
-
-    // Whilst nobody's looking, change the observable value
-    store.count = 42
-
-    // Now allow the useEffect calls to run to completion,
-    // re-awakening the component.
-    jest.advanceTimersByTime(500)
-    act(() => {
-        // no-op, but triggers effect flushing
-    })
-
-    // count should be observed once more.
-    expect(countIsObserved).toBeTruthy()
-    // and the component should have rendered enough to
-    // show the latest value, which was set whilst it
-    // wasn't even looking.
-    expect(rootNode.textContent).toContain("42")
 })
