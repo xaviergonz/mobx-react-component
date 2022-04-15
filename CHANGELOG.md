@@ -1,5 +1,9 @@
 # mobx-react-component changelog
 
+## 2.7.1
+
+- Use `useSyncExternalStore` for better concurrent rendering support.
+
 ## 2.7.0
 
 - Use vite for compilation.
