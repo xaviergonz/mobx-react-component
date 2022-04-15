@@ -1,4 +1,4 @@
-import { act, cleanup, render } from "@testing-library/react"
+import { cleanup, render } from "@testing-library/react"
 import * as mobx from "mobx"
 import * as React from "react"
 import { createRoot } from "react-dom/client"
@@ -12,7 +12,7 @@ import {
 } from "../src/shared/reactionCleanupTrackingCommon"
 import { useMobxObserver } from "../src/shared/useMobxObserver"
 import "./killFinalizationRegistry"
-import { globalSetup } from "./utils"
+import { globalSetup, sleep } from "./utils"
 
 globalSetup()
 
@@ -20,16 +20,6 @@ afterEach(cleanup)
 
 const maxSkip = Math.max(CLEANUP_LEAKED_REACTIONS_AFTER_MILLIS, CLEANUP_TIMER_LOOP_MILLIS)
 jest.setTimeout(maxSkip * 2)
-
-const sleep = (ms: number) =>
-    new Promise<void>((resolve) =>
-        setTimeout(() => {
-            resolve()
-            act(() => {
-                // no-op, but triggers effect flushing
-            })
-        }, ms)
-    )
 
 test("uncommitted components should not leak observations", async () => {
     resetCleanupScheduleForTests()

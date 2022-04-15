@@ -1,4 +1,5 @@
 import { configure } from "mobx"
+import { act } from "react-dom/test-utils"
 
 export function changesList(): [string[], (newChanges: string[]) => void] {
     const changes: string[] = []
@@ -18,6 +19,8 @@ export function globalSetup() {
 
 export function sleep(time: number) {
     return new Promise<void>((res) => {
-        setTimeout(res, time)
+        setTimeout(() => {
+            act(() => res())
+        }, time)
     })
 }
