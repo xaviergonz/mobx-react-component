@@ -1,5 +1,6 @@
 import { getDependencyTree, Reaction } from "mobx"
 import { useCallback, useDebugValue, useEffect, useRef, useState } from "react"
+import { useSyncExternalStore } from "use-sync-external-store/shim"
 import {
     addReactionToTrack,
     IReactionTracking,
@@ -35,8 +36,30 @@ function observerComponentNameFor(baseComponentName: string) {
 }
 
 function useForceUpdate() {
-    const [, setState] = useState<[]>()
-    return useCallback(() => setState([] as any), [])
+    type OnStoreChange = () => void
+
+    const stateObjRef = useRef([])
+
+    const getStateObj = useCallback(() => stateObjRef.current, [])
+
+    const onStoreChangeRef = useRef<OnStoreChange | undefined>()
+
+    const updateStateObj = useCallback(() => {
+        stateObjRef.current = []
+        onStoreChangeRef.current?.()
+    }, [])
+
+    const subscribe = useCallback((onStoreChange: OnStoreChange) => {
+        onStoreChangeRef.current = onStoreChange
+
+        return () => {
+            onStoreChangeRef.current = undefined
+        }
+    }, [])
+
+    useSyncExternalStore(subscribe, getStateObj)
+
+    return updateStateObj
 }
 
 export function useMobxObserver<T>(fn: () => T, baseComponentName: string = "observed"): T {
