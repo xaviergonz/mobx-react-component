@@ -21,7 +21,7 @@ export function injectContext<C extends React.Context<any>>(
 ) {
     return (targetComponent: MobxComponent, propertyKey: string) => {
         // target is the prototype
-        const prototype = (targetComponent as unknown) as IInternalMobxComponent
+        const prototype = targetComponent as unknown as IInternalMobxComponent
         let contextsToInject = prototype[contextsToInjectSymbol]
         if (!contextsToInject) {
             contextsToInject = []
@@ -69,11 +69,13 @@ export interface IMobxComponentOptions<P> {
     refEmulation?: boolean
 }
 
-export const mobxComponent = (
-    options?: IMobxComponentOptions<any> // TODO: how to get P here?
-) => <C extends new () => MobxComponent<any>>(clazz: C): C => {
-    return _mobxComponent(clazz as any, options || {}) as any
-}
+export const mobxComponent =
+    (
+        options?: IMobxComponentOptions<any> // TODO: how to get P here?
+    ) =>
+    <C extends new () => MobxComponent<any>>(clazz: C): C => {
+        return _mobxComponent(clazz as any, options || {}) as any
+    }
 
 interface IInternalMobxComponent {
     [contextsToInjectSymbol]: IContextToInject[]
@@ -166,12 +168,8 @@ function _mobxComponent<C extends React.ComponentClass<P>, P>(
             }, [ref, instance])
         }
 
-        const {
-            state,
-            useUpdateContexts,
-            useUpdateEffects,
-            useUpdateEffectsBeforeMount,
-        } = classInstance.current!
+        const { state, useUpdateContexts, useUpdateEffects, useUpdateEffectsBeforeMount } =
+            classInstance.current!
 
         usePropertyInjection(state, "props", props as any, toObservablePropsMode)
         setOriginalProps(state.props, props)

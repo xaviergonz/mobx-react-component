@@ -13,16 +13,34 @@ export default defineConfig({
         },
         sourcemap: "inline",
         minify: false,
+
         rollupOptions: {
             external: ["mobx", "react", "react-dom"],
-            output: {
-                globals: {
-                    mobx: "mobx",
-                    react: "React",
-                    "react-dom": "ReactDOM",
+
+            output: [
+                {
+                    format: "esm",
+                    entryFileNames: "mobx-react-component.esm.mjs",
                 },
-            },
+                {
+                    name: "mobx-react-component",
+                    format: "umd",
+                    globals: {
+                        mobx: "mobx",
+                        react: "React",
+                        "react-dom": "ReactDOM",
+                    },
+                },
+            ],
         },
     },
-    plugins: [{ ...typescript2({}), apply: "build", enforce: "pre" }],
+    plugins: [
+        {
+            ...typescript2({
+                useTsconfigDeclarationDir: true,
+            }),
+            apply: "build",
+            enforce: "pre",
+        },
+    ],
 })

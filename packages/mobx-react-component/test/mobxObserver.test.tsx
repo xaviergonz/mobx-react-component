@@ -46,7 +46,7 @@ function runTestSuite(mode: "observer" | "useObserver") {
                 list: 0,
             }
 
-            const TodoItem = obsComponent(({ todo }: { todo: typeof store.todos[0] }) => {
+            const TodoItem = obsComponent(({ todo }: { todo: (typeof store.todos)[0] }) => {
                 renderings.item++
                 return <li>|{todo.title}</li>
             }, true)

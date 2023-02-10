@@ -8,10 +8,10 @@
         "packages/sample-app"
     ],
     "devDependencies": {
-        "coveralls": "^3.0.3",
-        "eslint-config-prettier": "^8.3.0",
-        "prettier": "^2.6.2",
+        "coveralls": "^3.1.1",
+        "eslint-config-prettier": "^8.6.0",
+        "prettier": "^2.8.4",
         "react-scripts": "^5.0.1"
     },
-    "dependencies": {}
+    "packageManager": "yarn@3.4.1"
 }

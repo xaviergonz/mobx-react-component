@@ -1,5 +1,9 @@
 # mobx-react-component changelog
 
+## 2.7.3
+
+- Update dependencies.
+
 ## 2.7.2
 
 - Update dependencies.

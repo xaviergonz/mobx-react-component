@@ -52,8 +52,11 @@ it("prop types checks for children/render usage", () => {
     const restoreConsole = mockConsole()
     render(<Comp />)
     // tslint:disable-next-line:no-console
-    expect(console.error).toHaveBeenCalledWith(expect.anything(), expect.anything(),
-        expect.stringContaining("Do not use children and render at the same time"), expect.anything()
+    expect(console.error).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.stringContaining("Do not use children and render at the same time"),
+        expect.anything()
     )
     restoreConsole()
 })

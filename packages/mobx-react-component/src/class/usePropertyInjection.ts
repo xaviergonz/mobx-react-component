@@ -27,7 +27,7 @@ export function usePropertyInjection<T extends object>(
             enumerable: true,
             get() {
                 return boxedObservable()
-            }
+            },
         })
 
         inited.current = true

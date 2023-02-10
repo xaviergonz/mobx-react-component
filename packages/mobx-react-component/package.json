@@ -1,6 +1,6 @@
 {
     "name": "mobx-react-component",
-    "version": "2.7.2",
+    "version": "2.7.3",
     "description": "Write React functional components (with hooks) + MobX for local state in a fancy way",
     "keywords": [
         "mobx",
@@ -26,25 +26,22 @@
     "exports": {
         "./package.json": "./package.json",
         ".": {
-            "import": {
-                "webpack": "./dist/mobx-react-component.es.js",
-                "default": "./dist/mobx-react-component.es.mjs"
-            },
+            "import": "./dist/mobx-react-component.esm.mjs",
             "require": "./dist/mobx-react-component.umd.js",
             "script": "./dist/mobx-react-component.umd.js",
-            "default": "./dist/mobx-react-component.es.mjs"
+            "default": "./dist/mobx-react-component.esm.mjs"
         }
     },
-    "esmodule": "./dist/mobx-react-component.es.mjs",
-    "module": "./dist/mobx-react-component.es.js",
-    "jsnext:main": "./dist/mobx-react-component.es.js",
-    "react-native": "./dist/mobx-react-component.es.js",
+    "esmodule": "./dist/mobx-react-component.esm.js",
+    "module": "./dist/mobx-react-component.esm.js",
+    "jsnext:main": "./dist/mobx-react-component.esm.js",
+    "react-native": "./dist/mobx-react-component.umd.js",
     "umd:main": "./dist/mobx-react-component.umd.js",
     "unpkg": "./dist/mobx-react-component.umd.js",
     "jsdelivr": "./dist/mobx-react-component.umd.js",
     "main": "./dist/mobx-react-component.umd.js",
-    "types": "./dist/index.d.ts",
-    "typings": "./dist/index.d.ts",
+    "types": "./dist/types/index.d.ts",
+    "typings": "./dist/types/index.d.ts",
     "files": [
         "src",
         "dist",
@@ -56,7 +53,7 @@
         "quick-build": "tsc",
         "quick-build-tests": "tsc -p test",
         "copy-root-files": "shx cp ../../README.md . && shx cp ../../LICENSE . && shx cp ../../CHANGELOG.md .",
-        "build": "yarn quick-build && yarn copy-root-files && shx rm -rf dist && vite build && shx cp ./dist/mobx-react-component.es.js ./dist/mobx-react-component.es.mjs",
+        "build": "yarn quick-build && yarn copy-root-files && shx rm -rf dist && vite build && shx cp ./dist/mobx-react-component.esm.mjs ./dist/mobx-react-component.esm.js",
         "test": "jest",
         "prettier": "prettier --write \"**/*.js\" \"**/*.ts\" \"**/*.tsx\"",
         "lint": "eslint \"src/**/*.ts\" \"test/**/*.ts\" \"test/**/*.tsx\"",
@@ -75,29 +72,32 @@
         }
     },
     "devDependencies": {
-        "@testing-library/react": "^13.2.0",
+        "@testing-library/react": "^13.4.0",
         "@types/hoist-non-react-statics": "^3.3.1",
-        "@types/jest": "^27.5.0",
-        "@types/react": "^18.0.9",
-        "@types/react-dom": "^18.0.3",
+        "@types/jest": "^29.4.0",
+        "@types/react": "^18.0.27",
+        "@types/react-dom": "^18.0.10",
         "@types/use-sync-external-store": "^0.0.3",
-        "eslint-config-prettier": "^8.5.0",
+        "eslint": "^8.33.0",
+        "eslint-config-prettier": "^8.6.0",
         "expose-gc": "^1.0.0",
-        "hoist-non-react-statics": "^3.3.0",
-        "jest-mock-console": "^1.2.3",
-        "mobx": "^6.5.0",
-        "prettier": "^2.6.2",
-        "react": "^18.1.0",
-        "react-dom": "^18.1.0",
+        "hoist-non-react-statics": "^3.3.2",
+        "jest": "^29.4.2",
+        "jest-environment-jsdom": "^29.4.2",
+        "jest-mock-console": "^2.0.0",
+        "mobx": "^6.8.0",
+        "prettier": "^2.8.4",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
         "react-scripts": "^5.0.1",
-        "rollup-plugin-typescript2": "^0.31.2",
+        "rollup-plugin-typescript2": "^0.34.1",
         "shx": "^0.3.4",
-        "ts-jest": "^27.1.4",
-        "typescript": "^4.6.4",
-        "vite": "^2.9.8"
+        "ts-jest": "^29.0.5",
+        "typescript": "^4.9.5",
+        "vite": "^4.1.1"
     },
     "dependencies": {
-        "use-sync-external-store": "^1.1.0"
+        "use-sync-external-store": "^1.2.0"
     },
     "directories": {
         "test": "test"

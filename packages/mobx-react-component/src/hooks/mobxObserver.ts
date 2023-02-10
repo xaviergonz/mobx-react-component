@@ -13,7 +13,7 @@ export function mobxObserver<C, DP>(
         return baseComponent as any
     }
 
-    const baseComponentAsComponent = (baseComponent as unknown) as React.FC
+    const baseComponentAsComponent = baseComponent as unknown as React.FC
     let renderComponent: any = baseComponentAsComponent
 
     // extract memo

@@ -2,7 +2,7 @@ import { FinalizationRegistry as FinalizationRegistryMaybeUndefined } from "./Fi
 import {
     createTrackingData,
     IReactionTracking,
-    ReactionCleanupTracking
+    ReactionCleanupTracking,
 } from "./reactionCleanupTrackingCommon"
 import { RoundRobinReaction } from "./RoundRobinReaction"
 

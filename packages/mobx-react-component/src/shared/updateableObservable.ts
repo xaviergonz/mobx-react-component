@@ -11,7 +11,7 @@ import {
     ObservableMap,
     ObservableSet,
     remove,
-    set
+    set,
 } from "mobx"
 
 type LocalObservables = WeakMap<any, boolean>
@@ -34,7 +34,8 @@ export interface IUpdateableObservable<T> {
 const alwaysDeep = () => true
 const alwaysShallow = () => false
 
-const invalidModeError = (mode: any) => `mode has to be one of 'shallow', 'deep' or '{ deepProps }', but was ${JSON.stringify(mode)}`
+const invalidModeError = (mode: any) =>
+    `mode has to be one of 'shallow', 'deep' or '{ deepProps }', but was ${JSON.stringify(mode)}`
 
 /**
  * `updateableObservable` takes a non observable (or observable) value and turns it into
