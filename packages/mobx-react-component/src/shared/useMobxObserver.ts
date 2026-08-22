@@ -42,7 +42,7 @@ function useForceUpdate() {
 
     const getStateObj = useCallback(() => stateObjRef.current, [])
 
-    const onStoreChangeRef = useRef<OnStoreChange | undefined>()
+    const onStoreChangeRef = useRef<OnStoreChange | undefined>(undefined)
 
     const updateStateObj = useCallback(() => {
         stateObjRef.current = []

@@ -1,5 +1,6 @@
+import { expect } from "@jest/globals"
 import { configure } from "mobx"
-import { act } from "react-dom/test-utils"
+import { act } from "react"
 
 export function changesList(): [string[], (newChanges: string[]) => void] {
     const changes: string[] = []

@@ -1,4 +1,5 @@
 import * as React from "react"
+import { copyStaticProperties } from "../shared/copyStaticProperties"
 import { isUsingMobxStaticRendering } from "../shared/staticRendering"
 import { useMobxObserver } from "../shared/useMobxObserver"
 
@@ -56,23 +57,8 @@ export function mobxObserver<C, DP>(
         baseComponentAsComponent.displayName ||
         baseComponentAsComponent.name
 
-    ObserverComponent.defaultProps = options?.defaultProps || baseComponentAsComponent.defaultProps
+    ObserverComponent.defaultProps =
+        options?.defaultProps || (baseComponentAsComponent as any).defaultProps
 
     return ObserverComponent as any
-}
-
-// based on https://github.com/mridgway/hoist-non-react-statics/blob/master/src/index.js
-const hoistBlackList: any = {
-    $$typeof: true,
-    render: true,
-    compare: true,
-    type: true,
-}
-
-function copyStaticProperties(base: any, target: any) {
-    Object.keys(base).forEach((key) => {
-        if (base.hasOwnProperty(key) && !hoistBlackList[key]) {
-            Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(base, key)!)
-        }
-    })
 }

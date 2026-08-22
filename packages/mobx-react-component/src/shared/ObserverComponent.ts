@@ -17,6 +17,7 @@ ObserverWrapper.propTypes = {
 
 const Observer = memo(ObserverWrapper)
 Observer.displayName = "Observer"
+;(Observer as any).propTypes = ObserverWrapper.propTypes
 
 export { Observer }
 

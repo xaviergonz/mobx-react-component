@@ -1,11 +1,10 @@
-import { action, computed, makeObservable, observable, when } from "mobx"
+import { actionBound, computed, observable, when } from "mobx"
 import {
     injectContext,
     MobxComponent,
     mobxComponent,
     ReactContextValue,
 } from "mobx-react-component"
-import * as React from "react"
 import { SomeContext } from "./SomeContext"
 
 interface IMyComponentProps {
@@ -14,12 +13,6 @@ interface IMyComponentProps {
 
 @mobxComponent()
 export class MyComponent extends MobxComponent<IMyComponentProps> {
-    // only required if using MobX 6
-    constructor() {
-        super()
-        makeObservable(this)
-    }
-
     // statics (defaultProps, displayName, propTypes, etc.) can be declared here
     static displayName = "MyComponent"
     static defaultProps = {
@@ -40,9 +33,9 @@ export class MyComponent extends MobxComponent<IMyComponentProps> {
     someContext!: ReactContextValue<typeof SomeContext>
 
     @observable
-    y = 0
+    accessor y = 0
 
-    @action.bound
+    @actionBound
     incY() {
         this.y++
     }

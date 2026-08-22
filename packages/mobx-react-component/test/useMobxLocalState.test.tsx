@@ -1,13 +1,6 @@
+import { afterEach, expect, it } from "@jest/globals"
 import { act, cleanup, render } from "@testing-library/react"
-import {
-    action,
-    computed,
-    configure,
-    makeObservable,
-    observable,
-    reaction,
-    runInAction,
-} from "mobx"
+import { actionBound, computed, configure, observable, reaction, runInAction } from "mobx"
 import * as React from "react"
 import { memo } from "react"
 import { MobxLocalState, mobxObserver, useMobxLocalState } from "../src"
@@ -42,11 +35,6 @@ it("with props and effects", () => {
     let disposerCalled = 0
 
     class TestState extends MobxLocalState<IProps>() {
-        constructor() {
-            super()
-            makeObservable(this)
-        }
-
         @computed
         get addXY() {
             return this.x + this.props.y
@@ -168,22 +156,12 @@ it("with props and effects", () => {
 
 it("without props / effects", () => {
     class TestState1 extends MobxLocalState<{ s: number }>() {
-        constructor() {
-            super()
-            makeObservable(this)
-        }
-
         @observable
-        x = 10
+        accessor x = 10
     }
     class TestState2 extends MobxLocalState() {
-        constructor() {
-            super()
-            makeObservable(this)
-        }
-
         @observable
-        x = 20
+        accessor x = 20
     }
 
     let _setS: React.Dispatch<React.SetStateAction<number>>
@@ -220,15 +198,10 @@ it("without props / effects", () => {
 
 it("actions", () => {
     class TestState extends MobxLocalState() {
-        constructor() {
-            super()
-            makeObservable(this)
-        }
-
         @observable
-        x = 1
+        accessor x = 1
 
-        @action.bound
+        @actionBound
         incX() {
             this.x++
         }

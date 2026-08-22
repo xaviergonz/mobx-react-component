@@ -40,8 +40,9 @@ interface IMyComponentProps {
 // this.props.NAME or this.NAME
 
 class MyComponentState extends MobxLocalState<IMyComponentProps & { z: number }>() {
-    // only required if using MobX 6
+    // only required if using MobX 6/7
     constructor() {
+        super()
         makeObservable(this)
     }
 
@@ -115,7 +116,7 @@ export const MyComponent = mobxObserver(
 #### Using a "hook-enabled" class
 
 ```tsx
-import { action, computed, observable, when } from "mobx"
+import { actionBound, computed, makeObservable, observable, when } from "mobx"
 import {
     injectContext,
     MobxComponent,
@@ -131,8 +132,9 @@ interface IMyComponentProps {
 
 @mobxComponent()
 export class MyComponent extends MobxComponent<IMyComponentProps> {
-    // only required if using MobX 6
+    // only required if using MobX 6/7
     constructor() {
+        super()
         makeObservable(this)
     }
 
@@ -158,7 +160,7 @@ export class MyComponent extends MobxComponent<IMyComponentProps> {
     @observable
     y = 0
 
-    @action.bound
+    @actionBound
     incY() {
         this.y++
     }

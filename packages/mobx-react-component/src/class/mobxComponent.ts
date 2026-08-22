@@ -1,4 +1,5 @@
-import { forwardRef, memo, ReactElement, useContext, useEffect, useRef } from "react"
+import { createElement, forwardRef, memo, ReactElement, useContext, useEffect, useRef } from "react"
+import { copyStaticProperties } from "../shared/copyStaticProperties"
 import { MobxEffects } from "../shared/MobxEffects"
 import { ToObservableMode } from "../shared/observableWrapper"
 import { setOriginalProps } from "../shared/originalProps"
@@ -19,15 +20,43 @@ export function injectContext<C extends React.Context<any>>(
     context: C,
     toObservableMode: ToObservableMode<ReactContextValue<C>> = "ref"
 ) {
-    return (targetComponent: MobxComponent, propertyKey: string) => {
-        // target is the prototype
-        const prototype = targetComponent as unknown as IInternalMobxComponent
-        let contextsToInject = prototype[contextsToInjectSymbol]
-        if (!contextsToInject) {
-            contextsToInject = []
-            prototype[contextsToInjectSymbol] = contextsToInject
+    return (targetOrValue: any, propertyKeyOrContext: any) => {
+        // Stage 3 decorator support
+        if (
+            propertyKeyOrContext &&
+            typeof propertyKeyOrContext === "object" &&
+            "name" in propertyKeyOrContext &&
+            typeof propertyKeyOrContext.addInitializer === "function"
+        ) {
+            const propName = String(propertyKeyOrContext.name)
+            propertyKeyOrContext.addInitializer(function (this: any) {
+                const prototype = Object.getPrototypeOf(this) as IInternalMobxComponent
+                let contextsToInject = Object.prototype.hasOwnProperty.call(
+                    prototype,
+                    contextsToInjectSymbol
+                )
+                    ? prototype[contextsToInjectSymbol]
+                    : (prototype[contextsToInjectSymbol] = prototype[contextsToInjectSymbol]
+                          ? [...prototype[contextsToInjectSymbol]]
+                          : [])
+                if (!contextsToInject.some((c) => c.propName === propName)) {
+                    contextsToInject.push({ context, propName, toObservableMode })
+                }
+            })
+            return
         }
-        contextsToInject.push({ context, propName: propertyKey, toObservableMode })
+
+        // Legacy decorator support
+        const prototype = targetOrValue as unknown as IInternalMobxComponent
+        let contextsToInject = Object.prototype.hasOwnProperty.call(
+            prototype,
+            contextsToInjectSymbol
+        )
+            ? prototype[contextsToInjectSymbol]
+            : (prototype[contextsToInjectSymbol] = prototype[contextsToInjectSymbol]
+                  ? [...prototype[contextsToInjectSymbol]]
+                  : [])
+        contextsToInject.push({ context, propName: propertyKeyOrContext, toObservableMode })
     }
 }
 
@@ -73,8 +102,8 @@ export const mobxComponent =
     (
         options?: IMobxComponentOptions<any> // TODO: how to get P here?
     ) =>
-    <C extends new () => MobxComponent<any>>(clazz: C): C => {
-        return _mobxComponent(clazz as any, options || {}) as any
+    <C extends new () => MobxComponent<any>>(clazz: C, context?: any): C => {
+        return _mobxComponent(clazz as any, options || {}, context) as any
     }
 
 interface IInternalMobxComponent {
@@ -85,7 +114,8 @@ const emptyFunction = () => {}
 
 function _mobxComponent<C extends React.ComponentClass<P>, P>(
     clazz: C,
-    options: IMobxComponentOptions<any>
+    options: IMobxComponentOptions<any>,
+    context?: any
 ) {
     const refEmulation = options.refEmulation !== undefined ? options.refEmulation : true
     const displayName = clazz.displayName || clazz.name
@@ -186,38 +216,59 @@ function _mobxComponent<C extends React.ComponentClass<P>, P>(
     }
 
     FuncComponent.displayName = `${displayName} (mobxComponent)`
-    FuncComponent.contextTypes = clazz.contextTypes
+    ;(FuncComponent as any).contextTypes = (clazz as any).contextTypes
     // as any to not destroy the types
     ;(FuncComponent as any).propTypes = clazz.propTypes
 
-    if (!refEmulation) {
-        FuncComponent.defaultProps = clazz.defaultProps
+    const memoComponent = !refEmulation
+        ? memo(FuncComponent as any)
+        : memo(forwardRef(FuncComponent as any))
+    memoComponent.displayName = displayName
+    ;(memoComponent as any).defaultProps = clazz.defaultProps
+    ;(memoComponent as any).contextTypes = (clazz as any).contextTypes
+    ;(memoComponent as any).propTypes = clazz.propTypes
+    copyStaticProperties(clazz, memoComponent)
 
-        const memoComponent = memo(FuncComponent)
-        memoComponent.displayName = displayName
+    try {
+        Object.defineProperty(memoComponent, Symbol.hasInstance, {
+            value: function (instance: any) {
+                return instance instanceof clazz
+            },
+            configurable: true,
+        })
+    } catch {
+        // ignore if not supported in environment
+    }
 
-        return memoComponent
-    } else {
-        const forwardRefComponent = forwardRef(FuncComponent as any)
-        forwardRefComponent.displayName = `${displayName} (mobxComponent)`
-        ;(forwardRefComponent as any).defaultProps = clazz.defaultProps
-
-        const memoComponent = memo(forwardRefComponent)
-        memoComponent.displayName = displayName
-
-        // make sure instanceof clazz keeps working for refs
-        const originalHasInstance = memoComponent[Symbol.hasInstance]
-        memoComponent[Symbol.hasInstance] = function (this: any, instance) {
-            if (originalHasInstance) {
-                const result = originalHasInstance.apply(memoComponent, arguments as any)
-                if (result) {
-                    return true
-                }
+    // When used with TC39 Stage 3 class decorators (@mobxComponent()), the decorator
+    // must return a constructor function rather than an object.
+    if (context && typeof context === "object" && context.kind === "class") {
+        const ResultFunction: any = function (props: any, ref?: any) {
+            if (ref !== undefined) {
+                return createElement(memoComponent, { ...props, ref })
             }
-
-            return instance instanceof clazz
+            return createElement(memoComponent, props)
         }
 
-        return memoComponent
+        ResultFunction.displayName = displayName
+        ResultFunction.defaultProps = clazz.defaultProps
+        ;(ResultFunction as any).contextTypes = (clazz as any).contextTypes
+        ;(ResultFunction as any).propTypes = clazz.propTypes
+        copyStaticProperties(clazz, ResultFunction)
+
+        try {
+            Object.defineProperty(ResultFunction, Symbol.hasInstance, {
+                value: function (instance: any) {
+                    return instance instanceof clazz
+                },
+                configurable: true,
+            })
+        } catch {
+            // ignore if not supported in environment
+        }
+
+        return ResultFunction
     }
+
+    return memoComponent
 }

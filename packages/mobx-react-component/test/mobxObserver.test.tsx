@@ -1,3 +1,4 @@
+import { afterEach, describe, expect, it, jest, test } from "@jest/globals"
 import { act, cleanup, fireEvent, render } from "@testing-library/react"
 import mockConsole from "jest-mock-console"
 import * as mobx from "mobx"
@@ -584,7 +585,7 @@ it("should hoist known statics only", () => {
     expect(wrapped.randomStaticThing).toEqual(3)
     expect(wrapped.defaultProps).toEqual({ x: 3 })
     expect(wrapped.propTypes).toEqual({ x: isNumber }) // eslint-disable-line react/forbid-foreign-prop-types
-    expect(wrappedMemo.type).toBeInstanceOf(Function) // And not "Nope!"; this is the wrapped component, the property is introduced by memo
+    expect((wrappedMemo as any).type).toBeInstanceOf(Function) // And not "Nope!"; this is the wrapped component, the property is introduced by memo
     expect((wrappedMemo as any).compare).toBe(null) // another memo field
     expect((wrapped as any).render).toBe(undefined)
 })

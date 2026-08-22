@@ -6,7 +6,7 @@ const resolvePath = (str: string) => path.resolve(__dirname, str)
 
 export default defineConfig({
     build: {
-        target: "node10",
+        target: "es2020",
         lib: {
             entry: resolvePath("./src/index.ts"),
             name: "mobxReactComponent",

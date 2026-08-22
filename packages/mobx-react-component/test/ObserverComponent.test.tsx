@@ -1,3 +1,4 @@
+import { afterEach, describe, expect, it, test } from "@jest/globals"
 import { act, cleanup, render } from "@testing-library/react"
 import mockConsole from "jest-mock-console"
 import * as mobx from "mobx"
@@ -46,17 +47,14 @@ it("renders null if no children/render prop is supplied a function", () => {
 })
 
 it("prop types checks for children/render usage", () => {
-    const Comp = () => (
-        <Observer render={() => <span>children</span>}>{() => <span>children</span>}</Observer>
+    const props = {
+        render: () => <span>children</span>,
+        children: () => <span>children</span>,
+    }
+    expect(
+        // eslint-disable-next-line react/forbid-foreign-prop-types
+        (Observer as any).propTypes.children(props, "children", "Observer", null, "children")
+    ).toEqual(
+        new Error('MobX Observer: Do not use children and render at the same time in "Observer"')
     )
-    const restoreConsole = mockConsole()
-    render(<Comp />)
-    // tslint:disable-next-line:no-console
-    expect(console.error).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.anything(),
-        expect.stringContaining("Do not use children and render at the same time"),
-        expect.anything()
-    )
-    restoreConsole()
 })

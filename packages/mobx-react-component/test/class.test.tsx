@@ -1,14 +1,7 @@
+import { afterEach, expect, it } from "@jest/globals"
 import { act, cleanup, render } from "@testing-library/react"
 import hoistNonReactStatics from "hoist-non-react-statics"
-import {
-    action,
-    computed,
-    configure,
-    makeObservable,
-    observable,
-    reaction,
-    runInAction,
-} from "mobx"
+import { actionBound, computed, configure, observable, reaction, runInAction } from "mobx"
 import * as React from "react"
 import { injectContext, MobxComponent, mobxComponent } from "../src"
 import { changesList, globalSetup } from "./utils"
@@ -43,11 +36,6 @@ it("with props and effects", () => {
 
     @mobxComponent()
     class TestComponent extends MobxComponent<IProps> {
-        constructor() {
-            super()
-            makeObservable(this)
-        }
-
         @computed
         get addXY() {
             return this.props.x + this.props.y
@@ -168,11 +156,10 @@ it("without props / effects", () => {
     @mobxComponent()
     class TestComponent extends MobxComponent {
         @observable
-        x!: number
+        accessor x!: number
 
         constructor() {
             super()
-            makeObservable(this)
             runInAction(() => {
                 this.x = 10
             })
@@ -291,18 +278,17 @@ it("actions", () => {
     @mobxComponent()
     class TestComponent extends MobxComponent {
         @observable
-        x!: number
+        accessor x!: number
 
         constructor() {
             super()
-            makeObservable(this)
             runInAction(() => {
                 this.x = 1
             })
         }
 
-        @action
-        incX = () => {
+        @actionBound
+        incX() {
             this.x++
         }
 
