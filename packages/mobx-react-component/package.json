@@ -1,6 +1,6 @@
 {
     "name": "mobx-react-component",
-    "version": "2.7.3",
+    "version": "2.7.4",
     "description": "Write React functional components (with hooks) + MobX for local state in a fancy way",
     "keywords": [
         "mobx",
@@ -26,6 +26,7 @@
     "exports": {
         "./package.json": "./package.json",
         ".": {
+            "types": "./dist/types/index.d.ts",
             "import": "./dist/mobx-react-component.esm.mjs",
             "require": "./dist/mobx-react-component.umd.js",
             "script": "./dist/mobx-react-component.umd.js",
