@@ -4,6 +4,7 @@
 
 -   Update for React 19.
 -   Update for MobX 7.
+-   Update to Vite 6 and Vitest.
 -   Update dependencies.
 
 ## 2.7.4

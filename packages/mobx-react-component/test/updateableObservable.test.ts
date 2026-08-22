@@ -1,4 +1,5 @@
 import { configure, isObservable, isObservableMap, isObservableSet, observable } from "mobx"
+import { expect, test } from "vitest"
 import { updateableObservable } from "../src/shared/updateableObservable"
 import { globalSetup } from "./utils"
 

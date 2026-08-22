@@ -1,12 +1,13 @@
 import { act, render } from "@testing-library/react"
 import * as mobx from "mobx"
 import * as React from "react"
+import { expect, it, test } from "vitest"
 import { mobxObserver } from "../src"
-import { globalSetup } from "./utils"
+import { globalSetup, sleep } from "./utils"
 
 globalSetup()
 
-test("mobx issue 50", (done) => {
+test("mobx issue 50", async () => {
     const foo = {
         a: mobx.observable.box(true),
         b: mobx.observable.box(false),
@@ -31,15 +32,13 @@ test("mobx issue 50", (done) => {
 
     render(<Test />)
 
-    setTimeout(() => {
-        act(() => {
-            flipStuff()
-        })
-        expect(asText).toBe("false:true:true")
-        expect(document.getElementById("x")!.innerHTML).toBe("false,true,true")
-        expect(willReactCount).toBe(2)
-        done()
-    }, 1)
+    await sleep(1)
+    act(() => {
+        flipStuff()
+    })
+    expect(asText).toBe("false:true:true")
+    expect(document.getElementById("x")!.innerHTML).toBe("false,true,true")
+    expect(willReactCount).toBe(2)
 })
 
 it("should respect transaction", async () => {

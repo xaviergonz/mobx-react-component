@@ -1,11 +1,10 @@
-import { afterEach, describe, expect, it, jest, test } from "@jest/globals"
 import { act, cleanup, fireEvent, render } from "@testing-library/react"
-import mockConsole from "jest-mock-console"
 import * as mobx from "mobx"
 import React from "react"
+import { afterEach, describe, expect, it, test, vi } from "vitest"
 import { enableMobxStaticRendering, mobxObserver } from "../src"
 import { useMobxObserver } from "../src/shared/useMobxObserver"
-import { globalSetup } from "./utils"
+import { globalSetup, mockConsole } from "./utils"
 
 globalSetup()
 
@@ -757,7 +756,7 @@ test("parent / childs render in the right order", async () => {
 // })
 
 it("dependencies should not become temporarily unobserved", async () => {
-    jest.spyOn(React, "useEffect")
+    vi.spyOn(React, "useEffect")
 
     let p: Promise<any>[] = []
     const cleanups: any[] = []
@@ -795,8 +794,8 @@ it("dependencies should not become temporarily unobserved", async () => {
         },
     })
 
-    const doubleDisposed = jest.fn()
-    const reactionFired = jest.fn()
+    const doubleDisposed = vi.fn()
+    const reactionFired = vi.fn()
 
     mobx.onBecomeUnobserved(store, "double", doubleDisposed)
 

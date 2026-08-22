@@ -1,10 +1,9 @@
-import { afterEach, describe, expect, it, test } from "@jest/globals"
 import { act, cleanup, render } from "@testing-library/react"
-import mockConsole from "jest-mock-console"
 import * as mobx from "mobx"
 import * as React from "react"
+import { afterEach, describe, expect, it, test } from "vitest"
 import { Observer } from "../src"
-import { globalSetup } from "./utils"
+import { globalSetup, mockConsole } from "./utils"
 
 globalSetup()
 

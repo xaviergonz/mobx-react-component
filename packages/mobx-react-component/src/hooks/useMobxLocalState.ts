@@ -17,7 +17,7 @@ class MobxLocalStateBase<Props extends object = {}> {
     get props(): Props {
         const props = this[propsSymbol]
         if (!props) {
-            throw fail("props are not available in the constructor")
+            throw new Error("props are not available in the constructor")
         }
 
         return props.get()

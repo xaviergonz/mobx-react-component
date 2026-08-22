@@ -13,5 +13,5 @@
         "eslint-config-react-app": "^7.0.1",
         "prettier": "^3.5.3"
     },
-    "packageManager": "yarn@3.4.1"
+    "packageManager": "yarn@4.18.0"
 }

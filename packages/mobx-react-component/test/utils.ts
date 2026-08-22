@@ -1,6 +1,6 @@
-import { expect } from "@jest/globals"
 import { configure } from "mobx"
 import { act } from "react"
+import { expect, vi } from "vitest"
 
 export function changesList(): [string[], (newChanges: string[]) => void] {
     const changes: string[] = []
@@ -24,4 +24,12 @@ export function sleep(time: number) {
             act(() => res())
         }, time)
     })
+}
+
+export function mockConsole() {
+    const originalConsoleError = console.error
+    console.error = vi.fn()
+    return () => {
+        console.error = originalConsoleError
+    }
 }

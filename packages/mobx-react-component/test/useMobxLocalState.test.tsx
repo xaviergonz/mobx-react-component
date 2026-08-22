@@ -1,4 +1,4 @@
-import { afterEach, expect, it } from "@jest/globals"
+import { afterEach, expect, it } from "vitest"
 import { act, cleanup, render } from "@testing-library/react"
 import { actionBound, computed, configure, observable, reaction, runInAction } from "mobx"
 import * as React from "react"

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`changing state in render should fail 1`] = `
 <div>
@@ -16,7 +16,7 @@ exports[`changing state in render should fail 2`] = `
 </div>
 `;
 
-exports[`issue 12 init state is correct 1`] = `
+exports[`issue 12 > init state is correct 1`] = `
 <div>
   <div>
     <span>
@@ -30,7 +30,7 @@ exports[`issue 12 init state is correct 1`] = `
 </div>
 `;
 
-exports[`issue 12 init state is correct 2`] = `
+exports[`issue 12 > init state is correct 2`] = `
 <div>
   <div>
     <span>
@@ -44,7 +44,7 @@ exports[`issue 12 init state is correct 2`] = `
 </div>
 `;
 
-exports[`issue 12 run transaction 1`] = `
+exports[`issue 12 > run transaction 1`] = `
 <div>
   <div>
     <span>
@@ -54,7 +54,7 @@ exports[`issue 12 run transaction 1`] = `
 </div>
 `;
 
-exports[`issue 12 run transaction 2`] = `
+exports[`issue 12 > run transaction 2`] = `
 <div>
   <div>
     <span>
