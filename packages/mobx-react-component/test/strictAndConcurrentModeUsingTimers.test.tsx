@@ -13,7 +13,7 @@ import {
 import { useMobxObserver } from "../src/shared/useMobxObserver"
 import { afterEach, expect, test } from "vitest"
 import "./killFinalizationRegistry"
-import { globalSetup, sleep } from "./utils"
+import { globalSetup, mockConsole, sleep } from "./utils"
 
 globalSetup()
 
@@ -91,32 +91,39 @@ test(
         // to be able to get in and do nasty things before everything (including useEffects) have completed,
         // and react-testing-library waits for all that, using act().
 
-        const rootNode = document.createElement("div")
-        const root = createRoot(rootNode)
-        root.render(
-            // We use StrictMode here, but it would be helpful to switch this to use real
-            // concurrent mode: we don't have a true async render right now so this test
-            // isn't as thorough as it could be.
-            <React.StrictMode>
-                <TestComponent1 />
-            </React.StrictMode>
-        )
+        const restoreConsole = mockConsole()
+        try {
+            const rootNode = document.createElement("div")
+            const root = createRoot(rootNode)
+            root.render(
+                // We use StrictMode here, but it would be helpful to switch this to use real
+                // concurrent mode: we don't have a true async render right now so this test
+                // isn't as thorough as it could be.
+                <React.StrictMode>
+                    <TestComponent1 />
+                </React.StrictMode>
+            )
 
-        // We need to trigger our cleanup timer to run. We can't do this simply
-        // by running all jest's faked timers as that would allow the scheduled
-        // `useEffect` calls to run, and we want to simulate our cleanup timer
-        // getting in between those stages.
+            // We need to trigger our cleanup timer to run. We can't do this simply
+            // by running all jest's faked timers as that would allow the scheduled
+            // `useEffect` calls to run, and we want to simulate our cleanup timer
+            // getting in between those stages.
 
-        // We force our cleanup loop to run even though enough time hasn't _really_
-        // elapsed.  In theory, it won't do anything because not enough time has
-        // elapsed since the reactions were queued, and so they won't be disposed.
-        forceCleanupTimerToRunNowForTests()
+            // We force our cleanup loop to run even though enough time hasn't _really_
+            // elapsed.  In theory, it won't do anything because not enough time has
+            // elapsed since the reactions were queued, and so they won't be disposed.
+            forceCleanupTimerToRunNowForTests()
 
-        // Advance time enough to allow any timer-queued effects to run
-        await sleep(500)
+            // Advance time enough to allow any timer-queued effects to run
+            await sleep(500)
 
-        // count should still be observed
-        expect(countIsObserved).toBeTruthy()
+            // count should still be observed
+            expect(countIsObserved).toBeTruthy()
+
+            root.unmount()
+        } finally {
+            restoreConsole()
+        }
     },
     maxSkip * 2
 )
