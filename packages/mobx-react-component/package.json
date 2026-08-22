@@ -28,9 +28,7 @@
         ".": {
             "types": "./dist/types/index.d.ts",
             "import": "./dist/mobx-react-component.esm.mjs",
-            "require": "./dist/mobx-react-component.umd.js",
-            "script": "./dist/mobx-react-component.umd.js",
-            "default": "./dist/mobx-react-component.esm.mjs"
+            "require": "./dist/mobx-react-component.umd.js"
         }
     },
     "esmodule": "./dist/mobx-react-component.esm.js",
